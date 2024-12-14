@@ -66,7 +66,7 @@ export class UserController {
     // Vérification des permissions
     if (req.user.userId !== user.id && req.user.role !== 'admin') {
       throw new UnauthorizedException(
-        `You do not have permission to modify this account. Connected user: ${req.user.userId}, Target account: ${user.id}`,
+        `You do not have permission to modify this account.`,
       );
     }
 
@@ -74,10 +74,11 @@ export class UserController {
     return this.userService.update(id, userData);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard) // Protège cette route
   @Get('profile')
-  async getProfile(@Req() req: any): Promise<User> {
-    return this.userService.findOne(req.user.userId); // Retourne les informations de l'utilisateur connecté
+  getProfile(@Req() req: any) {
+    console.log('Authenticated user:', req.user); // Assurez-vous que req.user contient userId et role
+    return req.user;
   }
 
   // Accessible uniquement au propriétaire ou aux admins
