@@ -9,6 +9,7 @@ import {
   UseGuards,
   Req,
   ForbiddenException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
@@ -23,7 +24,6 @@ export class UserController {
   @UseGuards(AuthGuard, RolesGuard) // Les deux guards doivent être appliqués
   @Get()
   async findAll(@Req() req: any): Promise<User[]> {
-    console.log('Inside findAll controller'); // Ajouter un log pour vérifier si ce point est atteint
     if (req.user.role !== 'admin') {
       throw new ForbiddenException('Only admins can access this resource.');
     }
@@ -57,13 +57,27 @@ export class UserController {
     @Body() userData: Partial<User>,
     @Req() req: any,
   ): Promise<User> {
-    const user = await this.userService.findOne(id);
+    console.log('req.user:', req.user); // Vérifiez que req.user contient userId et role
+    console.log('Param id:', id);
 
-    // Vérification : propriétaire ou admin
+    const user = await this.userService.findOne(id);
+    console.log('User from DB:', user);
+
+    // Vérification des permissions
     if (req.user.userId !== user.id && req.user.role !== 'admin') {
-      throw new ForbiddenException('You do not have access to this resource.');
+      throw new UnauthorizedException(
+        `You do not have permission to modify this account. Connected user: ${req.user.userId}, Target account: ${user.id}`,
+      );
     }
+
+    // Si l'utilisateur connecté est autorisé
     return this.userService.update(id, userData);
+  }
+
+  @UseGuards(AuthGuard)
+  @Get('profile')
+  async getProfile(@Req() req: any): Promise<User> {
+    return this.userService.findOne(req.user.userId); // Retourne les informations de l'utilisateur connecté
   }
 
   // Accessible uniquement au propriétaire ou aux admins
@@ -83,8 +97,6 @@ export class UserController {
   @UseGuards(AuthGuard, RolesGuard)
   @Patch('restore/:id')
   async restore(@Param('id') id: string, @Req() req: any): Promise<void> {
-    console.log('test');
-
     if (req.user.role !== 'admin') {
       throw new ForbiddenException('Only admins can restore users.');
     }
