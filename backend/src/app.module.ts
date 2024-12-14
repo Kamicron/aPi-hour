@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from './auth/auth.module';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -21,6 +22,7 @@ console.log('process.env.DB_HOST', process.env.DB_HOST);
       synchronize: true, // Ne pas utiliser en production
     }),
     UserModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

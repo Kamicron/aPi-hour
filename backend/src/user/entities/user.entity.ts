@@ -21,6 +21,9 @@ export class User {
   @Column({ select: false }) // Ne pas inclure dans les sélections par défaut
   password: string;
 
+  @Column({ default: 'user' }) // Valeurs possibles : 'user', 'admin'
+  role: 'user' | 'admin';
+
   @CreateDateColumn()
   createdAt: Date;
 
