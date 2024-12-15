@@ -1,6 +1,6 @@
 <template>
-  <div class='index'>
-    test
+  <div class='coucou'>
+    coucou
   </div>
 </template>
 
@@ -45,8 +45,11 @@
 // ------ Watch -----
 
 // ------------------
+
 </script>
 
 <style lang='scss' scoped>
-.index {}
+.coucou{
+  
+}
 </style>

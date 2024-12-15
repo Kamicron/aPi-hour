@@ -1,7 +1,10 @@
 <template>
-  <div class='index'>
-    test
-  </div>
+  <header class="header">
+    <div class="header__container">
+      <h1 class="header__title">Système de Gestion de Pointage</h1>
+      <Login />
+    </div>
+  </header>
 </template>
 
 <script setup lang='ts'>
@@ -45,8 +48,23 @@
 // ------ Watch -----
 
 // ------------------
+
 </script>
 
-<style lang='scss' scoped>
-.index {}
+<style lang="scss" scoped>
+.header {
+  background-color: #f5f5f5;
+  padding: 1rem;
+
+  &__container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  &__title {
+    font-size: 1.5rem;
+    font-weight: bold;
+  }
+}
 </style>

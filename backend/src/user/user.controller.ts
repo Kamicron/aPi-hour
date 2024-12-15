@@ -74,11 +74,10 @@ export class UserController {
     return this.userService.update(id, userData);
   }
 
-  @UseGuards(AuthGuard) // Protège cette route
   @Get('profile')
+  @UseGuards(AuthGuard)
   getProfile(@Req() req: any) {
-    console.log('Authenticated user:', req.user); // Assurez-vous que req.user contient userId et role
-    return req.user;
+    return this.userService.findOne(req.user.sub); // Récupère l'utilisateur à partir de l'ID JWT
   }
 
   // Accessible uniquement au propriétaire ou aux admins

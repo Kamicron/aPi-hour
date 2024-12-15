@@ -10,8 +10,13 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "jwt-decode": "^4.0.0",
     "nuxt": "^3.14.1592",
+    "sass": "^1.83.0",
     "vue": "latest",
     "vue-router": "latest"
+  },
+  "devDependencies": {
+    "@nuxt/types": "^2.18.1"
   }
 }
