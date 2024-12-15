@@ -4,6 +4,8 @@ import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
+import { TimeEntriesModule } from './time-entries/time-entries.module';
+import { PausesModule } from './pauses/pauses.module';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -23,6 +25,8 @@ console.log('process.env.DB_HOST', process.env.DB_HOST);
     }),
     UserModule,
     AuthModule,
+    TimeEntriesModule,
+    PausesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

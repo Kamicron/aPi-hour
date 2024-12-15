@@ -1,3 +1,4 @@
+import { TimeEntry } from 'src/time-entries/entities/time-entry.entity';
 import {
   Entity,
   Column,
@@ -5,6 +6,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   DeleteDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 @Entity('users') // Nom de la table dans la base de données
@@ -32,4 +34,7 @@ export class User {
 
   @DeleteDateColumn() // Géré automatiquement pour le soft delete
   deletedAt: Date | null;
+
+  @OneToMany(() => TimeEntry, (timeEntry) => timeEntry.user)
+  timeEntries: TimeEntry[];
 }
