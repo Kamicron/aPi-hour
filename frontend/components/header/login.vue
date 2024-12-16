@@ -1,5 +1,6 @@
 <template>
   <div class="auth-widget">
+  <button @click="getProfile()">getProfile</button>
     <!-- Si l'utilisateur est connecté -->
     <div v-if="isLoggedIn" class="auth-widget__connected">
       <p>Bienvenue, {{ userName }}</p>
@@ -40,6 +41,7 @@ import { ref, computed, onMounted  } from 'vue';
 import { useRouter } from 'vue-router';
 import { useNuxtApp, useCookie } from '#app';
 import { jwtDecode } from 'jwt-decode';
+import { useUserStore } from '../../stores/user';
 
 // ------------------
 
@@ -55,6 +57,7 @@ import { jwtDecode } from 'jwt-decode';
 const router = useRouter();
 const token = useCookie('token');
 const { $api } = useNuxtApp();
+const userStore = useUserStore();
 // ------------------
 
 // ---- Reactive ----
@@ -63,7 +66,6 @@ const password = ref('');
 const userName = ref('');
 const isLoggedIn = ref(false);
 const isRegistering = ref(false);
-const userProfile = ref()
 // ------------------
 
 // ---- Computed ----
@@ -71,17 +73,17 @@ const userProfile = ref()
 // ------------------
 
 // ------ Hooks -----
-onMounted(() => {
+onMounted(async () => {
   if (token.value) {
     try {
       const decoded: any = jwtDecode(token.value);
       const currentTime = Date.now() / 1000;
       if (decoded.exp > currentTime) {
-        userName.value = decoded.sub; // Exemple : email ou nom d'utilisateur
         isLoggedIn.value = true;
-        userProfile.value = getProfile()
-        console.log('userProfile.value', userProfile.value);
-        
+
+        // Appel pour récupérer le profil
+        const profile = await getProfile();
+
       } else {
         logout();
       }
@@ -100,24 +102,24 @@ async function handleAuth() {
       email: email.value,
       password: password.value,
     });
-    token.value = response.data.access_token;
 
-    const decoded: any = jwtDecode(response.data.access_token);
-    userName.value = decoded.sub;
-    isLoggedIn.value = true;
+    // Stocke le token dans les cookies
+    userStore.token = response.data.access_token;
+
+    // Récupère les données du profil
+    await userStore.fetchProfile($api);
+
+    isLoggedIn.value = true; // Optionnel
   } catch (err) {
-    console.error('Erreur d\'authentification', err);
+    console.error("Erreur d'authentification", err);
   }
 }
 
 async function getProfile() {
-  try {
-    const profile = await $api.get('/user/profile');
-    return profile
-  } catch (error) {
-    console.error('Erreur lors de la récupération du compte', error);
-  }
+  await userStore.fetchProfile($api);
 }
+
+
 // ------------------
 
 // ---- Function ----
@@ -126,8 +128,8 @@ function toggleAuthMode() {
 }
 
 function logout() {
-  token.value = null;
-  isLoggedIn.value = false;
+  userStore.logout();
+  isLoggedIn.value = false; // Optionnel si tu utilises le store pour tout
 }
 // ------------------
 

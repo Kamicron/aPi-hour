@@ -8,7 +8,6 @@ import { UserModule } from '../user/user.module';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-console.log('auth process.env.JWT_KEY', process.env.JWT_KEY);
 
 @Module({
   imports: [

@@ -6,6 +6,8 @@ export default defineNuxtConfig({
   devServer: {
     port: 3001,
   },
+  plugins: ['~/plugins/pinia'],
+  modules: ['@pinia/nuxt'],
   runtimeConfig: {
     public: {
       apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:3000', // URL par défaut si .env est manquant

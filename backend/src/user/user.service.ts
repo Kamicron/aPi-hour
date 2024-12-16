@@ -36,6 +36,8 @@ export class UserService {
 
   // Mettre à jour un utilisateur
   async update(id: string, userData: Partial<User>): Promise<User> {
+    console.log('edit serve');
+
     const user = await this.findOne(id); // Vérifie si l'utilisateur existe
     Object.assign(user, userData);
     return this.userRepository.save(user);
@@ -51,6 +53,8 @@ export class UserService {
 
   // Recherche par adresse mail
   async findByEmail(email: string): Promise<User | undefined> {
+    console.log("findbtemaul");
+    
     return this.userRepository.findOne({
       where: { email },
       select: ['id', 'name', 'email', 'password', 'role'], // Inclure explicitement le champ `password`

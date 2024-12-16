@@ -11,8 +11,6 @@ export class RolesGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user; // Récupère req.user injecté par JwtStrategy
 
-    console.log('User in RolesGuard:', user); // Log des informations utilisateur
-
     if (!user || !user.role) {
       throw new ForbiddenException('You do not have access to this resource.');
     }

@@ -30,10 +30,44 @@ export class UserController {
     return this.userService.findAll();
   }
 
+  @Get('profile')
+  @UseGuards(AuthGuard)
+  getProfile(@Req() req: any) {
+    console.log('profile', req.user);
+
+    return this.userService.findOne(req.user.userId);
+  }
+
+  // Accessible uniquement au propriétaire ou aux admins
+  @UseGuards(AuthGuard)
+  @Delete(':id')
+  async softDelete(@Param('id') id: string, @Req() req: any): Promise<void> {
+    const user = await this.userService.findOne(id);
+    console.log('delete');
+
+    // Vérification : propriétaire ou admin
+    if (req.user.userId !== user.id && req.user.role !== 'admin') {
+      throw new ForbiddenException('You do not have access to this resource.');
+    }
+    return this.userService.softDelete(id);
+  }
+
+  // Accessible uniquement aux admins
+  @UseGuards(AuthGuard, RolesGuard)
+  @Patch('restore/:id')
+  async restore(@Param('id') id: string, @Req() req: any): Promise<void> {
+    if (req.user.role !== 'admin') {
+      throw new ForbiddenException('Only admins can restore users.');
+    }
+    return this.userService.restore(id);
+  }
+
   // Accessible uniquement au propriétaire ou aux admins
   @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req: any): Promise<User> {
+    console.log(':id');
+
     const user = await this.userService.findOne(id);
 
     // Vérification : propriétaire ou admin
@@ -57,11 +91,8 @@ export class UserController {
     @Body() userData: Partial<User>,
     @Req() req: any,
   ): Promise<User> {
-    console.log('req.user:', req.user); // Vérifiez que req.user contient userId et role
-    console.log('Param id:', id);
-
     const user = await this.userService.findOne(id);
-    console.log('User from DB:', user);
+    console.log('ediit');
 
     // Vérification des permissions
     if (req.user.userId !== user.id && req.user.role !== 'admin') {
@@ -72,34 +103,5 @@ export class UserController {
 
     // Si l'utilisateur connecté est autorisé
     return this.userService.update(id, userData);
-  }
-
-  @Get('profile')
-  @UseGuards(AuthGuard)
-  getProfile(@Req() req: any) {
-    return this.userService.findOne(req.user.sub); // Récupère l'utilisateur à partir de l'ID JWT
-  }
-
-  // Accessible uniquement au propriétaire ou aux admins
-  @UseGuards(AuthGuard)
-  @Delete(':id')
-  async softDelete(@Param('id') id: string, @Req() req: any): Promise<void> {
-    const user = await this.userService.findOne(id);
-
-    // Vérification : propriétaire ou admin
-    if (req.user.userId !== user.id && req.user.role !== 'admin') {
-      throw new ForbiddenException('You do not have access to this resource.');
-    }
-    return this.userService.softDelete(id);
-  }
-
-  // Accessible uniquement aux admins
-  @UseGuards(AuthGuard, RolesGuard)
-  @Patch('restore/:id')
-  async restore(@Param('id') id: string, @Req() req: any): Promise<void> {
-    if (req.user.role !== 'admin') {
-      throw new ForbiddenException('Only admins can restore users.');
-    }
-    return this.userService.restore(id);
   }
 }
