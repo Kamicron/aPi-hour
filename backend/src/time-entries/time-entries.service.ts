@@ -94,6 +94,59 @@ export class TimeEntriesService {
     return timeEntry;
   }
 
+  async findByDate(date: string, userId: string, userRole: string) {
+    const query = this.timeEntriesRepository
+      .createQueryBuilder('timeEntry')
+      .leftJoinAndSelect('timeEntry.pauses', 'pauses') // Inclure les pauses
+      .where('DATE(timeEntry.startTime) = :date', { date });
+
+    if (userRole !== 'admin') {
+      query.andWhere('timeEntry.userId = :userId', { userId });
+    }
+
+    const sessions = await query.getMany();
+
+    // Calculer les totaux
+    return this.calculateWorkDetails(sessions);
+  }
+
+  private calculateWorkDetails(sessions: any[]) {
+    let totalWorkTime = 0;
+    let totalPauseTime = 0;
+
+    const details = sessions.map((session) => {
+      const startTime = new Date(session.startTime);
+      const endTime = session.endTime ? new Date(session.endTime) : new Date();
+
+      // Temps de travail brut
+      const workTime = (endTime.getTime() - startTime.getTime()) / 1000;
+
+      // Temps de pause total
+      const pauseTime = session.pauses.reduce((sum: number, pause: any) => {
+        const pauseStart = new Date(pause.pauseStart);
+        const pauseEnd = pause.pauseEnd ? new Date(pause.pauseEnd) : new Date();
+        return sum + (pauseEnd.getTime() - pauseStart.getTime()) / 1000;
+      }, 0);
+
+      totalWorkTime += workTime - pauseTime;
+      totalPauseTime += pauseTime;
+
+      return {
+        sessionId: session.id,
+        startTime,
+        endTime,
+        workTime: workTime - pauseTime,
+        pauseTime,
+      };
+    });
+
+    return {
+      totalWorkTime,
+      totalPauseTime,
+      details,
+    };
+  }
+
   async start(userId: string) {
     const timeEntry = this.timeEntriesRepository.create({
       user: { id: userId },

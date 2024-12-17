@@ -6,7 +6,6 @@ export default defineNuxtConfig({
   devServer: {
     port: 3001,
   },
-  plugins: ['~/plugins/pinia'],
   modules: ['@pinia/nuxt'],
   runtimeConfig: {
     public: {

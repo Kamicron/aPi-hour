@@ -41,6 +41,14 @@ export class TimeEntriesController {
     return this.timeEntriesService.softDelete(id, userId, userRole);
   }
 
+  // Récupérer les sessions pour une date donnée
+  @Get('date/:date')
+  async findByDate(@Param('date') date: string, @Req() req: any) {
+    const userId = req.user.userId;
+    const userRole = req.user.role;
+    return this.timeEntriesService.findByDate(date, userId, userRole);
+  }
+
   // Restaurer une entrée soft deleted (admin uniquement)
   @Patch('restore/:id')
   @UseGuards(RolesGuard)

@@ -1,6 +1,7 @@
 <template>
   <div class='index'>
-    test
+    <session-time />
+    <work-session />
   </div>
 </template>
 

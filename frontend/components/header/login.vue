@@ -1,13 +1,11 @@
 <template>
   <div class="auth-widget">
-  <button @click="getProfile()">getProfile</button>
-    <!-- Si l'utilisateur est connecté -->
+  <!-- <button @click="getProfile()">getProfile</button> -->
     <div v-if="isLoggedIn" class="auth-widget__connected">
-      <p>Bienvenue, {{ userName }}</p>
+      <p v-if="profile">Bienvenue, {{ profile.name }}</p>
       <button @click="logout" class="auth-widget__button">Déconnexion</button>
     </div>
 
-    <!-- Si l'utilisateur n'est pas connecté -->
     <div v-else class="auth-widget__form">
       <form @submit.prevent="handleAuth">
         <input
@@ -37,7 +35,7 @@
 
 <script setup lang='ts'>
 // ----- Import -----
-import { ref, computed, onMounted  } from 'vue';
+import { ref, onMounted  } from 'vue';
 import { useRouter } from 'vue-router';
 import { useNuxtApp, useCookie } from '#app';
 import { jwtDecode } from 'jwt-decode';
@@ -66,6 +64,7 @@ const password = ref('');
 const userName = ref('');
 const isLoggedIn = ref(false);
 const isRegistering = ref(false);
+const profile = ref()
 // ------------------
 
 // ---- Computed ----
@@ -81,9 +80,7 @@ onMounted(async () => {
       if (decoded.exp > currentTime) {
         isLoggedIn.value = true;
 
-        // Appel pour récupérer le profil
-        const profile = await getProfile();
-
+        getProfile()
       } else {
         logout();
       }
@@ -103,20 +100,17 @@ async function handleAuth() {
       password: password.value,
     });
 
-    // Stocke le token dans les cookies
     userStore.token = response.data.access_token;
 
-    // Récupère les données du profil
-    await userStore.fetchProfile($api);
-
-    isLoggedIn.value = true; // Optionnel
+    getProfile()
+    isLoggedIn.value = true; 
   } catch (err) {
     console.error("Erreur d'authentification", err);
   }
 }
 
 async function getProfile() {
-  await userStore.fetchProfile($api);
+  profile.value = await userStore.fetchProfile($api);
 }
 
 
@@ -129,7 +123,7 @@ function toggleAuthMode() {
 
 function logout() {
   userStore.logout();
-  isLoggedIn.value = false; // Optionnel si tu utilises le store pour tout
+  isLoggedIn.value = false; 
 }
 // ------------------
 
