@@ -8,6 +8,7 @@ import {
   Body,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { TimeEntriesService } from './time-entries.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -39,6 +40,16 @@ export class TimeEntriesController {
     const userId = req.user.userId;
     const userRole = req.user.role;
     return this.timeEntriesService.softDelete(id, userId, userRole);
+  }
+
+  @Get('month')
+  async getTimeEntriesByMonth(
+    @Query('year') year: number,
+    @Query('month') month: number,
+    @Req() req: any,
+  ) {
+    const userId = req.user.userId;
+    return this.timeEntriesService.getTimeEntriesForMonth(userId, year, month);
   }
 
   // Récupérer les sessions pour une date donnée
@@ -85,4 +96,6 @@ export class TimeEntriesController {
     const userId = req.user.userId;
     return this.timeEntriesService.end(id, userId);
   }
+
+
 }

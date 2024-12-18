@@ -3,7 +3,8 @@
     <h2 class="work-sessions__title">Résumé de la journée</h2>
 
     <!-- Sélecteur de date -->
-    <input v-model="selectedDate" type="date" @change="fetchSessions" class="work-sessions__date-picker" />
+    <!-- <input v-model="selectedDate" type="date" @change="fetchSessions" class="work-sessions__date-picker" /> -->
+    <calendar @pick-date="handleDatePicked" />
 
     <!-- Résumé total -->
     <div v-if="summary" class="work-sessions__summary">
@@ -30,6 +31,7 @@
       <p>Aucune session trouvée pour cette date.</p>
     </div>
   </div>
+
 </template>
 
 <script setup lang="ts">
@@ -54,6 +56,12 @@ async function fetchSessions() {
     console.error('Erreur lors de la récupération des sessions', error);
   }
 }
+
+function handleDatePicked(date: Date) {
+  selectedDate.value = date.toISOString().slice(0, 10);
+  fetchSessions();
+}
+
 
 // Formater les secondes en HH:MM:SS
 function formatTime(seconds: number) {

@@ -1,7 +1,7 @@
 <template>
   <header class="header">
     <div class="header__container">
-      <h1 class="header__title">Système de Gestion de Pointage</h1>
+      <h1 class="header__title">aPi-hour</h1>
       <Login />
     </div>
   </header>

@@ -1,18 +1,15 @@
 <template>
   <div class="time-session">
-    <!-- État de repos -->
     <div v-if="!sessionStore.isRunning" class="time-session__idle">
       <button @click="start" class="time-session__button">Démarrer</button>
     </div>
 
-    <!-- État en cours -->
     <div v-else-if="sessionStore.isRunning && !sessionStore.isPaused" class="time-session__running">
       <p>Session en cours...</p>
       <button @click="pause" class="time-session__button">Pause</button>
       <button @click="stop" class="time-session__button time-session__button--stop">Stop</button>
     </div>
 
-    <!-- État en pause -->
     <div v-else class="time-session__paused">
       <p>Session en pause...</p>
       <button @click="resume" class="time-session__button">Reprendre</button>

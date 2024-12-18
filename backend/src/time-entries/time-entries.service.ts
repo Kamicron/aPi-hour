@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { TimeEntry } from './entities/time-entry.entity';
 
 @Injectable()
@@ -169,5 +169,21 @@ export class TimeEntriesService {
     });
     if (!timeEntry) throw new NotFoundException('Time entry not found');
     return timeEntry;
+  }
+
+  async getTimeEntriesForMonth(userId: string, year: number, month: number) {
+    const startDate = new Date(year, month - 1, 1); // Premier jour du mois
+    const endDate = new Date(year, month, 0, 23, 59, 59); // Dernier jour du mois
+    console.log('StartDate:', startDate, 'EndDate:', endDate);
+
+    return this.timeEntriesRepository.find({
+      where: {
+        user: { id: userId },
+        startTime: MoreThanOrEqual(startDate),
+        endTime: LessThanOrEqual(endDate),
+      },
+
+      relations: ['pauses'],
+    });
   }
 }
