@@ -12,13 +12,13 @@ dotenv.config();
 @Module({
   imports: [
     UserModule,
-    PassportModule.register({ defaultStrategy: 'jwt' }), // Enregistrez 'jwt' comme stratégie par défaut
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
       secret: process.env.JWT_KEY || 'defaultSecret',
-      signOptions: { expiresIn: '1h' },
+      signOptions: { expiresIn: '12h' },
     }),
   ],
-  providers: [AuthService, JwtStrategy], // Assurez-vous que JwtStrategy est inclus ici
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })
