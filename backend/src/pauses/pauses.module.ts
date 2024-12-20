@@ -1,15 +1,21 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { PausesController } from './pauses.controller';
 import { PausesService } from './pauses.service';
+import { PausesController } from './pauses.controller';
 import { Pause } from './entities/pause.entity';
-import { TimeEntriesService } from '../time-entries/time-entries.service';
-import { TimeEntry } from '../time-entries/entities/time-entry.entity';
+import { TimeEntriesModule } from '../time-entries/time-entries.module';
+import { UserSessionsModule } from '../user_sessions/user_sessions.module';
+import { UserSession } from 'src/user_sessions/entities/user_session.entity';
+import { TimeEntry } from 'src/time-entries/entities/time-entry.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Pause, TimeEntry])],
+  imports: [
+    TypeOrmModule.forFeature([Pause, TimeEntry, UserSession]), // Ajout des entités manquantes
+    TimeEntriesModule,
+    UserSessionsModule,
+  ],
+  providers: [PausesService],
   controllers: [PausesController],
-  providers: [PausesService, TimeEntriesService],
-  exports: [PausesService],
 })
 export class PausesModule {}
+

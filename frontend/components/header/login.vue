@@ -1,6 +1,6 @@
 <template>
   <div class="auth-widget">
-  <!-- <button @click="getProfile()">getProfile</button> -->
+  <button @click="getProfile()">getProfile</button>
     <div v-if="isLoggedIn" class="auth-widget__connected">
       <p v-if="profile">Bienvenue, {{ profile.name }}</p>
       <button @click="logout" class="auth-widget__button">Déconnexion</button>

@@ -3,12 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import * as bcrypt from 'bcrypt';
+import { UserSession } from 'src/user_sessions/entities/user_session.entity';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User)
+    @InjectRepository(User) // Injectez le repository des entrées de temps
     private readonly userRepository: Repository<User>,
+    @InjectRepository(UserSession) // Injectez correctement la table des sessions
+    private readonly sessionRepository: Repository<UserSession>,
   ) {}
 
   // Récupérer tous les utilisateurs (sans ceux supprimés)
@@ -17,12 +20,26 @@ export class UserService {
   }
 
   // Récupérer un utilisateur par ID
-  async findOne(id: string): Promise<User> {
-    console.log('findOne id', id);
+  async findOne(userId: string): Promise<any> {
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+      relations: ['sessions'],
+    });
 
-    const user = await this.userRepository.findOne({ where: { id } });
-    if (!user) throw new NotFoundException(`User with ID ${id} not found`);
-    return user;
+    if (!user) throw new NotFoundException('User not found');
+
+    // Récupérer la session active
+    const currentSession = await this.sessionRepository.findOne({
+      where: { user: { id: userId } },
+      order: { updatedAt: 'DESC' },
+    });
+
+    console.log('currentSession', currentSession);
+
+    return {
+      ...user,
+      currentSession: currentSession || null,
+    };
   }
 
   // Créer un nouvel utilisateur
@@ -53,8 +70,6 @@ export class UserService {
 
   // Recherche par adresse mail
   async findByEmail(email: string): Promise<User | undefined> {
-    console.log("findbtemaul");
-    
     return this.userRepository.findOne({
       where: { email },
       select: ['id', 'name', 'email', 'password', 'role'], // Inclure explicitement le champ `password`

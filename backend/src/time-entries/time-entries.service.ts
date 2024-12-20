@@ -6,12 +6,15 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
 import { TimeEntry } from './entities/time-entry.entity';
+import { UserSession } from 'src/user_sessions/entities/user_session.entity';
 
 @Injectable()
 export class TimeEntriesService {
   constructor(
-    @InjectRepository(TimeEntry)
+    @InjectRepository(TimeEntry) // Injectez le repository des entrées de temps
     private readonly timeEntriesRepository: Repository<TimeEntry>,
+    @InjectRepository(UserSession) // Injectez correctement la table des sessions
+    private readonly sessionRepository: Repository<UserSession>,
   ) {}
 
   // Créer une entrée de pointage
@@ -79,10 +82,16 @@ export class TimeEntriesService {
 
   // Récupérer une entrée spécifique
   async findOne(id: string, userId: string, userRole: string) {
+    console.log('id', id);
+    console.log('userId', userId);
+    console.log('userRole', userRole);
+
     const timeEntry = await this.timeEntriesRepository.findOne({
       where: { id },
       withDeleted: userRole === 'admin',
     });
+
+    console.log('timeEntry', timeEntry);
 
     if (!timeEntry) throw new NotFoundException('Time entry not found');
     if (timeEntry.user.id !== userId && userRole !== 'admin') {
@@ -148,18 +157,61 @@ export class TimeEntriesService {
   }
 
   async start(userId: string) {
+    // Créer une nouvelle entrée dans `time_entries`
     const timeEntry = this.timeEntriesRepository.create({
       user: { id: userId },
       startTime: new Date(),
     });
-    return this.timeEntriesRepository.save(timeEntry);
+    const savedEntry = await this.timeEntriesRepository.save(timeEntry);
+
+    // Mettre à jour ou créer une nouvelle session pour l'utilisateur
+
+    const session = await this.sessionRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    console.log('session', session);
+
+    if (session) {
+      session.status = 'started';
+      session.timeEntry = savedEntry;
+      session.pause = null;
+    } else {
+      await this.sessionRepository.save({
+        user: { id: userId },
+        timeEntry: savedEntry,
+        status: 'started',
+      });
+    }
+
+    return savedEntry;
   }
 
   // Terminer une session
   async end(id: string, userId: string) {
+    // Récupérer l'entrée de temps associée
     const timeEntry = await this.getTimeEntry(id, userId);
+
+    if (!timeEntry) {
+      throw new NotFoundException('Time entry not found');
+    }
+
+    // Mettre à jour l'heure de fin
     timeEntry.endTime = new Date();
-    return this.timeEntriesRepository.save(timeEntry);
+    const updatedTimeEntry = await this.timeEntriesRepository.save(timeEntry);
+
+    // Mettre à jour le statut dans user_sessions
+    const session = await this.sessionRepository.findOne({
+      where: { user: { id: userId } },
+    });
+
+    console.log('session', session);
+
+    if (session) {
+      await this.sessionRepository.remove(session);
+    }
+
+    return updatedTimeEntry;
   }
 
   // Méthode privée pour valider l'accès à une session

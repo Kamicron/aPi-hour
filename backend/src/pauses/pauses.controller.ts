@@ -16,6 +16,8 @@ export class PausesController {
   @Patch(':id/resume')
   resumePause(@Param('id') id: string, @Req() req: any) {
     const userId = req.user.userId;
+    console.log('id', id);
+    
     return this.pausesService.resumePause(id, userId);
   }
 }

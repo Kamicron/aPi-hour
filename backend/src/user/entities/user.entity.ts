@@ -1,4 +1,5 @@
 import { TimeEntry } from 'src/time-entries/entities/time-entry.entity';
+import { UserSession } from 'src/user_sessions/entities/user_session.entity';
 import {
   Entity,
   Column,
@@ -37,4 +38,7 @@ export class User {
 
   @OneToMany(() => TimeEntry, (timeEntry) => timeEntry.user)
   timeEntries: TimeEntry[];
+
+  @OneToMany(() => UserSession, (session) => session.user)
+  sessions: UserSession[];
 }

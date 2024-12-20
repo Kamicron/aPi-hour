@@ -6,6 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from './auth/auth.module';
 import { TimeEntriesModule } from './time-entries/time-entries.module';
 import { PausesModule } from './pauses/pauses.module';
+import { UserSessionsModule } from './user_sessions/user_sessions.module';
 import * as dotenv from 'dotenv';
 dotenv.config();
 
@@ -27,6 +28,7 @@ console.log('process.env.DB_HOST', process.env.DB_HOST);
     AuthModule,
     TimeEntriesModule,
     PausesModule,
+    UserSessionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
