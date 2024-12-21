@@ -53,7 +53,8 @@
 
 <style lang="scss" scoped>
 .header {
-  background-color: #f5f5f5;
+  background-color: $color-surface;
+  box-shadow: $box-shadow-dark;
   padding: 1rem;
 
   &__container {

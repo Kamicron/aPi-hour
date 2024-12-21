@@ -84,7 +84,6 @@ fetchSessions();
 <style lang="scss" scoped>
 .work-sessions {
   padding: 1rem;
-  background: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
@@ -114,11 +113,11 @@ fetchSessions();
       padding: 0;
 
       li {
-        background: #fff;
+        background: $color-surface;
         margin: 0.5rem 0;
         padding: 1rem;
-        border-radius: 5px;
-        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-radius: $border-radius;
+        box-shadow: $box-shadow-light;
       }
     }
   }

@@ -1,19 +1,21 @@
 <template>
-  <div v-if="profile" class="time-session">
+  <div v-if="profile && isLogged" class="time-session">
     <div v-if="profile.sessions.length === 0" class="time-session__idle">
-      <button @click="start" class="time-session__button">Démarrer</button>
+      <button @click="start" class="btn">Démarrer</button>
     </div>
     <div v-else>
       <div v-if="profile.sessions[0].status === 'started'" class="time-session__running">
         <p>Session en cours...</p>
-        <button @click="pause" class="time-session__button">Pause</button>
-        <button @click="stop" class="time-session__button time-session__button--stop">Stop</button>
+        <p>Heure de debut: {{ startTime }}</p>
+        <p>Temps écoulé : {{ formattedElapsedTime }}</p>
+        <button @click="pause" class="btn">Pause</button>
+        <button @click="stop" class="btn">Stop</button>
       </div>
 
       <div v-if="profile.sessions[0].status === 'paused'">
         <p>Session en pause...</p>
-        <button @click="resume" class="time-session__button">Reprendre</button>
-        <button @click="stop" class="time-session__button time-session__button--stop">Stop</button>
+        <button @click="resume" class="btn">Reprendre</button>
+        <button @click="stop" class="btn">Stop</button>
       </div>
     </div>
 
@@ -28,6 +30,9 @@
 import { useSessionStore } from '../../stores/session';
 import { useNuxtApp, useCookie } from '#app';
 import { useUserStore } from '../../stores/user';
+import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
+import { useGlobalEvents } from '../../composable/useGlobalEvent';
+import { EGlobalEvent } from '../../assets/ts/enums/global/globalEvent.enum';
 
 const userStore = useUserStore();
 
@@ -35,6 +40,31 @@ const sessionStore = useSessionStore();
 const { $api } = useNuxtApp();
 const token = useCookie('token');
 const profile = ref()
+const isLogged = ref<boolean>(false)
+
+const startTime = ref(new Date()); // Exemple de startTime
+const elapsedTime = ref(0);
+let interval = null;
+
+const formattedElapsedTime = computed(() => {
+  const hours = Math.floor(elapsedTime.value / 3600);
+  const minutes = Math.floor((elapsedTime.value % 3600) / 60);
+  const seconds = elapsedTime.value % 60;
+  return `${hours.toString().padStart(2, '0')}:${minutes
+    .toString()
+    .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+});
+
+onMounted(() => {
+  interval = setInterval(() => {
+    const now = new Date();
+    elapsedTime.value = Math.floor((now - new Date(startTime.value)) / 1000);
+  }, 1000);
+});
+
+onUnmounted(() => {
+  if (interval) clearInterval(interval);
+});
 
 // ----- Functions -----
 async function start() {
@@ -43,12 +73,15 @@ async function start() {
       headers: { Authorization: `Bearer ${token.value}` }
     });
 
+    console.log('response', response);
+    
     // Supposons que la réponse contient { id: 'session-id' }
     const sessionIdFromApi = response.data.id;
     if (sessionIdFromApi) {
       sessionStore.sessionId = sessionIdFromApi;
       sessionStore.startSession();
       getProfile()
+      startTime.value = response.data.startTime
     } else {
       throw new Error('ID de session non reçu du serveur');
     }
@@ -56,6 +89,13 @@ async function start() {
     console.error('Erreur lors du démarrage de la session', err);
   }
 }
+
+useGlobalEvents().subscribeTo<boolean | undefined>(EGlobalEvent.LOGGED, (isLoggedIn) => {
+  if (typeof isLoggedIn !== 'boolean') return; 
+  isLogged.value = isLoggedIn; 
+});
+
+
 
 onMounted(() => { getProfile() })
 
@@ -92,7 +132,7 @@ async function resume() {
 
 async function stop() {
   try {
-    await $api.patch(`/time-entries/${sessionStore.sessionId}/end`, {}, {
+    await $api.patch(`/time-entries/${profile.value.sessions[0].timeEntry.id}/end`, {}, {
       headers: { Authorization: `Bearer ${token.value}` }
     });
     sessionStore.stopSession();
@@ -101,4 +141,14 @@ async function stop() {
     console.error('Erreur lors de l\'arrêt de la session', err);
   }
 }
+
+watch(isLogged, (newValue) => {
+  if (newValue) {
+    console.log('newValue', newValue);
+    
+    getProfile(); // Récupère le profil si l'utilisateur est connecté
+  } else {
+    profile.value = null; // Nettoie le profil si déconnecté
+  }
+});
 </script>

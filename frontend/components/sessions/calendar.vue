@@ -1,9 +1,9 @@
 <template>
   <div class="calendar">
     <div class="calendar__header">
-      <button @click="changeMonth(-1)">&lt;</button>
+      <button class="btn" @click="changeMonth(-1)">&lt;</button>
       <h2>{{ monthName }} {{ currentYear }}</h2>
-      <button @click="changeMonth(1)">&gt;</button>
+      <button class="btn" @click="changeMonth(1)">&gt;</button>
     </div>
     <div class="calendar__grid">
       <div class="calendar__day" v-for="day in daysOfWeek" :key="day">
@@ -18,7 +18,7 @@
           'calendar__cell--session': hasSessionOnDay(day.date), // Nouvelle classe
         }
       ]" @click="selectDay(day.date)">
-        <span>{{ day.date.getDate() }}</span>
+        <span class="date">{{ day.date.getDate() }}</span>
       </div>
     </div>
     <div class="calendar__footer" v-if="selectedDate">
@@ -183,26 +183,38 @@ watch([currentMonth, currentYear], () => {
     padding: 1rem;
     text-align: center;
     cursor: pointer;
-    border: 1px solid #ddd;
+    border: 1px solid $color-text-primary;
     border-radius: 4px;
 
+
     &--inactive {
-      color: #aaa;
-      background-color: #f9f9f9;
+      background-color: $color-surface;
+
+      .date{
+        color: $color-text-secondary
+      }
     }
 
     &--today {
-      background-color: #ffecb3;
+      background-color: $color-primary;
       font-weight: bold;
     }
 
     &--selected {
-      background-color: #b3d9ff;
+      background-color: $color-primary-light;
       font-weight: bold;
+
+      .date{
+        color: $color-primary
+      }
     }
 
     &:hover {
-      background-color: #eef;
+      background-color: $color-secondary;
+
+      .date{
+        color: $color-background
+      }
     }
   }
 
@@ -214,9 +226,8 @@ watch([currentMonth, currentYear], () => {
 }
 
 .calendar__cell--session {
-  border: 2px solid #0288d1; // Bordure plus marquée
+  border: 2px solid $color-secondary; 
   font-weight: bold;
-  color: #01579b;
 }
 
 </style>

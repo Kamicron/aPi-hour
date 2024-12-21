@@ -1,9 +1,9 @@
 <template>
   <div class="auth-widget">
-  <button @click="getProfile()">getProfile</button>
+  <button class="btn" @click="getProfile()">getProfile</button>
     <div v-if="isLoggedIn" class="auth-widget__connected">
       <p v-if="profile">Bienvenue, {{ profile.name }}</p>
-      <button @click="logout" class="auth-widget__button">Déconnexion</button>
+      <button @click="logout" class="btn">Déconnexion</button>
     </div>
 
     <div v-else class="auth-widget__form">
@@ -22,7 +22,7 @@
           class="auth-widget__input"
           required
         />
-        <button type="submit" class="auth-widget__button">
+        <button type="submit" class="btn">
           {{ isRegistering ? 'Créer un compte' : 'Se connecter' }}
         </button>
       </form>
@@ -40,6 +40,8 @@ import { useRouter } from 'vue-router';
 import { useNuxtApp, useCookie } from '#app';
 import { jwtDecode } from 'jwt-decode';
 import { useUserStore } from '../../stores/user';
+import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 
 // ------------------
 
@@ -104,6 +106,8 @@ async function handleAuth() {
 
     getProfile()
     isLoggedIn.value = true; 
+    useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, true)
+
   } catch (err) {
     console.error("Erreur d'authentification", err);
   }
@@ -122,8 +126,13 @@ function toggleAuthMode() {
 }
 
 function logout() {
+  console.log('logout');
+  
+  useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, false)
   userStore.logout();
   isLoggedIn.value = false; 
+
+  router.push('/')
 }
 // ------------------
 

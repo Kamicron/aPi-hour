@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia';
 import { useCookie } from '#app';
+import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 
 export const useUserStore = defineStore('user', () => {
   const token = useCookie('token');
@@ -13,7 +15,9 @@ export const useUserStore = defineStore('user', () => {
         },
       });
       profile.value = response.data;
+      useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, true)
       return response.data;
+
     } catch (error) {
       console.error('Erreur lors de la récupération du profil:', error);
       profile.value = null;
@@ -23,6 +27,9 @@ export const useUserStore = defineStore('user', () => {
   function logout() {
     token.value = null;
     profile.value = null;
+    console.log('logout');
+    
+    useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, false)
   }
 
   return {

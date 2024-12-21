@@ -1,0 +1,51 @@
+.btn {
+  padding: $spacing-medium $spacing-large;
+  border-radius: $border-radius; // Arrondi léger, plus moderne
+  font-family: $font-family-base;
+  font-size: $font-size-small;
+  letter-spacing: 2px;
+  font-weight: bold;
+  text-transform: uppercase; // Texte en majuscule pour un aspect plus affirmé
+  cursor: pointer;
+  border: none;
+  transition: all 0.3s ease-in-out;
+
+  // Base pour tous les boutons
+  background-color: $color-primary-light;
+  color: $color-text-primary;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); // Ombre subtile pour la profondeur
+
+  &:hover {
+    background-color: lighten($color-secondary, 5%);
+    transform: translateY(-2px);
+    box-shadow: $box-shadow-dark;
+    color: $color-background;// Renforcement de l'ombre au hover
+  }
+
+  &:active {
+    background-color: darken($color-surface, 5%);
+    transform: translateY(1px);
+    box-shadow: $box-shadow-dark; // Feedback au clic
+  }
+
+  &:disabled {
+    background-color: lighten($color-surface, 15%);
+    color: lighten($color-text-secondary, 20%);
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+  }
+
+  &--danger {
+    background-color: $color-danger;
+    color: $color-text-primary;
+
+    &:hover {
+      background-color: lighten($color-danger, 10%);
+    }
+
+    &:active {
+      background-color: darken($color-danger, 10%);
+    }
+  }
+}

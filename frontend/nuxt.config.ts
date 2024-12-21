@@ -6,6 +6,21 @@ export default defineNuxtConfig({
   devServer: {
     port: 3001,
   },
+  css: ['~/assets/scss/stylesheet.scss'],
+  vite: {
+    css: {
+      preprocessorOptions: {
+        scss: {
+          additionalData: `
+          @import "~/assets/scss/variables.scss";
+          @import "~/assets/scss/mixins.scss";
+          @import "~/assets/scss/buttons.scss";
+          `,
+          
+        },
+      },
+    },
+  },
   modules: ['@pinia/nuxt'],
   runtimeConfig: {
     public: {

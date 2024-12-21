@@ -1,0 +1,38 @@
+// VARIABLES GLOBALES
+// Palette de couleurs (Mode Dark)
+$color-background: #20242b; // Fond principal
+$color-surface: #2b333f; // Fonds secondaires (cartes, sections)
+$color-primary: #4f668d; // Bleu doux pour les éléments interactifs principaux
+$color-primary-light: rgb(139, 166, 212); // Variante claire pour hover ou accents
+$color-secondary: #ecc130; // Vert pastel pour les détails ou éléments secondaires
+$color-success: #43a047; // Succès (actions réussies)
+$color-warning: #ffb74d; // Avertissements (orange doux)
+$color-danger: #f36a6a; // Erreurs ou actions destructrices
+$color-text-primary: #e1e1e1; // Texte principal (blanc cassé pour un bon contraste)
+$color-text-secondary: #a5a5a5; // Texte secondaire (gris doux)
+
+// Typographie
+$font-family-base: 'Roboto', sans-serif;
+$font-size-base: 16px;
+$font-size-small: 14px;
+$font-size-large: 20px;
+$line-height-base: 1.5;
+
+// Espacements
+$spacing-unit: 8px;
+$spacing-small: $spacing-unit / 2;  // 4px
+$spacing-medium: $spacing-unit;  // 8px
+$spacing-large: $spacing-unit * 2;  // 16px
+
+// Ombres (légères pour éviter un visuel lourd en mode dark)
+$box-shadow-light: 0 2px 4px rgba(0, 0, 0, 0.2);
+$box-shadow-dark: 0 4px 8px rgba(0, 0, 0, 0.4);
+
+// Breakpoints
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;
+$breakpoint-xl: 1200px;
+
+// Border Radius
+$border-radius: 6px;
