@@ -1,21 +1,24 @@
 <template>
+
+
   <div v-if="profile && isLogged" class="time-session">
     <div v-if="profile.sessions.length === 0" class="time-session__idle">
       <button @click="start" class="btn">Démarrer</button>
+      <p>{{ startTimeString }}</p>
     </div>
     <div v-else>
       <div v-if="profile.sessions[0].status === 'started'" class="time-session__running">
         <p>Session en cours...</p>
         <p>Heure de debut: {{ startTime }}</p>
         <p>Temps écoulé : {{ formattedElapsedTime }}</p>
-        <button @click="pause" class="btn">Pause</button>
-        <button @click="stop" class="btn">Stop</button>
+        <button @click="pause" class="btn --pause">Pause</button>
+        <button @click="stop" class="btn --stop">Stop</button>
       </div>
 
       <div v-if="profile.sessions[0].status === 'paused'">
         <p>Session en pause...</p>
-        <button @click="resume" class="btn">Reprendre</button>
-        <button @click="stop" class="btn">Stop</button>
+        <button @click="resume" class="btn --resume">Reprendre</button>
+        <button @click="stop" class="btn --stop">Stop</button>
       </div>
     </div>
 
@@ -33,6 +36,7 @@ import { useUserStore } from '../../stores/user';
 import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
 import { useGlobalEvents } from '../../composable/useGlobalEvent';
 import { EGlobalEvent } from '../../assets/ts/enums/global/globalEvent.enum';
+import useDateFormatter from '~/composable/useDate';
 
 const userStore = useUserStore();
 
@@ -43,6 +47,8 @@ const profile = ref()
 const isLogged = ref<boolean>(false)
 
 const startTime = ref(new Date()); // Exemple de startTime
+const startTimeString = ref<string>('')
+
 const elapsedTime = ref(0);
 let interval = null;
 
@@ -56,6 +62,19 @@ const formattedElapsedTime = computed(() => {
 });
 
 onMounted(() => {
+  startTimeString.value = useDateFormatter().formatDate('2024-12-22T15:30:45', {
+  customOptions: {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'short',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+    timeZone: 'Europe/Paris',
+  },
+});
+
   interval = setInterval(() => {
     const now = new Date();
     elapsedTime.value = Math.floor((now - new Date(startTime.value)) / 1000);
@@ -64,6 +83,8 @@ onMounted(() => {
 
 onUnmounted(() => {
   if (interval) clearInterval(interval);
+
+
 });
 
 // ----- Functions -----
@@ -74,7 +95,7 @@ async function start() {
     });
 
     console.log('response', response);
-    
+
     // Supposons que la réponse contient { id: 'session-id' }
     const sessionIdFromApi = response.data.id;
     if (sessionIdFromApi) {
@@ -82,6 +103,7 @@ async function start() {
       sessionStore.startSession();
       getProfile()
       startTime.value = response.data.startTime
+
     } else {
       throw new Error('ID de session non reçu du serveur');
     }
@@ -91,8 +113,8 @@ async function start() {
 }
 
 useGlobalEvents().subscribeTo<boolean | undefined>(EGlobalEvent.LOGGED, (isLoggedIn) => {
-  if (typeof isLoggedIn !== 'boolean') return; 
-  isLogged.value = isLoggedIn; 
+  if (typeof isLoggedIn !== 'boolean') return;
+  isLogged.value = isLoggedIn;
 });
 
 
@@ -145,10 +167,25 @@ async function stop() {
 watch(isLogged, (newValue) => {
   if (newValue) {
     console.log('newValue', newValue);
-    
+
     getProfile(); // Récupère le profil si l'utilisateur est connecté
   } else {
     profile.value = null; // Nettoie le profil si déconnecté
   }
 });
 </script>
+
+<style lang="scss" scoped>
+.--pause {
+  background-color: $color-warning;
+  color: $color-primary;
+}
+
+.--stop {
+  background-color: $color-danger;
+}
+
+.--resume {
+  background-color: $color-success;
+}
+</style>
