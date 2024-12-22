@@ -1,47 +1,32 @@
 <template>
   <div class="auth-widget">
-  <button class="btn" @click="getProfile()">getProfile</button>
+    <!-- <button class="btn" @click="getProfile()">getProfile</button> -->
     <div v-if="isLoggedIn" class="auth-widget__connected">
-      <p v-if="profile">Bienvenue, {{ profile.name }}</p>
+      <p v-if="profile">Bienvenue, <span class="auth-widget__connected--user">{{ profile.name }}</span> </p>
       <button @click="logout" class="btn">Déconnexion</button>
     </div>
 
-    <div v-else class="auth-widget__form">
-      <form @submit.prevent="handleAuth">
-        <input
-          v-model="email"
-          type="email"
-          placeholder="Email"
-          class="auth-widget__input"
-          required
-        />
-        <input
-          v-model="password"
-          type="password"
-          placeholder="Mot de passe"
-          class="auth-widget__input"
-          required
-        />
-        <button type="submit" class="btn">
-          {{ isRegistering ? 'Créer un compte' : 'Se connecter' }}
-        </button>
-      </form>
-      <p @click="toggleAuthMode" class="auth-widget__toggle">
-        {{ isRegistering ? 'Déjà inscrit ? Connectez-vous' : 'Créer un compte' }}
-      </p>
+    <div v-else>
+      <button @click="isOpenModal = true" class="btn">
+        {{ isRegistering ? 'Créer un compte' : 'Se connecter' }}
+      </button>
     </div>
   </div>
+
+  <modal v-model="isOpenModal">
+    <login-modal @handleAuth="handleAuth" @close="isOpenModal = false" />
+  </modal>
 </template>
 
 <script setup lang='ts'>
 // ----- Import -----
-import { ref, onMounted  } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import { useNuxtApp, useCookie } from '#app';
 import { jwtDecode } from 'jwt-decode';
 import { useUserStore } from '../../stores/user';
-import { useGlobalEvents } from '~/composable/useGlobalEvent';
-import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
+import { useGlobalEvents } from '../../composable/useGlobalEvent';
+import { EGlobalEvent } from '../../assets/ts/enums/global/globalEvent.enum';
 
 // ------------------
 
@@ -61,12 +46,11 @@ const userStore = useUserStore();
 // ------------------
 
 // ---- Reactive ----
-const email = ref('');
-const password = ref('');
-const userName = ref('');
+
 const isLoggedIn = ref(false);
 const isRegistering = ref(false);
 const profile = ref()
+const isOpenModal = ref<boolean>(false)
 // ------------------
 
 // ---- Computed ----
@@ -94,22 +78,21 @@ onMounted(async () => {
 // ------------------
 
 // --- Async Func ---
-async function handleAuth() {
+async function handleAuth({ email, password, isRegistering }: {
+  email: string;
+  password: string;
+  isRegistering: boolean;
+}) {
   try {
-    const url = isRegistering.value ? '/auth/register' : '/auth/login';
-    const response = await $api.post(url, {
-      email: email.value,
-      password: password.value,
-    });
+    const url = isRegistering ? '/auth/register' : '/auth/login';
+    const response = await $api.post(url, { email, password });
 
     userStore.token = response.data.access_token;
-
-    getProfile()
-    isLoggedIn.value = true; 
-    useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, true)
-
+    getProfile();
+    isLoggedIn.value = true;
+    isOpenModal.value = false;
   } catch (err) {
-    console.error("Erreur d'authentification", err);
+    console.error('Erreur d\'authentification', err);
   }
 }
 
@@ -121,16 +104,14 @@ async function getProfile() {
 // ------------------
 
 // ---- Function ----
-function toggleAuthMode() {
-  isRegistering.value = !isRegistering.value;
-}
+
 
 function logout() {
   console.log('logout');
-  
+
   useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, false)
   userStore.logout();
-  isLoggedIn.value = false; 
+  isLoggedIn.value = false;
 
   router.push('/')
 }
@@ -149,11 +130,17 @@ function logout() {
   flex-direction: column;
   align-items: center;
 
-  &__form,
   &__connected {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
     gap: 1rem;
+
+    &--user {
+      color: $color-secondary;
+      font-weight: bold;
+    }
   }
 
   &__input {

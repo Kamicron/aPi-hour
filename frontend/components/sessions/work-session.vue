@@ -243,4 +243,12 @@ fetchSessions();
     color: $color-warning;
   }
 }
+
+@media screen and (max-width: $breakpoint-lg) {
+  .work-sessions {
+    &__layout {
+      flex-direction: column;
+    }
+  }
+}
 </style>
