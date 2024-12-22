@@ -1,11 +1,10 @@
 <template>
-  <header class="header">
-    <div class="header__container">
-      <h1 class="header__title">aPi-hour</h1>
-      <navbar />
-      <Login />
-    </div>
-  </header>
+  <div class='navbar'>
+    <ul>
+      <li><NuxtLink to="/">Acceuil</NuxtLink></li>
+      <li><NuxtLink to="/profile">Profile</NuxtLink></li>
+    </ul>
+  </div>
 </template>
 
 <script setup lang='ts'>
@@ -52,21 +51,8 @@
 
 </script>
 
-<style lang="scss" scoped>
-.header {
-  background-color: $color-surface;
-  box-shadow: $box-shadow-dark;
-  padding: 1rem;
+<style lang='scss' scoped>
+.navbar{
 
-  &__container {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  &__title {
-    font-size: 1.5rem;
-    font-weight: bold;
-  }
 }
 </style>
