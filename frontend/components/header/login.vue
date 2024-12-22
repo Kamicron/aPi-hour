@@ -84,17 +84,29 @@ async function handleAuth({ email, password, isRegistering }: {
   isRegistering: boolean;
 }) {
   try {
-    const url = isRegistering ? '/auth/register' : '/auth/login';
-    const response = await $api.post(url, { email, password });
+    // Route correcte en fonction du mode
+    const url = isRegistering ? '/users' : '/auth/login';
 
-    userStore.token = response.data.access_token;
-    getProfile();
-    isLoggedIn.value = true;
+    // Ajout du champ `name` pour l'enregistrement
+    const data = isRegistering
+      ? { name: email.split('@')[0], email, password } // Nom généré à partir de l'email
+      : { email, password };
+
+    const response = await $api.post(url, data);
+
+    // Si c'est une création, pas besoin de token immédiat
+    if (!isRegistering) {
+      userStore.token = response.data.access_token;
+      getProfile();
+      isLoggedIn.value = true;
+    }
+
     isOpenModal.value = false;
   } catch (err) {
     console.error('Erreur d\'authentification', err);
   }
 }
+
 
 async function getProfile() {
   profile.value = await userStore.fetchProfile($api);
