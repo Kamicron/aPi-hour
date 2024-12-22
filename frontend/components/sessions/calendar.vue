@@ -9,7 +9,7 @@
       <div class="calendar__day" v-for="day in daysOfWeek" :key="day">
         {{ day }}
       </div>
-      <div v-for="day in paddedDays" :key="day.date" :class="[
+      <div v-for="day in paddedDays" :key="day.date.toISOString" :class="[
         'calendar__cell',
         {
           'calendar__cell--inactive': day.isInactive,
@@ -49,7 +49,7 @@ const monthName = computed(() => {
   });
 });
 
-const hasSessionOnDay = (date) => {
+const hasSessionOnDay = (date: Date) => {
   return timeEntries.value.some((entry) => {
     const entryDate = new Date(entry.startTime);
     const localEntryDate = new Date(
@@ -110,7 +110,7 @@ const changeMonth = (direction) => {
   }
 };
 
-const selectDay = (date) => {
+const selectDay = (date: Date) => {
   // Fixe la date sélectionnée à minuit en temps local
   const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
   selectedDate.value = localDate;
@@ -118,7 +118,7 @@ const selectDay = (date) => {
 };
 
 
-const isToday = (date) => {
+const isToday = (date: Date) => {
   const today = new Date();
   return (
     date.getFullYear() === today.getFullYear() &&
@@ -127,7 +127,7 @@ const isToday = (date) => {
   );
 };
 
-const isSelected = (date) => {
+const isSelected = (date: Date) => {
   return (
     selectedDate.value &&
     date.getFullYear() === selectedDate.value.getFullYear() &&
@@ -148,6 +148,8 @@ async function fetchTimeEntriesForMonth() {
       },
     });
     timeEntries.value = response.data;
+
+    
   } catch (err) {
     console.error("Erreur lors de la récupération des sessions", err);
   }

@@ -223,7 +223,7 @@ export class TimeEntriesService {
     return timeEntry;
   }
 
-  async getTimeEntriesForWeek(userId: string, year: number, Week: number) {
+  async getTimeEntriesForMonth(userId: string, year: number, Week: number) {
     const startDate = new Date(year, Week - 1, 1); // Premier jour du mois
     const endDate = new Date(year, Week, 0, 23, 59, 59); // Dernier jour du mois
     console.log('StartDate:', startDate, 'EndDate:', endDate);

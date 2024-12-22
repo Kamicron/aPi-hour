@@ -42,14 +42,14 @@ export class TimeEntriesController {
     return this.timeEntriesService.softDelete(id, userId, userRole);
   }
 
-  @Get('Week')
-  async getTimeEntriesByWeek(
+  @Get('month')
+  async getTimeEntriesByMonth(
     @Query('year') year: number,
-    @Query('Week') Week: number,
+    @Query('month') month: number,
     @Req() req: any,
   ) {
     const userId = req.user.userId;
-    return this.timeEntriesService.getTimeEntriesForWeek(userId, year, Week);
+    return this.timeEntriesService.getTimeEntriesForMonth(userId, year, month);
   }
 
   // Récupérer les sessions pour une date donnée
@@ -96,6 +96,4 @@ export class TimeEntriesController {
     const userId = req.user.userId;
     return this.timeEntriesService.end(id, userId);
   }
-
-
 }
