@@ -50,7 +50,7 @@ L'objet `customOptions` permet de passer des options détaillées directement à
 | `weekday`            | `String`   | Format des jours : `"narrow"` (D), `"short"` (dim.), `"long"` (dimanche). |
 | `era`                | `String`   | Ère : `"narrow"` (A), `"short"` (AP. J.-C.), `"long"` (Après Jésus-Christ). |
 | `year`               | `String`   | Format de l'année : `"numeric"` (2024), `"2-digit"` (24).                 |
-| `month`              | `String`   | Format des mois : `"numeric"`, `"2-digit"`, `"narrow"` (D), `"short"` (Déc.), `"long"` (Décembre). |
+| `Week`              | `String`   | Format des mois : `"numeric"`, `"2-digit"`, `"narrow"` (D), `"short"` (Déc.), `"long"` (Décembre). |
 | `day`                | `String`   | Format du jour : `"numeric"` (22), `"2-digit"` (22).                      |
 | `hour`               | `String`   | Format des heures : `"numeric"` (15), `"2-digit"` (15).                    |
 | `minute`             | `String`   | Format des minutes : `"numeric"` (30), `"2-digit"` (30).                  |
@@ -69,7 +69,7 @@ const customDate1 = formatDate('2024-12-22', {
   customOptions: {
     weekday: 'long',
     year: 'numeric',
-    month: 'long',
+    Week: 'long',
     day: 'numeric',
   },
 });
@@ -82,7 +82,7 @@ const customDate2 = formatDate('2024-12-22', {
   customOptions: {
     weekday: 'short',
     year: 'numeric',
-    month: 'short',
+    Week: 'short',
     day: '2-digit',
   },
 });
@@ -123,7 +123,7 @@ const customDate5 = formatDate('2024-12-22T15:30:45.123', {
     weekday: 'long',
     era: 'short',
     year: 'numeric',
-    month: 'long',
+    Week: 'long',
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
@@ -156,7 +156,7 @@ const longDateWithTime = formatDate('2024-12-22T15:30:00', {
 
 // Exemple 3 : Options personnalisées
 const customDate = formatDate('2024-12-22', {
-  customOptions: { weekday: 'long', month: 'long', year: 'numeric' },
+  customOptions: { weekday: 'long', Week: 'long', year: 'numeric' },
 });
 // Résultat : "dimanche 22 décembre 2024"
 ```

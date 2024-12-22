@@ -8,9 +8,10 @@ import { UserSession } from 'src/user_sessions/entities/user_session.entity';
 @Injectable()
 export class UserService {
   constructor(
-    @InjectRepository(User) // Injectez le repository des entrées de temps
+    @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    @InjectRepository(UserSession) // Injectez correctement la table des sessions
+
+    @InjectRepository(UserSession)
     private readonly sessionRepository: Repository<UserSession>,
   ) {}
 
@@ -21,6 +22,7 @@ export class UserService {
 
   // Récupérer un utilisateur par ID
   async findOne(userId: string): Promise<any> {
+    console.log('findOne: Searching for user with ID:', userId);
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['sessions'],
@@ -34,11 +36,11 @@ export class UserService {
       order: { updatedAt: 'DESC' },
     });
 
-    console.log('currentSession', currentSession);
-
     return {
       ...user,
       currentSession: currentSession || null,
+      weeklyHoursGoal: user.weeklyHoursGoal,
+      workingDaysPerWeek: user.workingDaysPerWeek,
     };
   }
 
@@ -53,10 +55,30 @@ export class UserService {
 
   // Mettre à jour un utilisateur
   async update(id: string, userData: Partial<User>): Promise<User> {
-    console.log('edit serve');
-
     const user = await this.findOne(id); // Vérifie si l'utilisateur existe
     Object.assign(user, userData);
+    return this.userRepository.save(user);
+  }
+
+  // Mettre à jour les paramètres d'heures et de jours ouvrés
+  async updateSettings(
+    id: string,
+    settings: { weeklyHoursGoal?: number; workingDaysPerWeek?: number },
+  ): Promise<User> {
+    console.log('id received in updateSettings:', id);
+
+    const user = await this.findOne(id);
+
+    console.log('User found:', user);
+
+    if (settings.weeklyHoursGoal !== undefined) {
+      user.weeklyHoursGoal = settings.weeklyHoursGoal;
+    }
+
+    if (settings.workingDaysPerWeek !== undefined) {
+      user.workingDaysPerWeek = settings.workingDaysPerWeek;
+    }
+
     return this.userRepository.save(user);
   }
 
@@ -72,7 +94,7 @@ export class UserService {
   async findByEmail(email: string): Promise<User | undefined> {
     return this.userRepository.findOne({
       where: { email },
-      select: ['id', 'name', 'email', 'password', 'role'], // Inclure explicitement le champ `password`
+      select: ['id', 'name', 'email', 'password', 'role'],
     });
   }
 

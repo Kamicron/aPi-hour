@@ -16,6 +16,12 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
+  // Ajoutez ceci pour lister toutes les routes configurées
+  const server = app.getHttpAdapter();
+  const router = server.getInstance()._router;
+  console.log(router.stack.map((layer) => layer.route));
+
   await app.listen(process.env.PORT ?? 3000);
+  console.log('Application is running on: ', await app.getUrl());
 }
 bootstrap();

@@ -41,4 +41,10 @@ export class User {
 
   @OneToMany(() => UserSession, (session) => session.user)
   sessions: UserSession[];
+
+  @Column({ type: 'float', nullable: true })
+  weeklyHoursGoal?: number;
+
+  @Column({ type: 'int', nullable: true })
+  workingDaysPerWeek?: number;
 }

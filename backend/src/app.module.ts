@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -8,9 +8,9 @@ import { TimeEntriesModule } from './time-entries/time-entries.module';
 import { PausesModule } from './pauses/pauses.module';
 import { UserSessionsModule } from './user_sessions/user_sessions.module';
 import * as dotenv from 'dotenv';
-dotenv.config();
+import { LoggerMiddleware } from './middlewares/logger.middleware'; // Import du middleware
 
-console.log('process.env.DB_HOST', process.env.DB_HOST);
+dotenv.config();
 
 @Module({
   imports: [
@@ -33,4 +33,8 @@ console.log('process.env.DB_HOST', process.env.DB_HOST);
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*'); // Application globale du middleware
+  }
+}

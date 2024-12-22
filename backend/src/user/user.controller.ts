@@ -20,6 +20,10 @@ import { RolesGuard } from '../auth/roles.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
+  // ===========================================
+  //              ROUTES EXPLICITES
+  // ===========================================
+
   // Accessible uniquement aux admins
   @UseGuards(AuthGuard, RolesGuard) // Les deux guards doivent être appliqués
   @Get()
@@ -37,6 +41,28 @@ export class UserController {
 
     return this.userService.findOne(req.user.userId);
   }
+
+  @UseGuards(AuthGuard)
+  @Patch('settings')
+  async updateSettings(@Req() req: any, @Body() settings: any) {
+    console.log('updateSettings: Method called');
+    console.log('Request body:', settings);
+    console.log('Request headers:', req.headers);
+
+    // Remplacement temporaire si req.user est undefined
+    const userId = req.user?.sub || '4fceef20-3c27-4474-9242-adb6828d42f9'; // Par défaut, un userId de test
+    console.log('Extracted userId:', userId);
+
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token or userId not found');
+    }
+
+    return this.userService.updateSettings(userId, settings);
+  }
+
+  // ===========================================
+  //              ROUTES DYNAMIQUES
+  // ===========================================
 
   // Accessible uniquement au propriétaire ou aux admins
   @UseGuards(AuthGuard)

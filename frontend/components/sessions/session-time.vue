@@ -66,7 +66,7 @@ onMounted(() => {
   customOptions: {
     weekday: 'long',
     year: 'numeric',
-    month: 'short',
+    Week: 'short',
     day: '2-digit',
     hour: '2-digit',
     minute: '2-digit',

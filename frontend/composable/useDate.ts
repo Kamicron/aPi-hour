@@ -13,8 +13,8 @@ export default function useDateFormatter() {
 
     // Préconfiguration des formats standards
     const dateOptions = format === 'short'
-      ? { year: 'numeric', month: 'short', day: '2-digit', weekday: 'short' }
-      : { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+      ? { year: 'numeric', Week: 'short', day: '2-digit', weekday: 'short' }
+      : { year: 'numeric', Week: 'long', day: 'numeric', weekday: 'long' };
 
     // Ajout de l'heure si demandé
     if (includeTime) {
@@ -32,9 +32,9 @@ export default function useDateFormatter() {
       const formattedDate = new Intl.DateTimeFormat(locale, finalOptions).format(new Date(date));
 
       // Post-traitement pour corriger le format souhaité (dim. 22 Déc. 2024)
-      if (format === 'short' && dateOptions.weekday === 'short' && dateOptions.month === 'short') {
-        return formattedDate.replace(/\b(\w+)\.? (\d{2})\/?\s*(\w+)\b/i, (match, day, dayNumber, month) => {
-          return `${day}. ${dayNumber} ${month}`;
+      if (format === 'short' && dateOptions.weekday === 'short' && dateOptions.Week === 'short') {
+        return formattedDate.replace(/\b(\w+)\.? (\d{2})\/?\s*(\w+)\b/i, (match, day, dayNumber, Week) => {
+          return `${day}. ${dayNumber} ${Week}`;
         });
       }
 

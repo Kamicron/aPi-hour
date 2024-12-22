@@ -24,6 +24,28 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
+  async function updateSettings($api: any, settings: { weeklyHoursGoal: number; workingDaysPerWeek: number }) {
+    try {
+      const response = await $api.patch('/users/settings', settings, {
+        headers: {
+          Authorization: `Bearer ${token.value}`,
+        },
+      });
+      // Mise à jour locale
+      if (profile.value) {
+        profile.value = {
+          ...profile.value,
+          ...settings,
+        };
+      }
+      return response.data;
+    } catch (error) {
+      console.error('Erreur lors de la mise à jour des paramètres:', error);
+      throw error;
+    }
+  }
+  
+
   function logout() {
     token.value = null;
     profile.value = null;
@@ -36,6 +58,7 @@ export const useUserStore = defineStore('user', () => {
     token,
     profile,
     fetchProfile,
+    updateSettings,
     logout,
   };
 });
