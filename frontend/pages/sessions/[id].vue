@@ -1,5 +1,9 @@
 <template>
   <div class="session-details">
+    <button class="btn" @click="redirectToDate">
+      <i class="fa-solid fa-arrow-left"></i> Retour
+    </button>
+
     <h1 class="session-details__title">Détails de la session</h1>
     <p class="session-details__current-time">{{ currentTime }}</p>
 
@@ -9,9 +13,12 @@
       <p><strong>Temps de travail :</strong> {{ formattedWorkTime }}</p>
       <p><strong>Temps de pause :</strong> {{ formattedPauseTime }}</p>
     </div>
+
+    <button class="btn" @click="isUpdateSessionModal = true"><i class="fa-solid fa-pen"></i> Editer</button>
     <hr class="divider" />
 
     <h2 class="session-details__subtitle">Pauses</h2>
+    <button class="btn" @click="isUpdatePauseModal = true"><i class="fa-solid fa-plus"></i> Ajouter une pause</button>
     <ul class="session-details__pauses">
       <li v-for="pause in pauses" :key="pause.id" class="pause-item">
         <p>
@@ -30,7 +37,14 @@
         </button>
       </li>
     </ul>
+    <hr class="divider" />
 
+    <button class="btn btn--danger session-details__delete-session" @click="deleteSession">
+      Supprimer la session
+    </button>
+  </div>
+
+  <modal v-model="isUpdatePauseModal">
     <div class="form-container">
       <h3>Ajouter une pause</h3>
       <form @submit.prevent="addPause" class="form">
@@ -43,8 +57,9 @@
         <button type="submit" class="btn btn--primary">Ajouter la pause</button>
       </form>
     </div>
-    <hr class="divider" />
+  </modal>
 
+  <modal v-model="isUpdateSessionModal">
     <h2 class="session-details__subtitle">Modifier la session</h2>
     <form @submit.prevent="updateSession" class="form">
       <label for="start" class="form__label">Début :</label>
@@ -55,10 +70,7 @@
 
       <button type="submit" class="btn btn--primary">Enregistrer les modifications</button>
     </form>
-    <button class="btn btn--danger session-details__delete-session" @click="deleteSession">
-      Supprimer la session
-    </button>
-  </div>
+  </modal>
 </template>
 
 <script setup lang="ts">
@@ -68,7 +80,8 @@ import { useRoute } from "vue-router";
 import useDateFormatter from "../../composable/useDate";
 
 const { $api } = useNuxtApp();
-
+const isUpdateSessionModal = ref<boolean>(false)
+const isUpdatePauseModal = ref<boolean>(false)
 const route = useRoute();
 const sessionId = route.params.id as string;
 const token = useCookie("token");
@@ -87,6 +100,7 @@ const endSession = ref<string>("");
 
 const newPauseStart = ref<Date>()
 const newPauseEnd = ref<Date>()
+const formattedDate = ref<string>()
 
 const dateOptions = {
   weekday: "short",
@@ -135,6 +149,20 @@ const formattedWorkTime = computed(() =>
   useDateFormatter().calculateDuration(0, totalWorkTime.value, durationOptions)
 );
 
+function redirectToDate() {
+  if (typeof window !== "undefined") {
+    const date = formattedDate.value; // Accès à la valeur réactive
+    if (date) {
+      window.location.href = `/?date=${date}`;
+    } else {
+      console.error("La date formatée est invalide.");
+    }
+  } else {
+    console.error("L'environnement ne permet pas d'accéder à `window`.");
+  }
+}
+
+
 function combineDateAndTime(date: string, time: string): string {
   const baseDate = new Date(date);
   const [hours, minutes] = time.split(':');
@@ -158,9 +186,9 @@ async function fetchSessionDetails() {
     endSession.value = useDateFormatter().formatDate(session.value.endTime, {
       customOptions: dateOptions,
     });
-    newDate.value = session.value.startTime
+    formattedDate.value = new Date(session.value.startTime).toISOString().split('T')[0];
     console.log('newDate.value', newDate.value);
-    
+
   } catch (error) {
     console.error("Erreur lors du chargement des données :", error);
   }
@@ -230,6 +258,8 @@ async function updateSession() {
       }
     );
     session.value = response.data;
+    isUpdateSessionModal.value = false
+    fetchSessionDetails()
   } catch (error) {
     console.error("Erreur lors de la mise à jour de la session :", error);
   }
@@ -259,7 +289,6 @@ async function deleteSession() {
     });
     alert("Session supprimée avec succès.");
 
-    const formattedDate = new Date(newDate.value).toISOString().split('T')[0];
     console.log('formattedDate', formattedDate);
 
     window.location.href = `/?date=${formattedDate}`;

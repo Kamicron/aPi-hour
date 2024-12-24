@@ -33,12 +33,12 @@
         <section v-if="summary && summary.details.length" class="work-sessions__details">
           <h3 class="work-sessions__details-title">Détails des sessions :</h3>
           <ul class="work-sessions__list">
+            <button class="btn" @click="isCreateSessionModal = true">
+              <i class="fa-solid fa-plus"></i> Ajouter une session
+            </button>
             <li v-for="detail in summary.details" :key="detail.sessionId" class="work-sessions__card">
-              <single-session 
-                :sessionId="detail.sessionId" 
-                :start-time="formatDate(detail.startTime)" 
-                :end-time="formatDate(detail.endTime)"
-                :work-time="formatTime(detail.workTime)" 
+              <single-session :sessionId="detail.sessionId" :start-time="formatDate(detail.startTime)"
+                :end-time="formatDate(detail.endTime)" :work-time="formatTime(detail.workTime)"
                 :pause-time="formatTime(detail.pauseTime)" />
             </li>
           </ul>
@@ -51,10 +51,31 @@
       </div>
     </div>
   </div>
+
+  <modal v-model="isCreateSessionModal">
+    <form @submit.prevent="createSession" class="work-sessions__create-session-form">
+      <div>
+        <label for="startTime" class="form__label">Début :</label>
+        <input type="datetime-local" id="startTime" v-model="newSession.startTime" class="form__input" required />
+      </div>
+      <div>
+        <label for="endTime" class="form__label">Fin :</label>
+        <input type="datetime-local" id="endTime" v-model="newSession.endTime" class="form__input" />
+      </div>
+      <div class="work-sessions__create-session-actions">
+        <button type="submit" class="btn btn--primary">
+          <i class="fa-solid fa-check"></i> Enregistrer
+        </button>
+        <button type="button" class="btn btn--secondary" @click="cancelCreateSession">
+          <i class="fa-solid fa-xmark"></i> Annuler
+        </button>
+      </div>
+    </form>
+  </modal>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
 
 const { $api } = useNuxtApp();
@@ -63,6 +84,7 @@ const token = useCookie('token');
 // Variables réactives
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
 const summary = ref<any | null>(null);
+const isCreateSessionModal = ref<boolean>(false)
 
 // Calcul dynamique de l'objectif quotidien en fonction du profil
 const userProfile = ref({ weeklyHoursGoal: 35, workingDaysPerWeek: 5 }); // Exemple de profil utilisateur
@@ -71,10 +93,56 @@ const dailyWorkGoal = computed(() => {
   return (userProfile.value.weeklyHoursGoal / userProfile.value.workingDaysPerWeek) * 3600; // En secondes
 });
 
+const showCreateSessionForm = ref(false);
+
+const newSession = ref({
+  startTime: '',
+  endTime: '',
+});
+
+async function createSession() {
+  if (!newSession.value.startTime) {
+    alert('Veuillez renseigner une date de début pour créer une session.');
+    return;
+  }
+
+  try {
+    const payload = {
+      startTime: newSession.value.startTime,
+      endTime: newSession.value.endTime || null, // Fin facultative
+    };
+
+    await $api.post('/time-entries', payload, {
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+
+    // Réinitialiser le formulaire et cacher le formulaire
+    newSession.value.startTime = '';
+    newSession.value.endTime = '';
+    showCreateSessionForm.value = false;
+
+    // Rafraîchir les sessions
+    fetchSessions();
+
+    alert('Session créée avec succès.');
+  } catch (error) {
+    console.error('Erreur lors de la création de la session :', error);
+    alert('Une erreur est survenue lors de la création de la session.');
+  }
+}
+
+function cancelCreateSession() {
+  showCreateSessionForm.value = false;
+  newSession.value.startTime = '';
+  newSession.value.endTime = '';
+}
+
+
+
 watch(
   () => dailyWorkGoal.value,
   (newValue) => {
-    console.log('newValue:',newValue );
+    console.log('newValue:', newValue);
   }
 );
 
@@ -93,7 +161,7 @@ async function fetchSessions() {
     summary.value = response.data;
 
     console.log('summary', summary);
-    
+
   } catch (error) {
     console.error('Erreur lors de la récupération des sessions', error);
   }
@@ -126,6 +194,27 @@ function formatOvertime(seconds: number) {
 
 // Récupérer les sessions au montage
 fetchSessions();
+
+async function addSession() {
+  try {
+    // Préparation des données pour la nouvelle session
+    const payload = {
+      startTime: new Date(selectedDate.value).toISOString(), // Début de la session (minuit par défaut)
+    };
+
+    // Requête API pour créer la session
+    const response = await $api.post('/time-entries', payload, {
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+
+    alert('Session ajoutée avec succès.');
+    fetchSessions(); // Rafraîchit la liste des sessions après l'ajout
+  } catch (error) {
+    console.error('Erreur lors de l’ajout de la session :', error);
+    alert('Une erreur est survenue lors de l’ajout de la session.');
+  }
+}
+
 </script>
 
 <style lang="scss" scoped>
@@ -251,6 +340,56 @@ fetchSessions();
   .work-sessions {
     &__layout {
       flex-direction: column;
+    }
+  }
+}
+
+.work-sessions__create-session-form {
+  margin-top: $spacing-large;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-medium;
+
+  .form__label {
+    font-size: $font-size-small;
+    color: $color-text-secondary;
+  }
+
+  .form__input {
+    padding: $spacing-small;
+    border: 1px solid $color-primary-light;
+    border-radius: $border-radius;
+    background-color: $color-background;
+    color: $color-text-primary;
+    font-size: $font-size-small;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+  }
+
+  .work-sessions__create-session-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: $spacing-medium;
+  }
+
+  .btn--primary {
+    background-color: $color-primary;
+    color: $color-text-secondary;
+
+    &:hover {
+      background-color: darken($color-primary, 10%);
+    }
+  }
+
+  .btn--secondary {
+    background-color: $color-warning;
+    color: $color-text-secondary;
+
+    &:hover {
+      background-color: darken($color-warning, 10%);
     }
   }
 }
