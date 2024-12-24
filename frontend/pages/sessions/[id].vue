@@ -80,6 +80,8 @@ const editSession = ref({
   endTime: "",
 });
 
+const newDate = ref<Date>()
+
 const startSession = ref<string>("");
 const endSession = ref<string>("");
 
@@ -156,6 +158,9 @@ async function fetchSessionDetails() {
     endSession.value = useDateFormatter().formatDate(session.value.endTime, {
       customOptions: dateOptions,
     });
+    newDate.value = session.value.startTime
+    console.log('newDate.value', newDate.value);
+    
   } catch (error) {
     console.error("Erreur lors du chargement des données :", error);
   }
@@ -253,8 +258,12 @@ async function deleteSession() {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     alert("Session supprimée avec succès.");
-    // Redirection ou autre action après suppression
-    window.location.href = "/sessions"; // Remplacez par votre route
+
+    const formattedDate = new Date(newDate.value).toISOString().split('T')[0];
+    console.log('formattedDate', formattedDate);
+
+    window.location.href = `/?date=${formattedDate}`;
+    // window.location.href = "/sessions"; // Remplacez par votre route
   } catch (error) {
     console.error("Erreur lors de la suppression de la session :", error);
     alert("Une erreur est survenue lors de la suppression de la session.");

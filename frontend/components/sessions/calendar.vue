@@ -29,19 +29,43 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue';
-import { useNuxtApp, useCookie } from '#app';
-import { watch } from 'vue';
+import { ref, computed, watch } from 'vue';
+import { useNuxtApp, useCookie, useRoute } from '#app'; // Ajout de useRoute
 
 const currentYear = ref(new Date().getFullYear());
 const currentMonth = ref(new Date().getMonth());
 const selectedDate = ref(null);
 const daysOfWeek = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-const emits = defineEmits(['pick-date'])
+const emits = defineEmits(['pick-date']);
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
 const timeEntries = ref([]);
+const route = useRoute(); // Récupération de la route actuelle
+
+const selectDay = (date: Date) => {
+  // Fixe la date sélectionnée à minuit en temps local
+  const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
+  selectedDate.value = localDate;
+  emits('pick-date', localDate); // Émet la date corrigée
+};
+
+// Vérifie et applique la date passée dans l'URL
+function initializeDateFromQuery() {
+  const queryDate = route.query.date;
+  if (queryDate) {
+    const parsedDate = new Date(queryDate);
+    if (!isNaN(parsedDate.getTime())) {
+      selectDay(parsedDate);
+      currentYear.value = parsedDate.getFullYear();
+      currentMonth.value = parsedDate.getMonth();
+    } else {
+      console.warn("Le paramètre ?date= est invalide:", queryDate);
+    }
+  }
+}
+
+watch(route, initializeDateFromQuery, { immediate: true }); // Recalcul si l'URL change
 
 const monthName = computed(() => {
   return new Date(currentYear.value, currentMonth.value).toLocaleString('fr-FR', {
@@ -66,8 +90,6 @@ const hasSessionOnDay = (date: Date) => {
   });
 };
 
-
-
 const paddedDays = computed(() => {
   const days = [];
   const firstDayOfMonth = new Date(currentYear.value, currentMonth.value, 1);
@@ -75,8 +97,6 @@ const paddedDays = computed(() => {
 
   const startPadding = (firstDayOfMonth.getDay() + 6) % 7; // Lundi = 0
   const endPadding = 42 - (startPadding + lastDayOfMonth.getDate());
-
-
 
   // Days of the previous month
   for (let i = startPadding - 1; i >= 0; i--) {
@@ -110,12 +130,6 @@ const changeMonth = (direction) => {
   }
 };
 
-const selectDay = (date: Date) => {
-  // Fixe la date sélectionnée à minuit en temps local
-  const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
-  selectedDate.value = localDate;
-  emits('pick-date', localDate); // Émet la date corrigée
-};
 
 
 const isToday = (date: Date) => {
@@ -149,7 +163,6 @@ async function fetchTimeEntriesForMonth() {
     });
     timeEntries.value = response.data;
 
-    
   } catch (err) {
     console.error("Erreur lors de la récupération des sessions", err);
   }
@@ -192,7 +205,7 @@ watch([currentMonth, currentYear], () => {
     &--inactive {
       background-color: $color-surface;
 
-      .date{
+      .date {
         color: $color-text-secondary
       }
     }
@@ -206,7 +219,7 @@ watch([currentMonth, currentYear], () => {
       background-color: $color-primary-light;
       font-weight: bold;
 
-      .date{
+      .date {
         color: $color-primary
       }
     }
@@ -214,7 +227,7 @@ watch([currentMonth, currentYear], () => {
     &:hover {
       background-color: $color-secondary;
 
-      .date{
+      .date {
         color: $color-background
       }
     }
@@ -228,8 +241,7 @@ watch([currentMonth, currentYear], () => {
 }
 
 .calendar__cell--session {
-  border: 2px solid $color-secondary; 
+  border: 2px solid $color-secondary;
   font-weight: bold;
 }
-
 </style>
