@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Pause } from './entities/pause.entity';
@@ -49,6 +53,55 @@ export class PausesService {
     return savedPause;
   }
 
+  async addPauseWithDates(
+    timeEntryId: string,
+    userId: string,
+    pauseStart: string,
+    pauseEnd: string | null,
+  ) {
+    // Récupérer l'entrée de temps associée
+    const timeEntry = await this.timeEntryRepository.findOne({
+      where: { id: timeEntryId, user: { id: userId } },
+    });
+    if (!timeEntry) throw new NotFoundException('Time entry not found');
+
+    // Convertir les dates en timestamp pour les comparaisons
+    const pauseStartTime = new Date(pauseStart).getTime();
+    const pauseEndTime = pauseEnd ? new Date(pauseEnd).getTime() : null;
+
+    const sessionStartTime = new Date(timeEntry.startTime).getTime();
+    const sessionEndTime = timeEntry.endTime
+      ? new Date(timeEntry.endTime).getTime()
+      : null;
+
+    // Vérification des limites de la session
+    if (
+      pauseStartTime < sessionStartTime ||
+      (sessionEndTime && pauseStartTime > sessionEndTime)
+    ) {
+      throw new UnauthorizedException(
+        'Pause start time must be within the session start and end times.',
+      );
+    }
+    if (
+      pauseEndTime &&
+      (pauseEndTime < sessionStartTime ||
+        (sessionEndTime && pauseEndTime > sessionEndTime))
+    ) {
+      throw new UnauthorizedException(
+        'Pause end time must be within the session start and end times.',
+      );
+    }
+
+    // Créer une nouvelle pause
+    const pause = this.pauseRepository.create({
+      timeEntry,
+      pauseStart: new Date(pauseStart),
+      pauseEnd: pauseEnd ? new Date(pauseEnd) : null,
+    });
+    return this.pauseRepository.save(pause);
+  }
+
   async resumePause(timeEntryId: string, userId: string) {
     console.log('timeEntryId', timeEntryId);
     console.log('userId', userId);
@@ -88,5 +141,62 @@ export class PausesService {
     }
 
     return savedPause;
+  }
+
+  async updatePause(
+    pauseId: string,
+    userId: string,
+    pauseStart: string,
+    pauseEnd: string | null,
+  ) {
+    // Récupérer la pause existante
+    const pause = await this.pauseRepository.findOne({
+      where: { id: pauseId },
+      relations: ['timeEntry', 'timeEntry.user'],
+    });
+    if (!pause) {
+      throw new NotFoundException('Pause not found');
+    }
+
+    // Vérifier que l'utilisateur est autorisé
+    if (pause.timeEntry.user.id !== userId) {
+      throw new UnauthorizedException(
+        'You do not have permission to modify this pause',
+      );
+    }
+
+    // Convertir les dates
+    const pauseStartTime = new Date(pauseStart).getTime();
+    const pauseEndTime = pauseEnd ? new Date(pauseEnd).getTime() : null;
+
+    const sessionStartTime = new Date(pause.timeEntry.startTime).getTime();
+    const sessionEndTime = pause.timeEntry.endTime
+      ? new Date(pause.timeEntry.endTime).getTime()
+      : null;
+
+    // Vérifier que les dates de pause respectent les limites de la session
+    if (
+      pauseStartTime < sessionStartTime ||
+      (sessionEndTime && pauseStartTime > sessionEndTime)
+    ) {
+      throw new UnauthorizedException(
+        'Pause start time must be within the session start and end times',
+      );
+    }
+    if (
+      pauseEndTime &&
+      (pauseEndTime < sessionStartTime ||
+        (sessionEndTime && pauseEndTime > sessionEndTime))
+    ) {
+      throw new UnauthorizedException(
+        'Pause end time must be within the session start and end times',
+      );
+    }
+
+    // Mettre à jour la pause
+    pause.pauseStart = new Date(pauseStart);
+    pause.pauseEnd = pauseEnd ? new Date(pauseEnd) : null;
+
+    return this.pauseRepository.save(pause);
   }
 }

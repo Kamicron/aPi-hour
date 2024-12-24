@@ -35,6 +35,7 @@ export class TimeEntriesService {
   ) {
     const timeEntry = await this.timeEntriesRepository.findOne({
       where: { id },
+      relations: ['user', 'pauses'], // Assurez-vous que la relation 'user' est incluse
     });
 
     if (!timeEntry) throw new NotFoundException('Time entry not found');
@@ -42,6 +43,27 @@ export class TimeEntriesService {
       throw new UnauthorizedException(
         'You do not have permission to modify this time entry.',
       );
+    }
+
+    // Validation des pauses
+    if (data.startTime || data.endTime) {
+      for (const pause of timeEntry.pauses) {
+        const pauseStart = new Date(pause.pauseStart).getTime();
+        const pauseEnd = pause.pauseEnd
+          ? new Date(pause.pauseEnd).getTime()
+          : null;
+
+        if (
+          (data.startTime && new Date(data.startTime).getTime() > pauseStart) ||
+          (data.endTime &&
+            pauseEnd &&
+            new Date(data.endTime).getTime() < pauseEnd)
+        ) {
+          throw new UnauthorizedException(
+            'Session times must include all pauses.',
+          );
+        }
+      }
     }
 
     Object.assign(timeEntry, data);

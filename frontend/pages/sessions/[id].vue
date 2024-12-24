@@ -1,38 +1,56 @@
 <template>
   <div class="session-details">
-    <h1>Détails de la session</h1>
-    <p>{{ currentTime }}</p>
-    <div v-if="session">
+    <h1 class="session-details__title">Détails de la session</h1>
+    <p class="session-details__current-time">{{ currentTime }}</p>
+
+    <div v-if="session" class="session-details__info">
       <p><strong>Début :</strong> {{ startSession }}</p>
       <p><strong>Fin :</strong> {{ endSession || "En cours" }}</p>
       <p><strong>Temps de travail :</strong> {{ formattedWorkTime }}</p>
       <p><strong>Temps de pause :</strong> {{ formattedPauseTime }}</p>
     </div>
-    <hr />
+    <hr class="divider" />
 
-    <h2>Pauses</h2>
-    <ul>
-      <li v-for="pause in pauses" :key="pause.id">
-        Début : {{ useDateFormatter().formatDate(pause.pauseStart, {
-      customOptions: dateOptions,
-    }) }} - Fin : {{ useDateFormatter().formatDate(pause.pauseEnd, {
-      customOptions: dateOptions,
-    }) || "En cours" }}
-        <button @click="editPause(pause)">Modifier</button>
+    <h2 class="session-details__subtitle">Pauses</h2>
+    <ul class="session-details__pauses">
+      <li v-for="pause in pauses" :key="pause.id" class="pause-item">
+        <p>
+          <strong>Début :</strong>
+          {{ useDateFormatter().formatDate(pause.pauseStart, { customOptions: dateOptions }) }}
+        </p>
+        <p>
+          <strong>Fin :</strong>
+          {{ pause.pauseEnd
+            ? useDateFormatter().formatDate(pause.pauseEnd, { customOptions: dateOptions })
+            : "En cours" }}
+        </p>
+        <button class="btn btn--primary" @click="editPause(pause)">Modifier</button>
       </li>
     </ul>
-    <button @click="addPause">Ajouter une pause</button>
-    <hr />
 
-    <h2>Modifier la session</h2>
-    <form @submit.prevent="updateSession">
-      <label for="start">Début :</label>
-      <input type="datetime-local" v-model="editSession.startTime" id="start" />
+    <div class="form-container">
+      <h3>Ajouter une pause</h3>
+      <form @submit.prevent="addPause" class="form">
+        <label for="newPauseStart" class="form__label">Début :</label>
+        <input type="datetime-local" id="newPauseStart" v-model="newPauseStart" required class="form__input" />
 
-      <label for="end">Fin :</label>
-      <input type="datetime-local" v-model="editSession.endTime" id="end" />
+        <label for="newPauseEnd" class="form__label">Fin :</label>
+        <input type="datetime-local" id="newPauseEnd" v-model="newPauseEnd" class="form__input" />
 
-      <button type="submit">Enregistrer les modifications</button>
+        <button type="submit" class="btn btn--primary">Ajouter la pause</button>
+      </form>
+    </div>
+    <hr class="divider" />
+
+    <h2 class="session-details__subtitle">Modifier la session</h2>
+    <form @submit.prevent="updateSession" class="form">
+      <label for="start" class="form__label">Début :</label>
+      <input type="datetime-local" v-model="editSession.startTime" id="start" class="form__input" />
+
+      <label for="end" class="form__label">Fin :</label>
+      <input type="datetime-local" v-model="editSession.endTime" id="end" class="form__input" />
+
+      <button type="submit" class="btn btn--primary">Enregistrer les modifications</button>
     </form>
   </div>
 </template>
@@ -58,6 +76,9 @@ const editSession = ref({
 
 const startSession = ref<string>("");
 const endSession = ref<string>("");
+
+const newPauseStart = ref<Date>()
+const newPauseEnd = ref<Date>()
 
 const dateOptions = {
   weekday: "short",
@@ -127,40 +148,65 @@ async function fetchSessionDetails() {
 }
 
 async function addPause() {
+  if (!newPauseStart.value) {
+    alert("La date de début est requise pour ajouter une pause.");
+    return;
+  }
+
   try {
-    const response = await $api.patch(`/pauses/${sessionId}/start`, {
+    const payload = {
+      pauseStart: new Date(newPauseStart.value).toISOString(),
+      pauseEnd: newPauseEnd.value ? new Date(newPauseEnd.value).toISOString() : null,
+    };
+
+    const response = await $api.patch(`/pauses/${sessionId}/add-with-dates`, payload, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     pauses.value.push(response.data);
+    newPauseStart.value = "";
+    newPauseEnd.value = "";
   } catch (error) {
-    console.error("Erreur lors de l'ajout de la pause :", error);
+    console.error("Erreur lors de l’ajout de la pause :", error);
   }
 }
 
 async function editPause(pause: any) {
-  const newEndTime = prompt(
-    "Nouvelle heure de fin (YYYY-MM-DD HH:mm:ss) :",
-    pause.pauseEnd
-  );
-  if (!newEndTime) return;
+  const newStart = prompt('Nouvelle heure de début (YYYY-MM-DD HH:mm:ss) :', pause.pauseStart);
+  const newEnd = prompt('Nouvelle heure de fin (YYYY-MM-DD HH:mm:ss) :', pause.pauseEnd);
+
+  if (!newStart || (pause.pauseEnd && !newEnd)) return;
 
   try {
-    await $api.patch(
-      `/pauses/${pause.id}/resume`,
-      {
-        pauseEnd: newEndTime,
-      },
-      {
-        headers: { Authorization: `Bearer ${token.value}` },
-      }
-    );
-    fetchSessionDetails();
+    const payload = {
+      pauseStart: new Date(newStart).toISOString(),
+      pauseEnd: newEnd ? new Date(newEnd).toISOString() : null,
+    };
+
+    await $api.patch(`/pauses/${pause.id}/update`, payload, {
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+    fetchSessionDetails(); // Recharger les données pour refléter les modifications
   } catch (error) {
-    console.error("Erreur lors de la modification de la pause :", error);
+    console.error('Erreur lors de la modification de la pause :', error);
   }
 }
 
+
+
 async function updateSession() {
+  const newStart = new Date(editSession.value.startTime).getTime();
+  const newEnd = new Date(editSession.value.endTime).getTime();
+
+  for (const pause of pauses.value) {
+    const pauseStart = new Date(pause.pauseStart).getTime();
+    const pauseEnd = pause.pauseEnd ? new Date(pause.pauseEnd).getTime() : null;
+
+    if (newStart > pauseStart || (pauseEnd && newEnd < pauseEnd)) {
+      alert('Les heures de session doivent inclure toutes les pauses.');
+      return;
+    }
+  }
+
   try {
     const response = await $api.patch(
       `/time-entries/${sessionId}`,
@@ -174,9 +220,10 @@ async function updateSession() {
     );
     session.value = response.data;
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de la session :", error);
+    console.error('Erreur lors de la mise à jour de la session :', error);
   }
 }
+
 
 onMounted(() => {
   fetchSessionDetails();
@@ -185,46 +232,102 @@ onMounted(() => {
 
 <style scoped lang="scss">
 .session-details {
-  color: #ffffff;
-  background-color: #20242b;
-  padding: 20px;
-  border-radius: 8px;
+  color: $color-text-primary;
+  background-color: $color-background;
+  padding: $spacing-large;
+  border-radius: $border-radius;
 
-  h1,
-  h2 {
-    margin-bottom: 10px;
+  &__title {
+    font-size: $font-size-large;
+    margin-bottom: $spacing-medium;
   }
 
-  ul {
+  &__current-time {
+    font-size: $font-size-small;
+    color: $color-text-secondary;
+    margin-bottom: $spacing-large;
+  }
+
+  &__info {
+    background-color: $color-surface;
+    padding: $spacing-medium;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow-light;
+    margin-bottom: $spacing-large;
+
+    p {
+      margin: $spacing-small 0;
+    }
+  }
+
+  &__subtitle {
+    font-size: $font-size-base;
+    color: $color-primary;
+    margin-bottom: $spacing-medium;
+  }
+
+  &__pauses {
     list-style: none;
     padding: 0;
 
-    li {
-      margin-bottom: 8px;
-    }
-  }
+    .pause-item {
+      background-color: $color-surface;
+      border-radius: $border-radius;
+      padding: $spacing-medium;
+      margin-bottom: $spacing-medium;
+      box-shadow: $box-shadow-light;
 
-  form {
-    display: flex;
-    flex-direction: column;
-
-    label {
-      margin-top: 10px;
-    }
-
-    button {
-      margin-top: 20px;
-      padding: 10px;
-      border: none;
-      background-color: #00aaff;
-      color: white;
-      border-radius: 4px;
-      cursor: pointer;
-
-      &:hover {
-        background-color: #0088cc;
+      p {
+        margin: $spacing-small 0;
       }
     }
   }
+}
+
+.form-container {
+  background-color: $color-surface;
+  padding: $spacing-large;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow-light;
+  margin-bottom: $spacing-large;
+
+  h3 {
+    font-size: $font-size-base;
+    color: $color-primary;
+    margin-bottom: $spacing-medium;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+
+  &__label {
+    margin-bottom: $spacing-small;
+    font-size: $font-size-small;
+    color: $color-text-secondary;
+  }
+
+  &__input {
+    margin-bottom: $spacing-medium;
+    padding: $spacing-small;
+    border: 1px solid $color-primary-light;
+    border-radius: $border-radius;
+    background-color: $color-background;
+    color: $color-text-primary;
+    font-size: $font-size-small;
+
+    &:focus {
+      outline: none;
+      border-color: $color-primary;
+    }
+  }
+}
+
+.divider {
+  border: none;
+  height: 1px;
+  background-color: $color-text-secondary;
+  margin: $spacing-large 0;
 }
 </style>
