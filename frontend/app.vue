@@ -2,6 +2,7 @@
   <div>
     <PiHeader />
     <NuxtPage />
+    <PiFooter />
   </div>
 </template>
 

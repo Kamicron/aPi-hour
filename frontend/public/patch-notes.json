@@ -1,0 +1,74 @@
+[
+  {
+    "version": "0.5.0",
+    "date": "2024-12-24",
+    "changes": {
+      "feat": [
+        "Ajout de la fonctionnalité de création de session.",
+        "Redirection automatique après la suppression d'une session.",
+        "Ajout de la possibilité de supprimer ou de mettre une session en pause."
+      ],
+      "fix": [
+        "Correction de l'ajout et de la modification des pauses dans les sessions.",
+        "Amélioration de l'affichage des sessions."
+      ]
+    }
+  },
+  {
+    "version": "0.4.0",
+    "date": "2024-12-22",
+    "changes": {
+      "feat": [
+        "Ajout de la gestion des pages avec identifiant unique.",
+        "Ajout de la semaine de travail dans les options.",
+        "Ajout d'un composable pour les dates avec documentation.",
+        "Ajout d'un calendrier."
+      ],
+      "fix": [
+        "Correction d'un bug lors du passage du mode mois au mode semaine.",
+        "Correction de l'affichage des styles.",
+        "Enregistrement du statut des sessions en base de données.",
+        "Ajustement du temps d'expiration des tokens.",
+        "Correction des erreurs de type CORS."
+      ]
+    }
+  },
+  {
+    "version": "0.3.0",
+    "date": "2024-12-18",
+    "changes": {
+      "feat": [
+        "Ajout d'un bouton pour démarrer, mettre en pause et afficher les sessions par date.",
+        "Ajout de la fonctionnalité de stockage des profils utilisateurs.",
+        "Ajout de la connexion frontend.",
+        "Ajout des fonctions pour démarrer, mettre en pause, reprendre et arrêter une session.",
+        "Ajout de la gestion des utilisateurs pour les administrateurs (création, lecture, mise à jour, suppression et restauration)."
+      ],
+      "fix": [
+        "Correction du fonctionnement du garde d'authentification."
+      ]
+    }
+  },
+  {
+    "version": "0.2.0",
+    "date": "2024-12-14",
+    "changes": {
+      "feat": [
+        "Sécurisation des liens (fonctionnalité encore non terminée).",
+        "Ajout d'une authentification pour récupérer tous les utilisateurs en tant qu'administrateur."
+      ],
+      "init": [
+        "Initialisation du backend et du frontend."
+      ]
+    }
+  },
+  {
+    "version": "0.1.0",
+    "date": "2024-12-01",
+    "changes": {
+      "init": [
+        "Première initialisation du projet."
+      ]
+    }
+  }
+]
