@@ -5,6 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
   UpdateDateColumn,
+  DeleteDateColumn,
 } from 'typeorm';
 import { TimeEntry } from '../../time-entries/entities/time-entry.entity';
 
@@ -29,4 +30,7 @@ export class Pause {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @DeleteDateColumn()
+  deletedAt: Date; // Soft delete column
 }

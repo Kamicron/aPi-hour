@@ -74,6 +74,7 @@ export class TimeEntriesService {
   async softDelete(id: string, userId: string, userRole: string) {
     const timeEntry = await this.timeEntriesRepository.findOne({
       where: { id },
+      relations: ['user'],
     });
 
     if (!timeEntry) throw new NotFoundException('Time entry not found');

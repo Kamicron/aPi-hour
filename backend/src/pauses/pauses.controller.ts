@@ -6,9 +6,11 @@ import {
   Req,
   BadRequestException,
   Body,
+  Delete,
 } from '@nestjs/common';
 import { PausesService } from './pauses.service';
 import { AuthGuard } from '../auth/auth.guard';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 @Controller('pauses')
 @UseGuards(AuthGuard)
@@ -62,5 +64,18 @@ export class PausesController {
   resumePause(@Param('id') id: string, @Req() req: any) {
     const userId = req.user.userId;
     return this.pausesService.resumePause(id, userId);
+  }
+
+  @Delete(':id')
+  async softDeletePause(@Param('id') id: string, @Req() req: any) {
+    const userId = req.user.userId;
+    const userRole = req.user.role;
+    return this.pausesService.softDeletePause(id, userId, userRole);
+  }
+
+  @Patch('restore/:id')
+  @UseGuards(RolesGuard) // Par exemple, seulement les admins peuvent restaurer
+  async restorePause(@Param('id') id: string) {
+    return this.pausesService.restorePause(id);
   }
 }

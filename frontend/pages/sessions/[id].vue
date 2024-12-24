@@ -25,6 +25,9 @@
             : "En cours" }}
         </p>
         <button class="btn btn--primary" @click="editPause(pause)">Modifier</button>
+        <button class="btn btn--danger" @click="deletePause(pause.id)">
+          <font-awesome-icon icon="trash" />
+        </button>
       </li>
     </ul>
 
@@ -32,10 +35,10 @@
       <h3>Ajouter une pause</h3>
       <form @submit.prevent="addPause" class="form">
         <label for="newPauseStart" class="form__label">Début :</label>
-        <input type="datetime-local" id="newPauseStart" v-model="newPauseStart" required class="form__input" />
+        <input type="time" id="newPauseStart" v-model="newPauseStart" required class="form__input" />
 
         <label for="newPauseEnd" class="form__label">Fin :</label>
-        <input type="datetime-local" id="newPauseEnd" v-model="newPauseEnd" class="form__input" />
+        <input type="time" id="newPauseEnd" v-model="newPauseEnd" class="form__input" />
 
         <button type="submit" class="btn btn--primary">Ajouter la pause</button>
       </form>
@@ -45,13 +48,16 @@
     <h2 class="session-details__subtitle">Modifier la session</h2>
     <form @submit.prevent="updateSession" class="form">
       <label for="start" class="form__label">Début :</label>
-      <input type="datetime-local" v-model="editSession.startTime" id="start" class="form__input" />
+      <input type="time" v-model="editSession.startTime" id="start" class="form__input" />
 
       <label for="end" class="form__label">Fin :</label>
-      <input type="datetime-local" v-model="editSession.endTime" id="end" class="form__input" />
+      <input type="time" v-model="editSession.endTime" id="end" class="form__input" />
 
       <button type="submit" class="btn btn--primary">Enregistrer les modifications</button>
     </form>
+    <button class="btn btn--danger session-details__delete-session" @click="deleteSession">
+      Supprimer la session
+    </button>
   </div>
 </template>
 
@@ -127,6 +133,14 @@ const formattedWorkTime = computed(() =>
   useDateFormatter().calculateDuration(0, totalWorkTime.value, durationOptions)
 );
 
+function combineDateAndTime(date: string, time: string): string {
+  const baseDate = new Date(date);
+  const [hours, minutes] = time.split(':');
+  baseDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+  return baseDate.toISOString();
+}
+
+
 async function fetchSessionDetails() {
   try {
     const response = await $api.get(`/time-entries/${sessionId}`, {
@@ -149,14 +163,15 @@ async function fetchSessionDetails() {
 
 async function addPause() {
   if (!newPauseStart.value) {
-    alert("La date de début est requise pour ajouter une pause.");
+    alert("L'heure de début est requise pour ajouter une pause.");
     return;
   }
 
   try {
+    const sessionDate = session.value.startTime; // Date de la session
     const payload = {
-      pauseStart: new Date(newPauseStart.value).toISOString(),
-      pauseEnd: newPauseEnd.value ? new Date(newPauseEnd.value).toISOString() : null,
+      pauseStart: combineDateAndTime(sessionDate, newPauseStart.value),
+      pauseEnd: newPauseEnd.value ? combineDateAndTime(sessionDate, newPauseEnd.value) : null,
     };
 
     const response = await $api.patch(`/pauses/${sessionId}/add-with-dates`, payload, {
@@ -191,36 +206,58 @@ async function editPause(pause: any) {
   }
 }
 
-
-
 async function updateSession() {
-  const newStart = new Date(editSession.value.startTime).getTime();
-  const newEnd = new Date(editSession.value.endTime).getTime();
-
-  for (const pause of pauses.value) {
-    const pauseStart = new Date(pause.pauseStart).getTime();
-    const pauseEnd = pause.pauseEnd ? new Date(pause.pauseEnd).getTime() : null;
-
-    if (newStart > pauseStart || (pauseEnd && newEnd < pauseEnd)) {
-      alert('Les heures de session doivent inclure toutes les pauses.');
-      return;
-    }
+  if (!editSession.value.startTime || !editSession.value.endTime) {
+    alert("Les heures de début et de fin sont obligatoires.");
+    return;
   }
 
   try {
+    const sessionDate = session.value.startTime; // Utiliser la date de la session
+    const startTime = combineDateAndTime(sessionDate, editSession.value.startTime);
+    const endTime = combineDateAndTime(sessionDate, editSession.value.endTime);
+
     const response = await $api.patch(
       `/time-entries/${sessionId}`,
-      {
-        startTime: editSession.value.startTime,
-        endTime: editSession.value.endTime,
-      },
+      { startTime, endTime },
       {
         headers: { Authorization: `Bearer ${token.value}` },
       }
     );
     session.value = response.data;
   } catch (error) {
-    console.error('Erreur lors de la mise à jour de la session :', error);
+    console.error("Erreur lors de la mise à jour de la session :", error);
+  }
+}
+
+async function deletePause(pauseId: string) {
+  if (!confirm("Êtes-vous sûr de vouloir supprimer cette pause ?")) return;
+
+  try {
+    await $api.delete(`/pauses/${pauseId}`, {
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+    pauses.value = pauses.value.filter((pause) => pause.id !== pauseId);
+    alert("Pause supprimée avec succès.");
+  } catch (error) {
+    console.error("Erreur lors de la suppression de la pause :", error);
+    alert("Une erreur est survenue lors de la suppression de la pause.");
+  }
+}
+
+async function deleteSession() {
+  if (!confirm("Êtes-vous sûr de vouloir supprimer cette session ?")) return;
+
+  try {
+    await $api.delete(`/time-entries/${sessionId}`, {
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+    alert("Session supprimée avec succès.");
+    // Redirection ou autre action après suppression
+    window.location.href = "/sessions"; // Remplacez par votre route
+  } catch (error) {
+    console.error("Erreur lors de la suppression de la session :", error);
+    alert("Une erreur est survenue lors de la suppression de la session.");
   }
 }
 
@@ -323,6 +360,24 @@ onMounted(() => {
     }
   }
 }
+
+.pause-item__actions {
+  display: flex;
+  gap: $spacing-small;
+}
+
+.btn--danger {
+  background-color: $color-danger;
+  color: $color-text-secondary;
+  border: none;
+  padding: $spacing-small;
+  border-radius: $border-radius;
+
+  &:hover {
+    background-color: darken($color-danger, 10%);
+  }
+}
+
 
 .divider {
   border: none;

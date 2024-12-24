@@ -199,4 +199,32 @@ export class PausesService {
 
     return this.pauseRepository.save(pause);
   }
+
+  async softDeletePause(pauseId: string, userId: string, userRole: string) {
+    const pause = await this.pauseRepository.findOne({
+      where: { id: pauseId },
+      relations: ['timeEntry', 'timeEntry.user'],
+    });
+
+    if (!pause) {
+      throw new NotFoundException('Pause not found');
+    }
+
+    // Vérification des permissions
+    if (pause.timeEntry.user.id !== userId && userRole !== 'admin') {
+      throw new UnauthorizedException(
+        'You do not have permission to delete this pause.',
+      );
+    }
+
+    return this.pauseRepository.softDelete(pauseId);
+  }
+
+  async restorePause(pauseId: string) {
+    const result = await this.pauseRepository.restore(pauseId);
+
+    if (!result.affected) {
+      throw new NotFoundException('Pause not found or already active.');
+    }
+  }
 }
