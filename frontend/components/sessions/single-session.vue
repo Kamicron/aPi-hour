@@ -1,17 +1,19 @@
 <template>
-  <div class='single-session'>
-    <div class="work-sessions__card-content">
-      <header class="work-sessions__card-header">
-        <h4 class="work-sessions__card-title">Session ID : {{ sessionId }}</h4>
-      </header>
-      <div class="work-sessions__card-body">
-        <p><strong>Début :</strong> {{ startTime }}</p>
-        <p><strong>Fin :</strong> {{ endTime }}</p>
-        <p><strong>Temps de travail :</strong> {{ workTime }}</p>
-        <p><strong>Temps de pause :</strong> {{ pauseTime }}</p>
+  <NuxtLink :to="`/sessions/${sessionId}`">
+    <div class='single-session'>
+      <div class="work-sessions__card-content">
+        <header class="work-sessions__card-header">
+          <h4 class="work-sessions__card-title">Session ID : {{ sessionId }}</h4>
+        </header>
+        <div class="work-sessions__card-body">
+          <p><strong>Début :</strong> {{ startTime }}</p>
+          <p><strong>Fin :</strong> {{ endTime }}</p>
+          <p><strong>Temps de travail :</strong> {{ workTime }}</p>
+          <p><strong>Temps de pause :</strong> {{ pauseTime }}</p>
+        </div>
       </div>
     </div>
-  </div>
+  </NuxtLink>
 </template>
 
 <script setup lang='ts'>
@@ -25,11 +27,11 @@
 
 // ----- Define -----
 defineProps({
-  sessionId: {type: String, required: true},
-  startTime: {type: String, default: ''},
-  endTime: {type: String, default: ''},
-  workTime: {type: String, default: ''},
-  pauseTime: {type: String, default: ''},
+  sessionId: { type: String, required: true },
+  startTime: { type: String, default: '' },
+  endTime: { type: String, default: '' },
+  workTime: { type: String, default: '' },
+  pauseTime: { type: String, default: '' },
 })
 // ------------------
 

@@ -91,6 +91,9 @@ async function fetchSessions() {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     summary.value = response.data;
+
+    console.log('summary', summary);
+    
   } catch (error) {
     console.error('Erreur lors de la récupération des sessions', error);
   }

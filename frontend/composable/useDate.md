@@ -1,12 +1,11 @@
 # Documentation : Composable `useDateFormatter`
 
 ## Introduction
-Le composable `useDateFormatter` permet de formater les dates en français avec différentes options, notamment :
-- Formats courts ou longs.
-- Affichage de l'heure avec des formats personnalisés (ex. `HH:mm` ou `HH:mm:ss`).
-- Gestion des dates relatives (ex. "il y a 2 jours").
-
-Ce composable est conçu pour une utilisation flexible et simple dans un projet Vue 3 ou Nuxt 3.
+Le composable `useDateFormatter` permet de gérer les dates et durées dans vos projets Vue 3 ou Nuxt 3 avec flexibilité et simplicité. Il inclut :
+- La gestion des formats de date courts ou longs.
+- L'affichage de l'heure avec des options personnalisées.
+- Le calcul et le formatage des durées (ex. `jj:hh:mm:ss`).
+- La gestion des dates relatives (ex. "il y a 2 jours").
 
 ---
 
@@ -19,7 +18,7 @@ Assurez-vous que le composable `useDateFormatter.js` est disponible dans le doss
 Dans un composant Vue, importez et utilisez le composable :
 
 ```javascript
-import useDateFormatter from '@/composables/useDateFormatter';
+import useDateFormatter from '../../composables/useDate';
 ```
 
 ---
@@ -50,7 +49,7 @@ L'objet `customOptions` permet de passer des options détaillées directement à
 | `weekday`            | `String`   | Format des jours : `"narrow"` (D), `"short"` (dim.), `"long"` (dimanche). |
 | `era`                | `String`   | Ère : `"narrow"` (A), `"short"` (AP. J.-C.), `"long"` (Après Jésus-Christ). |
 | `year`               | `String`   | Format de l'année : `"numeric"` (2024), `"2-digit"` (24).                 |
-| `Week`              | `String`   | Format des mois : `"numeric"`, `"2-digit"`, `"narrow"` (D), `"short"` (Déc.), `"long"` (Décembre). |
+| `month`              | `String`   | Format des mois : `"numeric"`, `"2-digit"`, `"narrow"`, `"short"`, `"long"`. |
 | `day`                | `String`   | Format du jour : `"numeric"` (22), `"2-digit"` (22).                      |
 | `hour`               | `String`   | Format des heures : `"numeric"` (15), `"2-digit"` (15).                    |
 | `minute`             | `String`   | Format des minutes : `"numeric"` (30), `"2-digit"` (30).                  |
@@ -69,7 +68,7 @@ const customDate1 = formatDate('2024-12-22', {
   customOptions: {
     weekday: 'long',
     year: 'numeric',
-    Week: 'long',
+    month: 'long',
     day: 'numeric',
   },
 });
@@ -82,7 +81,7 @@ const customDate2 = formatDate('2024-12-22', {
   customOptions: {
     weekday: 'short',
     year: 'numeric',
-    Week: 'short',
+    month: 'short',
     day: '2-digit',
   },
 });
@@ -116,49 +115,62 @@ const customDate4 = formatDate('2024-12-22T15:30:45', {
 // Résultat : "03:30 PM"
 ```
 
-**Exemple 5 : Combinaison avancée avec plusieurs options**
+**Exemple 5 : Format avec fractions de secondes et fuseau horaire long**
 ```javascript
 const customDate5 = formatDate('2024-12-22T15:30:45.123', {
   customOptions: {
-    weekday: 'long',
-    era: 'short',
-    year: 'numeric',
-    Week: 'long',
-    day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
     fractionalSecondDigits: 3,
-    hour12: true,
     timeZone: 'UTC',
     timeZoneName: 'long',
   },
 });
-// Résultat : "dimanche 22 décembre 2024 après J.-C., 03:30:45.123 UTC"
+// Résultat : "15:30:45.123 Temps universel coordonné"
 ```
 
-#### Exemple d'utilisation
+---
 
+### `calculateDuration`
+Calcule et formate la durée entre deux dates en fonction des options spécifiées.
+
+#### Arguments
+- **`startDate`** *(String | Date)* : Date de début.
+- **`endDate`** *(String | Date)* : Date de fin.
+- **`options`** *(Object)* : Options pour personnaliser le formatage.
+
+#### Options disponibles
+| Option          | Type      | Description                                                                 |
+|------------------|-----------|-----------------------------------------------------------------------------|
+| `locale`         | `String`  | Langue à utiliser pour le formatage (par défaut : `"fr-FR"`).             |
+| `customOptions`  | `Object`  | Options spécifiques pour définir les unités (`day`, `hour`, `minute`, etc.). |
+
+#### Exemples avec `customOptions`
+
+**Exemple 1 : Durée avec toutes les unités**
 ```javascript
-const { formatDate } = useDateFormatter();
-
-// Exemple 1 : Format court sans heure
-const shortDate = formatDate('2024-12-22', { format: 'short' });
-// Résultat : "dim. 22 Déc. 2024"
-
-// Exemple 2 : Format long avec heure en HH:mm
-const longDateWithTime = formatDate('2024-12-22T15:30:00', {
-  format: 'long',
-  includeTime: true,
-  timeFormat: 'HH:mm',
+const duration1 = calculateDuration('2024-12-20T08:30:00', '2024-12-22T18:45:30', {
+  customOptions: {
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  },
 });
-// Résultat : "22 décembre 2024, 15:30"
+// Résultat : "02:10:15:30"
+```
 
-// Exemple 3 : Options personnalisées
-const customDate = formatDate('2024-12-22', {
-  customOptions: { weekday: 'long', Week: 'long', year: 'numeric' },
+**Exemple 2 : Durée limitée à 24 heures**
+```javascript
+const duration2 = calculateDuration('2024-12-20T08:30:00', '2024-12-22T18:45:30', {
+  customOptions: {
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  },
 });
-// Résultat : "dimanche 22 décembre 2024"
+// Résultat : "58:15:30"
 ```
 
 ---
@@ -190,40 +202,5 @@ const today = formatRelativeDate(new Date());
 
 ---
 
-## Notes complémentaires
-1. Les formats standards suivent les conventions de l'API `Intl.DateTimeFormat`.
-2. Les erreurs de formatage sont capturées et affichées dans la console.
-3. Le composable prend en charge les ajustements avancés via l'option `customOptions`.
-
----
-
-## Intégration Nuxt 3
-Pour une utilisation globale, vous pouvez définir le composable dans un plugin et l'injecter dans vos composants.
-
-Exemple de déclaration dans un plugin :
-
-```javascript
-// plugins/dateFormatter.js
-import useDateFormatter from '@/composables/useDateFormatter';
-
-export default defineNuxtPlugin(() => {
-  return {
-    provide: {
-      dateFormatter: useDateFormatter(),
-    },
-  };
-});
-```
-
-Utilisation dans un composant :
-
-```javascript
-const { formatDate } = useNuxtApp().$dateFormatter;
-const formatted = formatDate('2024-12-22', { format: 'short' });
-console.log(formatted); // "dim. 22 Déc. 2024"
-```
-
----
-
 ## Conclusion
-Le composable `useDateFormatter` offre une solution puissante et flexible pour gérer le formatage des dates et heures dans vos projets Vue 3/Nuxt 3. Adaptez les options selon vos besoins et profitez d'une gestion harmonieuse des dates ! 🚀
+Le composable `useDateFormatter` offre une solution puissante et flexible pour gérer le formatage des dates et heures, ainsi que le calcul des durées dans vos projets Vue 3/Nuxt 3. Adaptez les options selon vos besoins et profitez d'une gestion harmonieuse des dates ! 🚀

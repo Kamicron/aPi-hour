@@ -13,7 +13,9 @@ export class Pause {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @ManyToOne(() => TimeEntry, (timeEntry) => timeEntry.pauses)
+  @ManyToOne(() => TimeEntry, (timeEntry) => timeEntry.pauses, {
+    onDelete: 'CASCADE',
+  })
   timeEntry: TimeEntry;
 
   @Column({ type: 'timestamp' })

@@ -26,22 +26,6 @@ export class TimeEntriesController {
     return this.timeEntriesService.create(userId, data);
   }
 
-  // Modifier une entrée de pointage
-  @Patch(':id')
-  async update(@Param('id') id: string, @Body() data: any, @Req() req: any) {
-    const userId = req.user.userId; // Récupération de l'utilisateur connecté
-    const userRole = req.user.role; // Rôle de l'utilisateur
-    return this.timeEntriesService.update(id, userId, userRole, data);
-  }
-
-  // Soft delete une entrée de pointage
-  @Delete(':id')
-  async softDelete(@Param('id') id: string, @Req() req: any) {
-    const userId = req.user.userId;
-    const userRole = req.user.role;
-    return this.timeEntriesService.softDelete(id, userId, userRole);
-  }
-
   @Get('month')
   async getTimeEntriesByMonth(
     @Query('year') year: number,
@@ -95,5 +79,21 @@ export class TimeEntriesController {
   end(@Param('id') id: string, @Req() req: any) {
     const userId = req.user.userId;
     return this.timeEntriesService.end(id, userId);
+  }
+
+  // Modifier une entrée de pointage
+  @Patch(':id')
+  async update(@Param('id') id: string, @Body() data: any, @Req() req: any) {
+    const userId = req.user.userId; // Récupération de l'utilisateur connecté
+    const userRole = req.user.role; // Rôle de l'utilisateur
+    return this.timeEntriesService.update(id, userId, userRole, data);
+  }
+
+  // Soft delete une entrée de pointage
+  @Delete(':id')
+  async softDelete(@Param('id') id: string, @Req() req: any) {
+    const userId = req.user.userId;
+    const userRole = req.user.role;
+    return this.timeEntriesService.softDelete(id, userId, userRole);
   }
 }

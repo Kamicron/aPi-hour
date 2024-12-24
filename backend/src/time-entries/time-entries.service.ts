@@ -82,12 +82,15 @@ export class TimeEntriesService {
 
   // Récupérer une entrée spécifique
   async findOne(id: string, userId: string, userRole: string) {
+    console.log('=============');
     console.log('id', id);
     console.log('userId', userId);
     console.log('userRole', userRole);
+    console.log('=============');
 
     const timeEntry = await this.timeEntriesRepository.findOne({
       where: { id },
+      relations: ['user', 'pauses'], // Inclure les pauses et l'utilisateur
       withDeleted: userRole === 'admin',
     });
 
