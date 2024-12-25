@@ -51,6 +51,10 @@
           <p>Aucune session trouvée pour cette date.</p>
         </section>
       </div>
+
+      <div>
+        <extra-hours-display />
+      </div>
     </div>
   </div>
 

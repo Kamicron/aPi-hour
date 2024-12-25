@@ -1,4 +1,13 @@
-[
+[  
+  {
+    "version": "0.5.1",
+    "date": "2024-12-25",
+    "changes": {
+      "feat": [
+        "Ajout du composant calculant les heures supplémentaire entre deux dates.",
+      ]
+    }
+  },
   {
     "version": "0.5.0",
     "date": "2024-12-24",
