@@ -29,13 +29,15 @@
           </div>
         </section>
 
+        <button class="btn" @click="isCreateSessionModal = true">
+          <i class="fa-solid fa-plus"></i> Ajouter une session
+        </button>
+        
         <!-- Détails par étape -->
         <section v-if="summary && summary.details.length" class="work-sessions__details">
           <h3 class="work-sessions__details-title">Détails des sessions :</h3>
           <ul class="work-sessions__list">
-            <button class="btn" @click="isCreateSessionModal = true">
-              <i class="fa-solid fa-plus"></i> Ajouter une session
-            </button>
+
             <li v-for="detail in summary.details" :key="detail.sessionId" class="work-sessions__card">
               <single-session :sessionId="detail.sessionId" :start-time="formatDate(detail.startTime)"
                 :end-time="formatDate(detail.endTime)" :work-time="formatTime(detail.workTime)"

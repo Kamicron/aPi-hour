@@ -96,4 +96,42 @@ export class TimeEntriesController {
     const userRole = req.user.role;
     return this.timeEntriesService.softDelete(id, userId, userRole);
   }
+
+  @Post('calculate-hours')
+  async calculateHours(
+    @Body() body: { startDate: string; endDate: string },
+    @Req() req: any,
+  ) {
+    const userId = req.user.userId;
+    return this.timeEntriesService.calculateHours(
+      userId,
+      body.startDate,
+      body.endDate,
+    );
+  }
+
+  @Post('declare-period')
+  async declarePeriod(
+    @Body()
+    body: {
+      startDate: string;
+      endDate: string;
+      workedHours: number;
+      pauseHours: number;
+      contractualHours: number;
+      extraHours: number;
+    },
+    @Req() req: any,
+  ) {
+    const userId = req.user.userId;
+    return this.timeEntriesService.declarePeriod(
+      userId,
+      body.startDate,
+      body.endDate,
+      body.workedHours,
+      body.pauseHours,
+      body.contractualHours,
+      body.extraHours,
+    );
+  }
 }

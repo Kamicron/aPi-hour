@@ -1,3 +1,4 @@
+import { Declaration } from 'src/declarations/entities/declaration.entity';
 import { TimeEntry } from 'src/time-entries/entities/time-entry.entity';
 import { UserSession } from 'src/user_sessions/entities/user_session.entity';
 import {
@@ -47,4 +48,7 @@ export class User {
 
   @Column({ type: 'int', nullable: true })
   workingDaysPerWeek?: number;
+
+  @OneToMany(() => Declaration, (declaration) => declaration.user)
+  declarations: Declaration[];
 }

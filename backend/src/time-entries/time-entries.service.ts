@@ -4,9 +4,12 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, MoreThanOrEqual, LessThanOrEqual } from 'typeorm';
+import { Repository, MoreThanOrEqual, LessThanOrEqual, Between } from 'typeorm';
 import { TimeEntry } from './entities/time-entry.entity';
 import { UserSession } from 'src/user_sessions/entities/user_session.entity';
+import { Declaration } from 'src/declarations/entities/declaration.entity';
+import { Pause } from 'src/pauses/entities/pause.entity';
+import { User } from 'src/user/entities/user.entity';
 
 @Injectable()
 export class TimeEntriesService {
@@ -15,6 +18,12 @@ export class TimeEntriesService {
     private readonly timeEntriesRepository: Repository<TimeEntry>,
     @InjectRepository(UserSession) // Injectez correctement la table des sessions
     private readonly sessionRepository: Repository<UserSession>,
+    @InjectRepository(Declaration) // Injection correcte
+    private readonly declarationRepository: Repository<Declaration>,
+    @InjectRepository(Pause) // Injection correcte
+    private readonly pauseRepository: Repository<Pause>,
+    @InjectRepository(User) // Injection correcte
+    private readonly userRepository: Repository<User>,
   ) {}
 
   // Créer une entrée de pointage
@@ -263,5 +272,152 @@ export class TimeEntriesService {
 
       relations: ['pauses'],
     });
+  }
+
+  async declarePeriod(
+    userId: string,
+    startDate: string,
+    endDate: string,
+    workedHours: number,
+    pauseHours: number,
+    contractualHours: number,
+    extraHours: number,
+  ) {
+    // Création de la déclaration
+    const declaration = this.declarationRepository.create({
+      user: { id: userId },
+      startDate: new Date(startDate),
+      endDate: new Date(endDate),
+      workedHours,
+      pauseHours,
+      contractualHours,
+      extraHours,
+    });
+
+    // Sauvegarde dans la base de données
+    const savedDeclaration = await this.declarationRepository.save(declaration);
+
+    // TypeScript doit reconnaître `savedDeclaration` comme une `Declaration`
+    return {
+      message: 'Période déclarée avec succès',
+      declarationId: (savedDeclaration as Declaration).id,
+    };
+  }
+
+  async getTimeEntriesBetweenDates(
+    userId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<TimeEntry[]> {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Inclure toute la journée du endDate
+
+    return this.timeEntriesRepository.find({
+      where: {
+        user: { id: userId },
+        startTime: Between(start, end),
+      },
+    });
+  }
+
+  async getPausesBetweenDates(
+    userId: string,
+    startDate: string,
+    endDate: string,
+  ): Promise<Pause[]> {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999);
+
+    return this.pauseRepository.find({
+      where: {
+        timeEntry: {
+          user: { id: userId },
+          startTime: Between(start, end),
+        },
+      },
+    });
+  }
+
+  calculateTotalHours(entries: { startTime: Date; endTime: Date }[]): number {
+    return entries.reduce((total, entry) => {
+      const start = new Date(entry.startTime).getTime();
+      const end = new Date(entry.endTime).getTime();
+      return total + (end - start) / (1000 * 60 * 60); // Convertir en heures
+    }, 0);
+  }
+
+  async calculateHours(userId: string, startDate: string, endDate: string) {
+    // Récupérer les entrées de temps entre les deux dates
+    const timeEntries = await this.getTimeEntriesBetweenDates(
+      userId,
+      startDate,
+      endDate,
+    );
+
+    // Récupérer les pauses associées entre les deux dates
+    const pauses = await this.getPausesBetweenDates(userId, startDate, endDate);
+
+    // Calcul des heures travaillées
+    const totalWorkedHours = this.calculateTotalHours(
+      timeEntries.map((entry) => ({
+        startTime: entry.startTime,
+        endTime: entry.endTime || new Date(),
+      })),
+    );
+
+    // Calcul des heures de pause
+    const totalPauseHours = this.calculateTotalHours(
+      pauses.map((pause) => ({
+        startTime: pause.pauseStart,
+        endTime: pause.pauseEnd || new Date(),
+      })),
+    );
+
+    // Récupération des informations utilisateur
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (
+      !user ||
+      user.weeklyHoursGoal === undefined ||
+      user.workingDaysPerWeek === undefined
+    ) {
+      throw new NotFoundException('User configuration is incomplete.');
+    }
+
+    // Calcul des heures contractuelles
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Inclure toute la journée du endDate
+
+    const workingDays = countWorkingDays(start, end); // Nombre de jours ouvrés
+    const hoursPerDay = user.weeklyHoursGoal / user.workingDaysPerWeek;
+    const contractualHours = workingDays * hoursPerDay;
+
+    // Calcul des heures supplémentaires
+    const extraHours = totalWorkedHours - totalPauseHours - contractualHours;
+
+    return {
+      workedHours: totalWorkedHours - totalPauseHours,
+      pauseHours: totalPauseHours,
+      contractualHours,
+      extraHours,
+    };
+
+    function countWorkingDays(startDate: Date, endDate: Date): number {
+      let count = 0;
+      const current = new Date(startDate);
+
+      while (current <= endDate) {
+        const dayOfWeek = current.getDay();
+        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+          // Exclure samedi (6) et dimanche (0)
+          count++;
+        }
+        current.setDate(current.getDate() + 1); // Passer au jour suivant
+      }
+
+      return count;
+    }
   }
 }

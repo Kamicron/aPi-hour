@@ -7,6 +7,7 @@
         "Ajout de la fonctionnalité de création de session.",
         "Redirection automatique après la suppression d'une session.",
         "Ajout de la possibilité de supprimer ou de mettre une session en pause."
+        "Ajout de la route permettant de calculer le nombre d'heure supplémentaire"
       ],
       "fix": [
         "Correction de l'ajout et de la modification des pauses dans les sessions.",
