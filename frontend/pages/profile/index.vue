@@ -4,17 +4,25 @@
     <form class="profile__form" @submit.prevent="updateSettings">
       <div class="profile__form-group">
         <label for="weeklyHoursGoal" class="profile__label">Heures mensuelles prévues</label>
-        <input type="number" id="weeklyHoursGoal" class="profile__input" v-model="settings.weeklyHoursGoal"
-          required />
-      </div>
-      <div class="profile__form-group">
-        <label for="workingDaysPerWeek" class="profile__label">Jours ouvrés par mois</label>
-        <input type="number" id="workingDaysPerWeek" class="profile__input" v-model="settings.workingDaysPerWeek"
-          required />
+        <input type="number" id="weeklyHoursGoal" class="profile__input" v-model="settings.weeklyHoursGoal" required />
       </div>
       <button type="submit" class="profile__button">Mettre à jour</button>
     </form>
+    <div class="working-days-form">
+      <h2 class="working-days-form__title">Configurer vos jours ouvrés</h2>
+      <form @submit.prevent="saveWorkingDays">
+        <div class="working-days-form__checkboxes">
+          <label v-for="day in days" :key="day.value" class="working-days-form__checkbox">
+            <input type="checkbox" :value="day.value" v-model="selectedWorkingDays" />
+            {{ day.label }}
+          </label>
+        </div>
+        <button type="submit" class="working-days-form__button">Enregistrer</button>
+      </form>
+    </div>
     <div v-if="message" class="profile__message">{{ message }}</div>
+
+
   </div>
 </template>
 
@@ -36,15 +44,26 @@ import { useNuxtApp } from '#app';
 // ------ Const -----
 const profileStore = useUserStore();
 const { $api } = useNuxtApp();
+
+const days = [
+  { value: 0, label: "Dimanche" },
+  { value: 1, label: "Lundi" },
+  { value: 2, label: "Mardi" },
+  { value: 3, label: "Mercredi" },
+  { value: 4, label: "Jeudi" },
+  { value: 5, label: "Vendredi" },
+  { value: 6, label: "Samedi" },
+];
 // ------------------
 
 // ---- Reactive ----
 const settings = ref({
   weeklyHoursGoal: profileStore.profile?.weeklyHoursGoal || 35,
-  workingDaysPerWeek: profileStore.profile?.workingDaysPerWeek || 5,
 });
 
 const message = ref('');
+
+const selectedWorkingDays = ref<number[]>([1, 2, 3, 4, 5]);
 // ------------------
 
 // ---- Computed ----
@@ -66,6 +85,21 @@ async function updateSettings() {
   }
 }
 
+async function saveWorkingDays() {
+  try {
+    await $api.patch("/users/me/working-days", {
+      workingDays: selectedWorkingDays.value,
+    }, {
+      headers: {
+        Authorization: `Bearer ${useCookie('token').value}`, // Vérifiez que le token est correct.
+      },
+    });
+
+  } catch (error) {
+    console.error(error);
+    alert("Erreur lors de la mise à jour des jours ouvrés.");
+  }
+};
 // ------------------
 
 // ---- Function ----

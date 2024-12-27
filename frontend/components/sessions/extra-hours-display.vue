@@ -15,7 +15,8 @@
     </div>
 
     <div class="extra-hours-display__content">
-      <div v-if="loading" class="extra-hours-display__loading">Chargement...</div>
+      
+      <div v-if="loading" class="extra-hours-display__loading"><loader /></div>
       <div v-if="!loading && !error" class="extra-hours-display__results">
         <p class="extra-hours-display__result">
           <strong>Heures Travaillées :</strong> {{ workedHours }} h

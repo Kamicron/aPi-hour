@@ -1,6 +1,6 @@
 <template>
   <div class="work-sessions">
-    <div class="work-sessions__layout">
+    <div v-if="profileStore.profile"  class="work-sessions__layout">
       <!-- Colonne gauche : Calendrier -->
       <div class="work-sessions__calendar-column">
         <header class="work-sessions__header">
@@ -56,6 +56,9 @@
         <extra-hours-display />
       </div>
     </div>
+    <div v-else>
+      Veuillez vous connecter
+    </div>
   </div>
 
   <modal v-model="isCreateSessionModal">
@@ -83,15 +86,22 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
+import { useUserStore } from '../../stores/user';
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
+const profileStore = useUserStore();
+
+console.log('profileStore', profileStore);
+
 
 // Variables réactives
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
 const summary = ref<any | null>(null);
 const isCreateSessionModal = ref<boolean>(false)
 
+
+//TODO: ATTENTION DONNE NON VARIALBE
 // Calcul dynamique de l'objectif quotidien en fonction du profil
 const userProfile = ref({ weeklyHoursGoal: 35, workingDaysPerWeek: 5 }); // Exemple de profil utilisateur
 const dailyWorkGoal = computed(() => {

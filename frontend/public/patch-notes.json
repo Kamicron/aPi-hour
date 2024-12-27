@@ -1,10 +1,26 @@
-[  
+[
+  {
+    "version": "0.6.0",
+    "date": "2024-12-27",
+    "changes": {
+      "feat": [
+        "Ajout d'un loader.",
+        "Ajout des jours ouvré personnalisé dans le profil."
+
+      ],
+      "fix": [
+        "Réactivité lors de la connexion / deconnexion.",
+        "Calcule du nombre d'heure en fonciton des jours ouvrés personnalisé.",
+        "Fichier patch-notes était cassé."
+      ]
+    }
+  },
   {
     "version": "0.5.1",
     "date": "2024-12-25",
     "changes": {
       "feat": [
-        "Ajout du composant calculant les heures supplémentaire entre deux dates.",
+        "Ajout du composant calculant les heures supplémentaires entre deux dates."
       ]
     }
   },
@@ -15,8 +31,8 @@
       "feat": [
         "Ajout de la fonctionnalité de création de session.",
         "Redirection automatique après la suppression d'une session.",
-        "Ajout de la possibilité de supprimer ou de mettre une session en pause."
-        "Ajout de la route permettant de calculer le nombre d'heure supplémentaire"
+        "Ajout de la possibilité de supprimer ou de mettre une session en pause.",
+        "Ajout de la route permettant de calculer le nombre d'heures supplémentaires."
       ],
       "fix": [
         "Correction de l'ajout et de la modification des pauses dans les sessions.",

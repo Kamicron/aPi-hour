@@ -10,6 +10,7 @@ import { UserSession } from 'src/user_sessions/entities/user_session.entity';
 import { Declaration } from 'src/declarations/entities/declaration.entity';
 import { Pause } from 'src/pauses/entities/pause.entity';
 import { User } from 'src/user/entities/user.entity';
+import { log } from 'console';
 
 @Injectable()
 export class TimeEntriesService {
@@ -349,25 +350,37 @@ export class TimeEntriesService {
   }
 
   async calculateHours(userId: string, startDate: string, endDate: string) {
-    // Récupérer les entrées de temps entre les deux dates
     const timeEntries = await this.getTimeEntriesBetweenDates(
       userId,
       startDate,
       endDate,
     );
-
-    // Récupérer les pauses associées entre les deux dates
     const pauses = await this.getPausesBetweenDates(userId, startDate, endDate);
+
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user || !user.weeklyHoursGoal || !user.workingDays) {
+      throw new NotFoundException('User configuration is incomplete.');
+    }
+
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    end.setHours(23, 59, 59, 999); // Inclure la journée entière
+
+    // Filtrer les entrées de temps pour ne garder que celles des jours ouvrés
+    const filteredEntries = timeEntries.filter((entry) => {
+      const dayOfWeek = new Date(entry.startTime).getDay(); // 0=Dimanche, 1=Lundi, ..., 6=Samedi
+      return user.workingDays.includes(dayOfWeek); // Inclure uniquement les jours ouvrés
+    });
 
     // Calcul des heures travaillées
     const totalWorkedHours = this.calculateTotalHours(
-      timeEntries.map((entry) => ({
+      filteredEntries.map((entry) => ({
         startTime: entry.startTime,
         endTime: entry.endTime || new Date(),
       })),
     );
 
-    // Calcul des heures de pause
+    // Calcul des pauses
     const totalPauseHours = this.calculateTotalHours(
       pauses.map((pause) => ({
         startTime: pause.pauseStart,
@@ -375,27 +388,33 @@ export class TimeEntriesService {
       })),
     );
 
-    // Récupération des informations utilisateur
-    const user = await this.userRepository.findOne({ where: { id: userId } });
-    if (
-      !user ||
-      user.weeklyHoursGoal === undefined ||
-      user.workingDaysPerWeek === undefined
-    ) {
-      throw new NotFoundException('User configuration is incomplete.');
-    }
+    // Calcul des jours ouvrés personnalisés
+    const workingDaysCount = this.countCustomWorkingDays(
+      start,
+      end,
+      user.workingDays,
+    );
 
-    // Calcul des heures contractuelles
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999); // Inclure toute la journée du endDate
+    console.log('workingDaysCount', workingDaysCount);
 
-    const workingDays = countWorkingDays(start, end); // Nombre de jours ouvrés
-    const hoursPerDay = user.weeklyHoursGoal / user.workingDaysPerWeek;
-    const contractualHours = workingDays * hoursPerDay;
+    const hoursPerDay = user.weeklyHoursGoal / user.workingDays.length;
+    console.log(' user.weeklyHoursGoal ', user.weeklyHoursGoal);
+
+    console.log('user.workingDays.length', user.workingDays.length);
+
+    console.log('hoursPerDay', hoursPerDay);
+    console.log('workingDaysCount', workingDaysCount);
+
+    const contractualHours = workingDaysCount * hoursPerDay;
 
     // Calcul des heures supplémentaires
     const extraHours = totalWorkedHours - totalPauseHours - contractualHours;
+
+    console.log('Total Worked Hours:', totalWorkedHours);
+    console.log('Total Pause Hours:', totalPauseHours);
+    console.log('Working Days Count:', workingDaysCount);
+    console.log('Contractual Hours:', contractualHours);
+    console.log('Extra Hours:', extraHours);
 
     return {
       workedHours: totalWorkedHours - totalPauseHours,
@@ -403,21 +422,33 @@ export class TimeEntriesService {
       contractualHours,
       extraHours,
     };
+  }
 
-    function countWorkingDays(startDate: Date, endDate: Date): number {
-      let count = 0;
-      const current = new Date(startDate);
+  private countCustomWorkingDays(
+    startDate: Date,
+    endDate: Date,
+    workingDays: number[],
+  ): number {
+    let count = 0;
+    const current = new Date(startDate);
 
-      while (current <= endDate) {
-        const dayOfWeek = current.getDay();
-        if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-          // Exclure samedi (6) et dimanche (0)
-          count++;
-        }
-        current.setDate(current.getDate() + 1); // Passer au jour suivant
+    while (current <= endDate) {
+      const dayOfWeek = current.getDay();
+      console.log('~~~');
+
+      console.log('dayOfWeek', dayOfWeek);
+      console.log('workingDays', workingDays);
+
+      console.log('~~~');
+
+      // 0=Dimanche, 1=Lundi, ..., 6=Samedi
+      if (workingDays.some((day) => day.toString() === dayOfWeek.toString())) {
+        count++;
       }
 
-      return count;
+      current.setDate(current.getDate() + 1);
     }
+
+    return count;
   }
 }

@@ -46,8 +46,8 @@ export class User {
   @Column({ type: 'float', nullable: true })
   weeklyHoursGoal?: number;
 
-  @Column({ type: 'int', nullable: true })
-  workingDaysPerWeek?: number;
+  @Column({ type: 'simple-array', default: '1,2,3,4,5' })
+  workingDays: number[];
 
   @OneToMany(() => Declaration, (declaration) => declaration.user)
   declarations: Declaration[];

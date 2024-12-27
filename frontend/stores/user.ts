@@ -24,7 +24,7 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  async function updateSettings($api: any, settings: { weeklyHoursGoal: number; workingDaysPerWeek: number }) {
+  async function updateSettings($api: any, settings: { weeklyHoursGoal: number }) {
     try {
       const response = await $api.patch('/users/settings', settings, {
         headers: {
@@ -47,9 +47,12 @@ export const useUserStore = defineStore('user', () => {
   
 
   function logout() {
+    
     token.value = null;
     profile.value = null;
-    console.log('logout');
+    console.log('logout user');
+    console.log('profile.value', profile.value);
+    
     
     useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, false)
   }

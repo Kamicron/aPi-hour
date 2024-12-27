@@ -119,7 +119,7 @@ async function getProfile() {
 
 
 function logout() {
-  console.log('logout');
+  console.log('logout login');
 
   useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, false)
   userStore.logout();

@@ -40,7 +40,7 @@ export class UserService {
       ...user,
       currentSession: currentSession || null,
       weeklyHoursGoal: user.weeklyHoursGoal,
-      workingDaysPerWeek: user.workingDaysPerWeek,
+      workingDays: user.workingDays,
     };
   }
 
@@ -60,10 +60,15 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  async updateWorkingDays(userId: string, workingDays: number[]) {
+    await this.userRepository.update(userId, { workingDays });
+    return { message: 'Jours ouvrés mis à jour avec succès.' };
+  }
+
   // Mettre à jour les paramètres d'heures et de jours ouvrés
   async updateSettings(
     id: string,
-    settings: { weeklyHoursGoal?: number; workingDaysPerWeek?: number },
+    settings: { weeklyHoursGoal?: number },
   ): Promise<User> {
     console.log('id received in updateSettings:', id);
 
@@ -73,10 +78,6 @@ export class UserService {
 
     if (settings.weeklyHoursGoal !== undefined) {
       user.weeklyHoursGoal = settings.weeklyHoursGoal;
-    }
-
-    if (settings.workingDaysPerWeek !== undefined) {
-      user.workingDaysPerWeek = settings.workingDaysPerWeek;
     }
 
     return this.userRepository.save(user);

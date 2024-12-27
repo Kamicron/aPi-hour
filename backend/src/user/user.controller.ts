@@ -60,6 +60,16 @@ export class UserController {
     return this.userService.updateSettings(userId, settings);
   }
 
+  @UseGuards(AuthGuard)
+  @Patch('me/working-days')
+  async updateWorkingDays(
+    @Req() req: any,
+    @Body() body: { workingDays: number[] },
+  ) {
+    const userId = req.user.userId; // ID de l'utilisateur connecté
+    return this.userService.updateWorkingDays(userId, body.workingDays);
+  }
+
   // ===========================================
   //              ROUTES DYNAMIQUES
   // ===========================================
