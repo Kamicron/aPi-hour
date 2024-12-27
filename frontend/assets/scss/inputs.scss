@@ -1,0 +1,42 @@
+.pi-input {
+  padding: $spacing-small;
+  border: 1px solid $color-primary-light;
+  border-radius: $border-radius;
+  background-color: $color-background;
+  color: $color-text-primary;
+  font-size: $font-size-small;
+  
+  &:focus {
+    outline: none;
+    border-color: $color-secondary;
+  }
+
+
+  &--disabled {
+    border-color: $color-surface;
+    background-color: lighten($color-background, 10%);
+    color: $color-text-secondary;
+    cursor: not-allowed;
+    opacity: 0.6;
+
+    &:focus {
+      border-color: $color-surface;
+    }
+  }
+
+
+
+    // Supprime la couleur par défaut de l'autocomplétion
+  &:-webkit-autofill {
+    box-shadow: 0 0 0px 1000px $color-background inset;
+    -webkit-box-shadow: 0 0 0px 1000px $color-secondary inset;
+    -webkit-text-fill-color: $color-background;
+  }
+
+  &:-webkit-autofill:focus {
+    box-shadow: 0 0 0px 1000px $color-background inset;
+    -webkit-box-shadow: 0 0 0px 1000px $color-background inset;
+    -webkit-text-fill-color: $color-text-primary;
+    border-color: $color-secondary;
+  }
+}

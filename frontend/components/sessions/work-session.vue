@@ -65,11 +65,11 @@
     <form @submit.prevent="createSession" class="work-sessions__create-session-form">
       <div>
         <label for="startTime" class="form__label">Début :</label>
-        <input type="datetime-local" id="startTime" v-model="newSession.startTime" class="form__input" required />
+        <input type="datetime-local" id="startTime" v-model="newSession.startTime" class="pi-input" required />
       </div>
       <div>
         <label for="endTime" class="form__label">Fin :</label>
-        <input type="datetime-local" id="endTime" v-model="newSession.endTime" class="form__input" />
+        <input type="datetime-local" id="endTime" v-model="newSession.endTime" class="pi-input" />
       </div>
       <div class="work-sessions__create-session-actions">
         <button type="submit" class="btn btn--primary">
@@ -276,7 +276,7 @@ async function addSession() {
       display: flex;
       justify-content: space-between;
       margin-bottom: $spacing-medium;
-      padding: $spacing-small;
+      padding: $spacing-small $spacing-medium;
       background-color: $color-background;
       border-radius: $border-radius;
     }

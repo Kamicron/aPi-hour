@@ -15,6 +15,7 @@ export default defineNuxtConfig({
           @import "~/assets/scss/variables.scss";
           @import "~/assets/scss/mixins.scss";
           @import "~/assets/scss/buttons.scss";
+          @import "~/assets/scss/inputs.scss";
           `,
           
         },

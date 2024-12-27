@@ -4,14 +4,14 @@
       v-model="email"
       type="email"
       placeholder="Email"
-      class="auth-widget__input"
+      class="pi-input"
       required
     />
     <input
       v-model="password"
       type="password"
       placeholder="Mot de passe"
-      class="auth-widget__input"
+      class="pi-input"
       required
     />
     <p @click="toggleAuthMode" class="auth-widget__toggle">
@@ -53,13 +53,6 @@ function closeModal() {
   flex-direction: column;
   gap: 1rem;
 
-  .auth-widget__input {
-    width: 100%;
-    padding: 0.8rem;
-    border: 1px solid $color-text-secondary;
-    border-radius: $border-radius;
-  }
-
   .auth-widget__toggle {
     cursor: pointer;
     color: $color-primary;
@@ -67,19 +60,6 @@ function closeModal() {
 
     &:hover {
       text-decoration: underline;
-    }
-  }
-
-  .btn {
-    background-color: $color-primary;
-    color: $color-text-primary;
-    border: none;
-    padding: 0.8rem 1rem;
-    border-radius: $border-radius;
-    cursor: pointer;
-
-    &:hover {
-      background-color: $color-primary-light;
     }
   }
 }

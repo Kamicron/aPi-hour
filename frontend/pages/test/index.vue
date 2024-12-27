@@ -1,6 +1,18 @@
 <template>
   <div class='test'>
-    {{ date }}
+    <button class="btn">Bouton classique</button>
+    <button class="btn btn--danger">Danger</button>
+    <button class="btn btn--success">Succès</button>
+    <button class="btn btn--warning">Avertissement</button>
+    <button class="btn btn--outline">Contour</button>
+    <button class="btn btn--ghost">Fantôme</button>
+    <button class="btn btn--icon">
+      <i class="fa-solid fa-house"></i>
+    </button>
+    <button class="btn btn--large">Grand</button>
+    <button class="btn btn--small">Petit</button>
+    <button class="btn btn--rounded">Arrondi</button>
+
   </div>
 </template>
 

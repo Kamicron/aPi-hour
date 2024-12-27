@@ -6,29 +6,28 @@
     <div class="extra-hours-display__inputs">
       <label class="extra-hours-display__label">
         Date de début :
-        <input type="date" v-model="startDate" @change="fetchExtraHours" class="extra-hours-display__input" />
+        <input type="date" v-model="startDate" @change="fetchExtraHours" class="pi-input" />
       </label>
       <label class="extra-hours-display__label">
         Date de fin :
-        <input type="date" v-model="endDate" @change="fetchExtraHours" class="extra-hours-display__input" />
+        <input type="date" v-model="endDate" @change="fetchExtraHours" class="pi-input" />
       </label>
     </div>
 
     <div class="extra-hours-display__content">
-      
-      <div v-if="loading" class="extra-hours-display__loading"><loader /></div>
+      <div v-if="loading" class="extra-hours-display__loading">Chargement...</div>
       <div v-if="!loading && !error" class="extra-hours-display__results">
         <p class="extra-hours-display__result">
-          <strong>Heures Travaillées :</strong> {{ workedHours }} h
+          <strong>Heures Travaillées :</strong> {{ workedHours.toFixed(2) }} h
         </p>
         <p class="extra-hours-display__result">
-          <strong>Heures de Pause :</strong> {{ pauseHours }} h
+          <strong>Heures de Pause :</strong> {{ pauseHours.toFixed(2) }} h
         </p>
         <p class="extra-hours-display__result">
-          <strong>Heures Contractuelles :</strong> {{ contractualHours }} h
+          <strong>Heures Contractuelles :</strong> {{ contractualHours.toFixed(2) }} h
         </p>
         <p class="extra-hours-display__result">
-          <strong>Heures Supplémentaires :</strong> {{ extraHours }} h
+          <strong>Heures Supplémentaires :</strong> <span :class="{'extra-hours-display__positive': extraHours >= 0, 'extra-hours-display__negative': extraHours < 0}">{{ extraHours.toFixed(2) }} h</span>
         </p>
       </div>
       <div v-if="error" class="extra-hours-display__error">{{ error }}</div>
@@ -38,22 +37,12 @@
 
 <script setup lang="ts">
 // ----- Import -----
-
 import { ref } from "vue";
-import { useCookie, useNuxtApp } from '#app'; // Ajout de useRoute
-
+import { useCookie, useNuxtApp } from '#app';
 // ------------------
 
-// ------ Type ------
-
-// ------------------
-
-// ----- Define -----
-
-// ------------------
-
-// ------ Const -----
-const { $api } = useNuxtApp()
+// ------ Const ------
+const { $api } = useNuxtApp();
 const token = useCookie('token');
 // ------------------
 
@@ -66,14 +55,6 @@ const workedHours = ref<number>(0);
 const pauseHours = ref<number>(0);
 const contractualHours = ref<number>(0);
 const extraHours = ref<number>(0);
-// ------------------
-
-// ---- Computed ----
-
-// ------------------
-
-// ------ Hooks -----
-
 // ------------------
 
 // --- Async Func ---
@@ -116,17 +97,6 @@ const fetchExtraHours = async () => {
     loading.value = false;
   }
 };
-
-
-// ------------------
-
-// ---- Function ----
-
-// ------------------
-
-// ------ Watch -----
-
-// ------------------
 </script>
 
 <style lang="scss" scoped>
@@ -136,6 +106,8 @@ const fetchExtraHours = async () => {
   padding: $spacing-large;
   border-radius: $border-radius;
   box-shadow: $box-shadow-light;
+  max-width: 700px;
+  margin: 0 auto;
 
   &__header {
     text-align: center;
@@ -144,12 +116,15 @@ const fetchExtraHours = async () => {
 
   &__title {
     font-size: $font-size-large-xl;
+    font-weight: bold;
+    color: $color-primary;
     margin: 0;
   }
 
   &__inputs {
     display: flex;
     justify-content: space-between;
+    gap: $spacing-medium;
     margin-bottom: $spacing-large;
 
     @media (max-width: $breakpoint-md) {
@@ -160,14 +135,14 @@ const fetchExtraHours = async () => {
   &__label {
     font-size: $font-size-small;
     color: $color-text-secondary;
-    margin-bottom: $spacing-small;
   }
 
   &__input {
+    width: 100%;
     padding: $spacing-small;
     font-size: $font-size-base;
     color: $color-text-primary;
-    background-color: $color-background;
+    background-color: $color-surface;
     border: 1px solid $color-primary;
     border-radius: $border-radius;
 
@@ -182,6 +157,7 @@ const fetchExtraHours = async () => {
   }
 
   &__loading {
+    font-size: $font-size-base;
     font-weight: bold;
     color: $color-primary;
   }
@@ -192,12 +168,22 @@ const fetchExtraHours = async () => {
     &__result {
       font-size: $font-size-base;
       margin: $spacing-small 0;
+      color: $color-text-primary;
+    }
+
+    .extra-hours-display__positive {
+      color: $color-success;
+    }
+
+    .extra-hours-display__negative {
+      color: $color-danger;
     }
   }
 
   &__error {
     color: $color-danger;
     font-weight: bold;
+    font-size: $font-size-base;
   }
 }
 </style>

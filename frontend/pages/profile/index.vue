@@ -4,7 +4,7 @@
     <form class="profile__form" @submit.prevent="updateSettings">
       <div class="profile__form-group">
         <label for="weeklyHoursGoal" class="profile__label">Heures mensuelles prévues</label>
-        <input type="number" id="weeklyHoursGoal" class="profile__input" v-model="settings.weeklyHoursGoal" required />
+        <input type="number" id="weeklyHoursGoal" class="pi-input" v-model="settings.weeklyHoursGoal" required />
       </div>
       <button type="submit" class="profile__button">Mettre à jour</button>
     </form>

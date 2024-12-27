@@ -1,31 +1,29 @@
 .btn {
   padding: $spacing-medium $spacing-large;
-  border-radius: $border-radius; // Arrondi léger, plus moderne
+  border-radius: $border-radius; 
   font-family: $font-family-base;
   font-size: $font-size-small;
   letter-spacing: 2px;
   font-weight: bold;
-  text-transform: uppercase; // Texte en majuscule pour un aspect plus affirmé
+  text-transform: uppercase;
   cursor: pointer;
   border: none;
   transition: all 0.3s ease-in-out;
-
-  // Base pour tous les boutons
   background-color: $color-primary-light;
   color: $color-text-primary;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); // Ombre subtile pour la profondeur
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 
   &:hover {
     background-color: lighten($color-secondary, 5%);
     transform: translateY(-2px);
     box-shadow: $box-shadow-dark;
-    color: $color-background;// Renforcement de l'ombre au hover
+    color: $color-background;
   }
 
   &:active {
     background-color: darken($color-surface, 5%);
     transform: translateY(1px);
-    box-shadow: $box-shadow-dark; // Feedback au clic
+    box-shadow: $box-shadow-dark;
   }
 
   &:disabled {
@@ -47,5 +45,96 @@
     &:active {
       background-color: darken($color-danger, 10%);
     }
+  }
+
+  &--success {
+    background-color: $color-success;
+    color: $color-text-primary;
+
+    &:hover {
+      background-color: lighten($color-success, 10%);
+    }
+
+    &:active {
+      background-color: darken($color-success, 10%);
+    }
+  }
+
+  &--warning {
+    background-color: $color-warning;
+    color: $color-text-primary;
+
+    &:hover {
+      background-color: lighten($color-warning, 10%);
+    }
+
+    &:active {
+      background-color: darken($color-warning, 10%);
+    }
+  }
+
+  &--outline {
+    background-color: transparent;
+    color: $color-primary;
+    border: 2px solid $color-primary;
+
+    &:hover {
+      background-color: $color-primary;
+      color: $color-text-primary;
+    }
+
+    &:active {
+      background-color: darken($color-primary, 10%);
+      border-color: darken($color-primary, 10%);
+    }
+  }
+
+  &--ghost {
+    background-color: transparent;
+    color: $color-text-primary;
+    box-shadow: none;
+
+    &:hover {
+      background-color: $color-surface;
+      color: $color-secondary;
+    }
+
+    &:active {
+      background-color: darken($color-surface, 10%);
+    }
+  }
+
+  &--icon {
+    padding: $spacing-small;
+    border-radius: 50%;
+    width: $spacing-large * 2;
+    height: $spacing-large * 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    & > svg {
+      width: $spacing-medium;
+      height: $spacing-medium;
+      fill: $color-text-primary;
+    }
+
+    &:hover > svg {
+      fill: $color-secondary;
+    }
+  }
+
+  &--large {
+    padding: $spacing-large $spacing-large * 2;
+    font-size: $font-size-large;
+  }
+
+  &--small {
+    padding: $spacing-small $spacing-medium;
+    font-size: $font-size-small;
+  }
+
+  &--rounded {
+    border-radius: 50px;
   }
 }

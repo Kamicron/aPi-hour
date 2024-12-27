@@ -49,10 +49,10 @@
       <h3>Ajouter une pause</h3>
       <form @submit.prevent="addPause" class="form">
         <label for="newPauseStart" class="form__label">Début :</label>
-        <input type="time" id="newPauseStart" v-model="newPauseStart" required class="form__input" />
+        <input type="time" id="newPauseStart" v-model="newPauseStart" required class="pi-input" />
 
         <label for="newPauseEnd" class="form__label">Fin :</label>
-        <input type="time" id="newPauseEnd" v-model="newPauseEnd" class="form__input" />
+        <input type="time" id="newPauseEnd" v-model="newPauseEnd" class="pi-input" />
 
         <button type="submit" class="btn btn--primary">Ajouter la pause</button>
       </form>
@@ -63,10 +63,10 @@
     <h2 class="session-details__subtitle">Modifier la session</h2>
     <form @submit.prevent="updateSession" class="form">
       <label for="start" class="form__label">Début :</label>
-      <input type="time" v-model="editSession.startTime" id="start" class="form__input" />
+      <input type="time" v-model="editSession.startTime" id="start" class="pi-input" />
 
       <label for="end" class="form__label">Fin :</label>
-      <input type="time" v-model="editSession.endTime" id="end" class="form__input" />
+      <input type="time" v-model="editSession.endTime" id="end" class="pi-input" />
 
       <button type="submit" class="btn btn--primary">Enregistrer les modifications</button>
     </form>
