@@ -9,14 +9,15 @@
       <div class="calendar__day" v-for="day in daysOfWeek" :key="day">
         {{ day }}
       </div>
-      <div v-for="day in paddedDays" :key="day.date.toISOString" :class="[
+      <div v-for="day in paddedDays" :key="day.date.toISOString()" :class="[
         'calendar__cell',
         {
           'calendar__cell--inactive': day.isInactive,
           'calendar__cell--today': isToday(day.date),
           'calendar__cell--selected': isSelected(day.date),
-          'calendar__cell--session': hasSessionOnDay(day.date), // Nouvelle classe
-        }
+          'calendar__cell--session': hasSessionOnDay(day.date),
+          'calendar__cell--vacation': hasVacationOnDay(day.date), // Classe pour les vacances
+        },
       ]" @click="selectDay(day.date)">
         <span class="date">{{ day.date.getDate() }}</span>
       </div>
@@ -24,13 +25,12 @@
     <div class="calendar__footer" v-if="selectedDate">
       Date sélectionnée : {{ new Date(selectedDate).toLocaleDateString('fr-FR') }}
     </div>
-
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { useNuxtApp, useCookie, useRoute } from '#app'; // Ajout de useRoute
+import { useNuxtApp, useCookie, useRoute } from '#app';
 
 const currentYear = ref(new Date().getFullYear());
 const currentMonth = ref(new Date().getMonth());
@@ -41,13 +41,13 @@ const emits = defineEmits(['pick-date']);
 const { $api } = useNuxtApp();
 const token = useCookie('token');
 const timeEntries = ref([]);
-const route = useRoute(); // Récupération de la route actuelle
+const vacations = ref([]);
+const route = useRoute();
 
 const selectDay = (date: Date) => {
-  // Fixe la date sélectionnée à minuit en temps local
   const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
   selectedDate.value = localDate;
-  emits('pick-date', localDate); // Émet la date corrigée
+  emits('pick-date', localDate);
 };
 
 // Vérifie et applique la date passée dans l'URL
@@ -65,7 +65,7 @@ function initializeDateFromQuery() {
   }
 }
 
-watch(route, initializeDateFromQuery, { immediate: true }); // Recalcul si l'URL change
+watch(route, initializeDateFromQuery, { immediate: true });
 
 const monthName = computed(() => {
   return new Date(currentYear.value, currentMonth.value).toLocaleString('fr-FR', {
@@ -76,17 +76,21 @@ const monthName = computed(() => {
 const hasSessionOnDay = (date: Date) => {
   return timeEntries.value.some((entry) => {
     const entryDate = new Date(entry.startTime);
-    const localEntryDate = new Date(
-      entryDate.getUTCFullYear(),
-      entryDate.getUTCMonth(),
-      entryDate.getUTCDate()
-    );
-
     return (
-      localEntryDate.getFullYear() === date.getFullYear() &&
-      localEntryDate.getMonth() === date.getMonth() &&
-      localEntryDate.getDate() === date.getDate()
+      entryDate.getFullYear() === date.getFullYear() &&
+      entryDate.getMonth() === date.getMonth() &&
+      entryDate.getDate() === date.getDate()
     );
+  });
+};
+
+const hasVacationOnDay = (date: Date) => {
+  return vacations.value.some((vacation) => {
+    const startDate = new Date(vacation.startDate);
+    const endDate = new Date(vacation.endDate);
+
+    // Vérifie si la date se situe dans la période de congés
+    return date >= startDate && date <= endDate;
   });
 };
 
@@ -101,23 +105,39 @@ const paddedDays = computed(() => {
   // Days of the previous month
   for (let i = startPadding - 1; i >= 0; i--) {
     const date = new Date(currentYear.value, currentMonth.value, -i);
-    days.push({ date, isInactive: true });
+    days.push({
+      date,
+      isInactive: true,
+      hasVacation: hasVacationOnDay(date),
+      hasSession: hasSessionOnDay(date),
+    });
   }
 
   // Days of the current month
   for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
     const date = new Date(currentYear.value, currentMonth.value, i);
-    days.push({ date, isInactive: false });
+    days.push({
+      date,
+      isInactive: false,
+      hasVacation: hasVacationOnDay(date),
+      hasSession: hasSessionOnDay(date),
+    });
   }
 
   // Days of the next month
   for (let i = 1; i <= endPadding; i++) {
     const date = new Date(currentYear.value, currentMonth.value + 1, i);
-    days.push({ date, isInactive: true });
+    days.push({
+      date,
+      isInactive: true,
+      hasVacation: hasVacationOnDay(date),
+      hasSession: hasSessionOnDay(date),
+    });
   }
 
   return days;
 });
+
 
 const changeMonth = (direction) => {
   currentMonth.value += direction;
@@ -129,8 +149,6 @@ const changeMonth = (direction) => {
     currentYear.value++;
   }
 };
-
-
 
 const isToday = (date: Date) => {
   const today = new Date();
@@ -150,28 +168,20 @@ const isSelected = (date: Date) => {
   );
 };
 
-async function fetchTimeEntriesForMonth() {
+async function fetchTimeEntriesAndVacations() {
   try {
     const response = await $api.get('/time-entries/month', {
-      params: {
-        year: currentYear.value,
-        month: currentMonth.value + 1, // Car JS commence les mois à 0
-      },
-      headers: {
-        Authorization: `Bearer ${token.value}`,
-      },
+      params: { year: currentYear.value, month: currentMonth.value + 1 },
+      headers: { Authorization: `Bearer ${token.value}` },
     });
-    timeEntries.value = response.data;
-
+    timeEntries.value = response.data.timeEntries;
+    vacations.value = response.data.vacations;
   } catch (err) {
-    console.error("Erreur lors de la récupération des sessions", err);
+    console.error('Erreur lors de la récupération des données', err);
   }
 }
 
-watch([currentMonth, currentYear], () => {
-  fetchTimeEntriesForMonth();
-}, { immediate: true }); // `immediate: true` pour charger dès le montage
-
+watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: true });
 </script>
 
 <style lang="scss">
@@ -204,6 +214,15 @@ watch([currentMonth, currentYear], () => {
 
     &--inactive {
       background-color: $color-surface;
+
+      .date {
+        color: $color-text-secondary
+      }
+    }
+
+    &--vacation {
+      border: 2px solid $color-danger;
+      font-weight: bold;
 
       .date {
         color: $color-text-secondary

@@ -1,6 +1,6 @@
 <template>
   <div class="work-sessions">
-    <div v-if="profileStore.profile"  class="work-sessions__layout">
+    <div v-if="profileStore.profile" class="work-sessions__layout">
       <!-- Colonne gauche : Calendrier -->
       <div class="work-sessions__calendar-column">
         <header class="work-sessions__header">
@@ -32,7 +32,7 @@
         <button class="btn" @click="isCreateSessionModal = true">
           <i class="fa-solid fa-plus"></i> Ajouter une session
         </button>
-        
+
         <!-- Détails par étape -->
         <section v-if="summary && summary.details.length" class="work-sessions__details">
           <h3 class="work-sessions__details-title">Détails des sessions :</h3>
@@ -52,9 +52,16 @@
         </section>
       </div>
 
-      <div>
-        <extra-hours-display />
+      <div class="work-sessions__content--column">
+        <div>
+          <extra-hours-display />
+        </div>
+
+        <div>
+          <set_vacation />
+        </div>
       </div>
+
     </div>
     <div v-else>
       Veuillez vous connecter
@@ -266,6 +273,12 @@ async function addSession() {
     flex-direction: column;
     max-height: 600px;
     overflow: hidden;
+  }
+
+  &__content--column {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-large;
   }
 
   &__summary {

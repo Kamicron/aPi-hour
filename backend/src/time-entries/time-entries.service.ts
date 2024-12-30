@@ -10,7 +10,7 @@ import { UserSession } from 'src/user_sessions/entities/user_session.entity';
 import { Declaration } from 'src/declarations/entities/declaration.entity';
 import { Pause } from 'src/pauses/entities/pause.entity';
 import { User } from 'src/user/entities/user.entity';
-import { log } from 'console';
+import { Vacation } from 'src/vacations/entities/vacation.entity';
 
 @Injectable()
 export class TimeEntriesService {
@@ -25,6 +25,8 @@ export class TimeEntriesService {
     private readonly pauseRepository: Repository<Pause>,
     @InjectRepository(User) // Injection correcte
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Vacation) // Injection correcte
+    private readonly vacationsRepository: Repository<Vacation>,
   ) {}
 
   // Créer une entrée de pointage
@@ -259,20 +261,38 @@ export class TimeEntriesService {
     return timeEntry;
   }
 
-  async getTimeEntriesForMonth(userId: string, year: number, Week: number) {
-    const startDate = new Date(year, Week - 1, 1); // Premier jour du mois
-    const endDate = new Date(year, Week, 0, 23, 59, 59); // Dernier jour du mois
+  async getTimeEntriesForMonth(userId: string, year: number, week: number) {
+    // Définition des dates pour le mois
+    const startDate = new Date(year, week - 1, 1); // Premier jour de la semaine
+    const endDate = new Date(year, week, 0, 23, 59, 59); // Dernier jour de la semaine
     console.log('StartDate:', startDate, 'EndDate:', endDate);
 
-    return this.timeEntriesRepository.find({
+    // Récupérer les pointages
+    const timeEntries = await this.timeEntriesRepository.find({
       where: {
         user: { id: userId },
         startTime: MoreThanOrEqual(startDate),
         endTime: LessThanOrEqual(endDate),
       },
-
       relations: ['pauses'],
     });
+
+    // Récupérer les vacances chevauchant l'intervalle
+    const vacations = await this.vacationsRepository.find({
+      where: [
+        {
+          user: { id: userId },
+          startDate: LessThanOrEqual(endDate),
+          endDate: MoreThanOrEqual(startDate),
+        },
+      ],
+    });
+
+    // Retourner les deux ensembles de données
+    return {
+      timeEntries,
+      vacations,
+    };
   }
 
   async declarePeriod(

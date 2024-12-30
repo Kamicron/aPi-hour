@@ -10,6 +10,7 @@ import { UserSessionsModule } from './user_sessions/user_sessions.module';
 import * as dotenv from 'dotenv';
 import { LoggerMiddleware } from './middlewares/logger.middleware'; // Import du middleware
 import { DeclarationsModule } from './declarations/declarations.module';
+import { VacationsModule } from './vacations/vacations.module';
 
 dotenv.config();
 
@@ -31,6 +32,7 @@ dotenv.config();
     PausesModule,
     UserSessionsModule,
     DeclarationsModule,
+    VacationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -1,3 +1,4 @@
+import { Vacation } from 'src/vacations/entities/vacation.entity'; // Import de l'entité Vacation
 import { Declaration } from 'src/declarations/entities/declaration.entity';
 import { TimeEntry } from 'src/time-entries/entities/time-entry.entity';
 import { UserSession } from 'src/user_sessions/entities/user_session.entity';
@@ -51,4 +52,7 @@ export class User {
 
   @OneToMany(() => Declaration, (declaration) => declaration.user)
   declarations: Declaration[];
+
+  @OneToMany(() => Vacation, (vacation) => vacation.user)
+  vacations: Vacation[];
 }
