@@ -5,7 +5,7 @@
     </header>
     <main>
       <section v-for="version in patchNotes" :key="version.version" class="version-section">
-        <h2 class="version-title">Version {{ version.version }} - {{ version.date }}</h2>
+        <h2 class="version-title">Version {{ version.version }} - {{ dateFormating(version.date) }}</h2>
         <div v-if="version.changes.feat && version.changes.feat.length" class="changes feat">
           <h3>Nouveautés</h3>
           <ul>
@@ -31,8 +31,20 @@
 
 <script setup lang='ts'>
 import { ref, onMounted } from 'vue';
+import useDateFormatter from '../../composable/useDate';
 
 const patchNotes = ref([]);
+const customOptions = ref({
+      weekday: 'long',
+      year: 'numeric',
+      Week: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Europe/Paris',
+    })
+
 
 const fetchPatchNotes = async () => {
   try {
@@ -44,6 +56,12 @@ const fetchPatchNotes = async () => {
 };
 
 onMounted(fetchPatchNotes);
+
+function dateFormating(date: Date)  {
+  return useDateFormatter().formatDate(date, {
+    customOptions: customOptions,
+  });
+}
 </script>
 
 <style scoped lang="scss">

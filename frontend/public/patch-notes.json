@@ -1,5 +1,18 @@
 [
   {
+    "version": "0.7.0",
+    "date": "2024-12-30",
+    "changes": {
+      "feat": [
+        "Composant permettant de poser des jours de congés et de jour férié."
+      ],
+      "fix": [
+        "Réactivité lors d'ajout de session et de jour de congés",
+        "Modification du style du calendrier"
+      ]
+    }
+  },
+  {
     "version": "0.6.0",
     "date": "2024-12-27",
     "changes": {
