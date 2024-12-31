@@ -27,10 +27,10 @@ export class Vacation {
 
   @Column({
     type: 'enum',
-    enum: ['pending', 'approved', 'rejected'],
+    enum: ['pending', 'approved', 'rejected', 'public_holiday'],
     default: 'pending',
   })
-  status: 'pending' | 'approved' | 'rejected';
+  status: 'pending' | 'approved' | 'rejected' | 'public_holiday';
 
   @Column({ type: 'text', nullable: true })
   reason: string;

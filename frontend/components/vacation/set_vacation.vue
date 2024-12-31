@@ -14,6 +14,13 @@
       </div>
 
       <div class="vacation__field">
+        <label for="isHoliday" class="vacation__label">
+          <input id="isHoliday" v-model="isHoliday" type="checkbox" />
+          Jour férié
+        </label>
+      </div>
+
+      <div v-if="!isHoliday" class="vacation__field">
         <label for="reason" class="vacation__label">Raison</label>
         <textarea id="reason" v-model="vacation.reason" rows="3" class="pi-input" placeholder="Optionnel"></textarea>
       </div>
@@ -26,14 +33,19 @@
 <script setup lang="ts">
 // ---- Import -----
 import { ref } from 'vue';
-import { useNuxtApp, useCookie   } from '#app'; // Ajout de useRoute
+import { useNuxtApp, useCookie } from '#app'; // Ajout de useRoute
+import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 
 // ---- Reactive ----
 const vacation = ref({
   startDate: '',
   endDate: '',
   reason: '',
+  status: 'pending',
 });
+
+const isHoliday = ref(false);
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
@@ -41,12 +53,24 @@ const token = useCookie('token');
 // --- Async Func ---
 const submitVacation = async () => {
   try {
+    // Mettre à jour le statut en fonction de la case "jour férié"
+    vacation.value.status = isHoliday.value ? 'public_holiday' : 'pending';
+
     const response = await $api.post('/vacations', vacation.value, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     console.log('Vacances ajoutées avec succès :', response.data);
-    alert('Vacances ajoutées avec succès !');
-    vacation.value = { startDate: '', endDate: '', reason: '' }; // Réinitialisation du formulaire
+
+    alert(
+      isHoliday.value
+        ? 'Jour férié ajouté avec succès !'
+        : 'Vacances ajoutées avec succès !'
+    );
+
+    // Réinitialiser le formulaire
+    vacation.value = { startDate: '', endDate: '', reason: '', status: 'pending' };
+    isHoliday.value = false; // Réinitialiser la case à cocher
+    useGlobalEvents().emitEvent(EGlobalEvent.UPDATE_CALENDAR);
   } catch (error) {
     console.error('Erreur lors de l\'ajout des vacances :', error);
     alert('Une erreur est survenue. Veuillez réessayer.');
@@ -85,4 +109,5 @@ const submitVacation = async () => {
     color: $color-text-secondary;
   }
 }
+
 </style>

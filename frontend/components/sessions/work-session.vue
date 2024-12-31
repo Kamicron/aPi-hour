@@ -68,7 +68,7 @@
     </div>
   </div>
 
-  <modal v-model="isCreateSessionModal">
+  <modal v-model="isCreateSessionModal" title="Ajouter une session">
     <form @submit.prevent="createSession" class="work-sessions__create-session-form">
       <div>
         <label for="startTime" class="form__label">Début :</label>
@@ -94,6 +94,8 @@
 import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
 import { useUserStore } from '../../stores/user';
+import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
@@ -147,7 +149,11 @@ async function createSession() {
     // Rafraîchir les sessions
     fetchSessions();
 
-    alert('Session créée avec succès.');
+    // alert('Session créée avec succès.');
+    isCreateSessionModal.value = false
+    useGlobalEvents().emitEvent(EGlobalEvent.UPDATE_CALENDAR);
+
+
   } catch (error) {
     console.error('Erreur lors de la création de la session :', error);
     alert('Une erreur est survenue lors de la création de la session.');

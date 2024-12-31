@@ -15,8 +15,9 @@
           'calendar__cell--inactive': day.isInactive,
           'calendar__cell--today': isToday(day.date),
           'calendar__cell--selected': isSelected(day.date),
-          'calendar__cell--session': hasSessionOnDay(day.date),
-          'calendar__cell--vacation': hasVacationOnDay(day.date), // Classe pour les vacances
+          'calendar__cell--session': day.hasSession,
+          'calendar__cell--vacation': day.hasVacation,
+          'calendar__cell--public-holiday': day.isPublicHoliday, // Nouvelle classe pour les jours fériés
         },
       ]" @click="selectDay(day.date)">
         <span class="date">{{ day.date.getDate() }}</span>
@@ -31,6 +32,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie, useRoute } from '#app';
+import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 
 const currentYear = ref(new Date().getFullYear());
 const currentMonth = ref(new Date().getMonth());
@@ -49,6 +52,10 @@ const selectDay = (date: Date) => {
   selectedDate.value = localDate;
   emits('pick-date', localDate);
 };
+
+useGlobalEvents().subscribeTo(EGlobalEvent.UPDATE_CALENDAR, () => {
+  fetchTimeEntriesAndVacations();
+});
 
 // Vérifie et applique la date passée dans l'URL
 function initializeDateFromQuery() {
@@ -85,14 +92,23 @@ const hasSessionOnDay = (date: Date) => {
 };
 
 const hasVacationOnDay = (date: Date) => {
-  return vacations.value.some((vacation) => {
+  const vacation = vacations.value.find((vacation) => {
     const startDate = new Date(vacation.startDate);
-    const endDate = new Date(vacation.endDate);
+    startDate.setHours(0, 0, 0, 0);
 
-    // Vérifie si la date se situe dans la période de congés
+    const endDate = new Date(vacation.endDate);
+    endDate.setHours(23, 59, 59, 999);
+
     return date >= startDate && date <= endDate;
   });
+
+  if (vacation) {
+    return vacation.status === 'public_holiday' ? 'public_holiday' : 'vacation';
+  }
+  return null;
 };
+
+
 
 const paddedDays = computed(() => {
   const days = [];
@@ -105,10 +121,12 @@ const paddedDays = computed(() => {
   // Days of the previous month
   for (let i = startPadding - 1; i >= 0; i--) {
     const date = new Date(currentYear.value, currentMonth.value, -i);
+    const vacationStatus = hasVacationOnDay(date);
     days.push({
       date,
       isInactive: true,
-      hasVacation: hasVacationOnDay(date),
+      hasVacation: vacationStatus === 'vacation',
+      isPublicHoliday: vacationStatus === 'public_holiday',
       hasSession: hasSessionOnDay(date),
     });
   }
@@ -116,10 +134,12 @@ const paddedDays = computed(() => {
   // Days of the current month
   for (let i = 1; i <= lastDayOfMonth.getDate(); i++) {
     const date = new Date(currentYear.value, currentMonth.value, i);
+    const vacationStatus = hasVacationOnDay(date);
     days.push({
       date,
       isInactive: false,
-      hasVacation: hasVacationOnDay(date),
+      hasVacation: vacationStatus === 'vacation',
+      isPublicHoliday: vacationStatus === 'public_holiday',
       hasSession: hasSessionOnDay(date),
     });
   }
@@ -127,10 +147,12 @@ const paddedDays = computed(() => {
   // Days of the next month
   for (let i = 1; i <= endPadding; i++) {
     const date = new Date(currentYear.value, currentMonth.value + 1, i);
+    const vacationStatus = hasVacationOnDay(date);
     days.push({
       date,
       isInactive: true,
-      hasVacation: hasVacationOnDay(date),
+      hasVacation: vacationStatus === 'vacation',
+      isPublicHoliday: vacationStatus === 'public_holiday',
       hasSession: hasSessionOnDay(date),
     });
   }
@@ -225,7 +247,16 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
       font-weight: bold;
 
       .date {
-        color: $color-text-secondary
+        color: $color-danger
+      }
+    }
+
+    &--public-holiday {
+      border: 2px solid $color-success;
+
+      .date {
+        color: $color-success;
+        font-weight: bold;
       }
     }
 
@@ -243,6 +274,15 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
       }
     }
 
+    &--session {
+      border: 2px solid $color-secondary;
+      font-weight: bold;
+
+      .date {
+        color: $color-secondary
+      }
+    }
+
     &:hover {
       background-color: $color-secondary;
 
@@ -257,10 +297,5 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
     text-align: center;
     font-weight: bold;
   }
-}
-
-.calendar__cell--session {
-  border: 2px solid $color-secondary;
-  font-weight: bold;
 }
 </style>

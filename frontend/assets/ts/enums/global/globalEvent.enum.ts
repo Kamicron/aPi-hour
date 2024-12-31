@@ -1,3 +1,4 @@
 export enum EGlobalEvent {
-  LOGGED = 'logged'
+  LOGGED = 'logged',
+  UPDATE_CALENDAR = 'update_calendar'
 }
