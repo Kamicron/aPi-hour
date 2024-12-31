@@ -17,7 +17,7 @@
         class="minute-hand"
         x1="446.06"
         y1="428.32"
-        x2="450.06"
+        x2="530.06"
         y2="350.32"
       />
       <!-- Pupilles -->
@@ -76,7 +76,7 @@
 /* Aiguilles */
 .hour-hand,
 .minute-hand {
-  stroke: #e1e1e1;
+  stroke: #ecc130; /* Couleur jaune */
   stroke-width: 8px;
   stroke-linecap: round;
   transform-origin: 446.06px 428.32px;

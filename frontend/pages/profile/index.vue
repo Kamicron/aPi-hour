@@ -8,14 +8,16 @@
       </div>
       <button type="submit" class="profile__button">Mettre à jour</button>
     </form>
-    <div class="working-days-form">
+    <div class="working-days-form profile__form">
       <h2 class="working-days-form__title">Configurer vos jours ouvrés</h2>
       <form @submit.prevent="saveWorkingDays">
+
         <div class="working-days-form__checkboxes">
-          <label v-for="day in days" :key="day.value" class="working-days-form__checkbox">
-            <input type="checkbox" :value="day.value" v-model="selectedWorkingDays" />
+          <pi-checkbox v-for="day in sortedDays" :key="day.value" :id="`checkbox-${day.value}`" :value="day.value"
+            v-model="selectedWorkingDays">
             {{ day.label }}
-          </label>
+          </pi-checkbox>
+
         </div>
         <button type="submit" class="working-days-form__button">Enregistrer</button>
       </form>
@@ -54,6 +56,8 @@ const days = [
   { value: 5, label: "Vendredi" },
   { value: 6, label: "Samedi" },
 ];
+
+const sortedDays = days.slice(1).concat(days[0]);
 // ------------------
 
 // ---- Reactive ----
@@ -115,65 +119,100 @@ async function saveWorkingDays() {
 
 <style lang='scss' scoped>
 .profile {
+  margin: $spacing-large;
+
   &__title {
     text-align: center;
-    margin-bottom: 2rem;
-    color: #fff;
+    margin-bottom: $spacing-large;
+    color: $color-text-primary;
+    font-size: $font-size-large-xl;
   }
 
   &__form {
-    background-color: $color-background;
-    padding: 2rem;
-    border-radius: 0.5rem;
+    background-color: $color-surface;
+    padding: $spacing-large;
+    border-radius: $border-radius;
     max-width: 600px;
     margin: 0 auto;
+    box-shadow: $box-shadow-light;
 
     &-group {
-      margin-bottom: 1.5rem;
+      margin-bottom: $spacing-large;
     }
 
     &__label {
       display: block;
-      margin-bottom: 0.5rem;
+      margin-bottom: $spacing-small;
       font-weight: bold;
-      color: #fff;
+      color: $color-text-secondary;
+      font-size: $font-size-small;
     }
 
     &__input {
       width: 100%;
-      padding: 0.5rem;
-      border: 1px solid darken($color-background, 20%);
-      border-radius: 0.25rem;
-      background-color: lighten($color-background, 10%);
-      color: #fff;
+      padding: $spacing-medium;
+      border: 1px solid $color-primary-light;
+      border-radius: $border-radius;
+      background-color: $color-background;
+      color: $color-text-primary;
+      font-size: $font-size-base;
 
       &:focus {
         outline: none;
-        border-color: lighten($color-background, 30%);
+        border-color: $color-secondary;
+        box-shadow: 0 0 5px $color-secondary;
       }
     }
   }
 
   &__button {
+    @extend .btn;
     width: 100%;
-    padding: 0.75rem;
-    background-color: lighten($color-background, 20%);
-    color: #fff;
-    border: none;
-    border-radius: 0.25rem;
-    cursor: pointer;
-    font-size: 1rem;
-    font-weight: bold;
-
-    &:hover {
-      background-color: lighten($color-background, 30%);
-    }
+    margin-top: $spacing-medium;
   }
 
   &__message {
-    margin-top: 1rem;
+    margin-top: $spacing-large;
     text-align: center;
-    color: lighten($color-background, 40%);
+    color: $color-success;
+    font-size: $font-size-small;
+  }
+}
+
+.working-days-form {
+  margin-top: $spacing-large;
+
+  &__title {
+    color: $color-text-primary;
+    text-align: center;
+    font-size: $font-size-large;
+    margin-bottom: $spacing-large;
+  }
+
+  &__checkboxes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: $spacing-medium;
+    margin-bottom: $spacing-large;
+  }
+
+  &__button {
+    @extend .btn;
+    width: 100%;
+  }
+}
+
+.pi-input {
+  padding: $spacing-medium;
+  border: 1px solid $color-primary-light;
+  border-radius: $border-radius;
+  background-color: $color-background;
+  color: $color-text-primary;
+  font-size: $font-size-base;
+
+  &:focus {
+    outline: none;
+    border-color: $color-secondary;
   }
 }
 </style>

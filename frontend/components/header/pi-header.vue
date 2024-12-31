@@ -2,7 +2,7 @@
   <header class="header">
     <div class="header__container">
       <!-- <h1 class="header__title">aPi-hour</h1> -->
-       <img class="header__logo" src="https://api.pi-cto.top/uploads/16d20c54-45bf-4dba-bbc1-9e377f7c224e/1735655377600-Sans%20titre%20-%201_Plan%20de%20travail%201.png"/>
+       <img class="header__logo" src="https://api.pi-cto.top/uploads/16d20c54-45bf-4dba-bbc1-9e377f7c224e/1735662932144-logo.png"/>
       <navbar />
       <Login />
     </div>

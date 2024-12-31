@@ -236,7 +236,7 @@ async function addSession() {
       headers: { Authorization: `Bearer ${token.value}` },
     });
 
-    alert('Session ajoutée avec succès.');
+    // alert('Session ajoutée avec succès.');
     fetchSessions(); // Rafraîchit la liste des sessions après l'ajout
   } catch (error) {
     console.error('Erreur lors de l’ajout de la session :', error);

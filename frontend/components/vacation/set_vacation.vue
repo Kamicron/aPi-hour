@@ -15,8 +15,10 @@
 
       <div class="vacation__field">
         <label for="isHoliday" class="vacation__label">
-          <input id="isHoliday" v-model="isHoliday" type="checkbox" />
-          Jour férié
+          <pi-checkbox id="checkbox1" v-model="isHoliday">Jour férié</pi-checkbox>
+
+          <!-- <input class="pi-checkbox" id="isHoliday" v-model="isHoliday" type="checkbox" />
+          Jour férié -->
         </label>
       </div>
 
@@ -61,11 +63,11 @@ const submitVacation = async () => {
     });
     console.log('Vacances ajoutées avec succès :', response.data);
 
-    alert(
-      isHoliday.value
-        ? 'Jour férié ajouté avec succès !'
-        : 'Vacances ajoutées avec succès !'
-    );
+    // alert(
+    //   isHoliday.value
+    //     ? 'Jour férié ajouté avec succès !'
+    //     : 'Vacances ajoutées avec succès !'
+    // );
 
     // Réinitialiser le formulaire
     vacation.value = { startDate: '', endDate: '', reason: '', status: 'pending' };

@@ -273,7 +273,7 @@ async function deletePause(pauseId: string) {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     pauses.value = pauses.value.filter((pause) => pause.id !== pauseId);
-    alert("Pause supprimée avec succès.");
+    // alert("Pause supprimée avec succès.");
   } catch (error) {
     console.error("Erreur lors de la suppression de la pause :", error);
     alert("Une erreur est survenue lors de la suppression de la pause.");
@@ -287,7 +287,7 @@ async function deleteSession() {
     await $api.delete(`/time-entries/${sessionId}`, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
-    alert("Session supprimée avec succès.");
+    // alert("Session supprimée avec succès.");
 
     console.log('formattedDate', formattedDate);
 

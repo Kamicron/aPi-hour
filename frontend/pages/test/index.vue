@@ -12,8 +12,11 @@
     <button class="btn btn--large">Grand</button>
     <button class="btn btn--small">Petit</button>
     <button class="btn btn--rounded">Arrondi</button>
-      <pi-loader />
+    <pi-loader />
 
+    <pi-checkbox id="checkbox1" v-model="isChecked">Accepter les termes</pi-checkbox>
+
+    
   </div>
 </template>
 
@@ -45,6 +48,8 @@ const date = ref<string | null>(useDateFormatter().calculateDuration("2024-12-20
     second: "2-digit",
   },
 }))
+
+const isChecked = ref(false);
 // ------------------
 
 // ---- Computed ----
@@ -71,5 +76,7 @@ const date = ref<string | null>(useDateFormatter().calculateDuration("2024-12-20
 </script>
 
 <style lang='scss' scoped>
-.test {}
+.test {
+  margin:20px
+}
 </style>
