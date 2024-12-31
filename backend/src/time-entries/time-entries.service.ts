@@ -384,20 +384,19 @@ export class TimeEntriesService {
 
     const start = new Date(startDate);
     const end = new Date(endDate);
-    end.setHours(23, 59, 59, 999); // Inclure la journée entière
+    end.setHours(23, 59, 59, 999);
 
-    // Filtrer les entrées de temps en jours ouvrés et non ouvrés
     const entriesOnWorkingDays = timeEntries.filter((entry) => {
-      const dayOfWeek = new Date(entry.startTime).getDay(); // 0=Dimanche, 1=Lundi, ..., 6=Samedi
-      return user.workingDays.map(Number).includes(dayOfWeek); // Jours ouvrés
+      const dayOfWeek = new Date(entry.startTime).getDay();
+      return user.workingDays.map(Number).includes(dayOfWeek);
     });
 
     const entriesOnNonWorkingDays = timeEntries.filter((entry) => {
       const dayOfWeek = new Date(entry.startTime).getDay();
-      return !user.workingDays.map(Number).includes(dayOfWeek); // Non ouvrés
+      return !user.workingDays.map(Number).includes(dayOfWeek);
     });
 
-    // Calcul des heures travaillées sur les jours ouvrés
+    // Calcul des heures travaillées
     const workedHoursOnWorkingDays = this.calculateTotalHours(
       entriesOnWorkingDays.map((entry) => ({
         startTime: entry.startTime,
@@ -405,7 +404,6 @@ export class TimeEntriesService {
       })),
     );
 
-    // Calcul des heures travaillées sur les jours non ouvrés
     const workedHoursOnNonWorkingDays = this.calculateTotalHours(
       entriesOnNonWorkingDays.map((entry) => ({
         startTime: entry.startTime,
@@ -421,12 +419,14 @@ export class TimeEntriesService {
       })),
     );
 
-    // Calcul des jours ouvrés personnalisés
-    const workingDaysCount = this.countCustomWorkingDays(
-      start,
-      end,
-      user.workingDays.map(Number),
-    );
+    // Calcul des jours ouvrés sans congés
+    const workingDaysCount =
+      await this.countCustomWorkingDaysExcludingVacations(
+        start,
+        end,
+        user.workingDays.map(Number),
+        userId,
+      );
 
     const hoursPerDay = user.weeklyHoursGoal / user.workingDays.length;
     const contractualHours = workingDaysCount * hoursPerDay;
@@ -447,6 +447,61 @@ export class TimeEntriesService {
       contractualHours,
       extraHours,
     };
+  }
+
+  private async countCustomWorkingDaysExcludingVacations(
+    startDate: Date,
+    endDate: Date,
+    workingDays: number[],
+    userId: string,
+  ): Promise<number> {
+    let count = 0;
+    const current = new Date(startDate);
+
+    // Récupérer les congés de l'utilisateur
+    const vacations = await this.getVacationsBetweenDates(
+      userId,
+      startDate,
+      endDate,
+    );
+
+    while (current <= endDate) {
+      const dayOfWeek = current.getDay();
+
+      // Vérifier si le jour est un jour ouvré
+      if (workingDays.includes(dayOfWeek)) {
+        // Vérifier si le jour ne chevauche aucun congé
+        const isVacation = vacations.some(
+          (vacation) =>
+            current >= new Date(vacation.startDate) &&
+            current <= new Date(vacation.endDate),
+        );
+
+        if (!isVacation) {
+          count++;
+        }
+      }
+
+      current.setDate(current.getDate() + 1);
+    }
+
+    return count;
+  }
+
+  private async getVacationsBetweenDates(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+  ): Promise<Vacation[]> {
+    return this.vacationsRepository.find({
+      where: [
+        {
+          user: { id: userId },
+          startDate: LessThanOrEqual(endDate),
+          endDate: MoreThanOrEqual(startDate),
+        },
+      ],
+    });
   }
 
   private countCustomWorkingDays(

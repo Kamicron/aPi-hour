@@ -12,6 +12,7 @@
     <button class="btn btn--large">Grand</button>
     <button class="btn btn--small">Petit</button>
     <button class="btn btn--rounded">Arrondi</button>
+      <pi-loader />
 
   </div>
 </template>

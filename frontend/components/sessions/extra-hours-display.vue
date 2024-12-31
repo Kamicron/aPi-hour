@@ -15,7 +15,7 @@
     </div>
 
     <div class="extra-hours-display__content">
-      <div v-if="loading" class="extra-hours-display__loading">Chargement...</div>
+      <div v-if="loading" class="extra-hours-display__loading"><pi-loader /></div>
       <div v-if="!loading && !error" class="extra-hours-display__results">
         <p class="extra-hours-display__result">
           <strong>Heures Travaillées :</strong> {{ workedHours.toFixed(2) }} h
@@ -27,7 +27,15 @@
           <strong>Heures Contractuelles :</strong> {{ contractualHours.toFixed(2) }} h
         </p>
         <p class="extra-hours-display__result">
-          <strong>Heures Supplémentaires :</strong> <span :class="{'extra-hours-display__positive': extraHours >= 0, 'extra-hours-display__negative': extraHours < 0}">{{ extraHours.toFixed(2) }} h</span>
+          <strong>Heures Supplémentaires :</strong>
+          <span
+            :class="{
+              'extra-hours-display__positive': extraHours >= 0,
+              'extra-hours-display__negative': extraHours < 0,
+            }"
+          >
+            {{ extraHours.toFixed(2) }} h
+          </span>
         </p>
       </div>
       <div v-if="error" class="extra-hours-display__error">{{ error }}</div>
@@ -38,12 +46,12 @@
 <script setup lang="ts">
 // ----- Import -----
 import { ref } from "vue";
-import { useCookie, useNuxtApp } from '#app';
+import { useCookie, useNuxtApp } from "#app";
 // ------------------
 
 // ------ Const ------
 const { $api } = useNuxtApp();
-const token = useCookie('token');
+const token = useCookie("token");
 // ------------------
 
 // ---- Reactive ----
@@ -154,9 +162,17 @@ const fetchExtraHours = async () => {
 
   &__content {
     text-align: center;
+    min-height: 150px; /* Fixe une hauteur minimale */
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 
   &__loading {
+    display: flex;
+    max-height: 150px; /* Fixe une hauteur minimale */
+    justify-content: center;
+    align-items: center;
     font-size: $font-size-base;
     font-weight: bold;
     color: $color-primary;

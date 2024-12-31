@@ -7,7 +7,7 @@
       </p>
     </div>
     <div class="footer__copyright">
-      © 2024 Mon Site. Tous droits réservés.
+      © 2024 aPi-Hour. Tous droits réservés.
     </div>
   </footer>
 </template>

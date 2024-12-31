@@ -4,7 +4,9 @@
     "date": "2024-12-30",
     "changes": {
       "feat": [
-        "Composant permettant de poser des jours de congés et de jour férié."
+        "Composant permettant de poser des jours de congés et de jour férié.",
+        "Ajout d'un loader personnalisé.",
+        "Ajout d'un logo"
       ],
       "fix": [
         "Réactivité lors d'ajout de session et de jour de congés",
