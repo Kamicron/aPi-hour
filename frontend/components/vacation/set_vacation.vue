@@ -21,6 +21,7 @@
           Jour férié -->
         </label>
       </div>
+      
 
       <div v-if="!isHoliday" class="vacation__field">
         <label for="reason" class="vacation__label">Raison</label>

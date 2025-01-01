@@ -55,6 +55,7 @@
       <div class="work-sessions__content--column">
         <div>
           <extra-hours-display />
+          <extra-hours-rate />
         </div>
 
         <div>

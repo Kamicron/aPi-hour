@@ -34,12 +34,13 @@ import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie, useRoute } from '#app';
 import { useGlobalEvents } from '~/composable/useGlobalEvent';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
+import { emit } from 'process';
 
 const currentYear = ref(new Date().getFullYear());
 const currentMonth = ref(new Date().getMonth());
 const selectedDate = ref(null);
 const daysOfWeek = ['Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam', 'Dim'];
-const emits = defineEmits(['pick-date']);
+const emits = defineEmits(['pick-date', 'currentMonth']);
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
@@ -170,6 +171,10 @@ const changeMonth = (direction) => {
     currentMonth.value = 0;
     currentYear.value++;
   }
+  const formattedMonth = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, "0")}`  ;
+  console.log("currentMonth.value", formattedMonth);
+
+  emits("currentMonth", formattedMonth); // Emit dans le format 'YYYY-MM'
 };
 
 const isToday = (date: Date) => {

@@ -17,7 +17,7 @@
     <pi-checkbox id="checkbox1" v-model="isChecked">Accepter les termes</pi-checkbox>
 
     
-  </div>
+  </div>ac
 </template>
 
 <script setup lang='ts'>

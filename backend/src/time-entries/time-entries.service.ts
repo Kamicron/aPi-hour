@@ -449,6 +449,154 @@ export class TimeEntriesService {
     };
   }
 
+  private getMonthRange(year: number, month: number) {
+    console.log('*******************');
+    console.log('month', month);
+
+    // Vérifier si le mois est déjà 0-indexé
+    if (month < 0 || month > 11) {
+      throw new Error(
+        'Invalid month value. Month should be 0-11 (January = 0).',
+      );
+    }
+
+    // Début du mois (toujours 0-indexé dans `Date`)
+    const startOfMonth = new Date(year, month, 1);
+    const startDay = startOfMonth.getDay() || 7; // Dimanche = 0 devient 7
+    const startDate = new Date(startOfMonth);
+    startDate.setDate(startOfMonth.getDate() - (startDay - 1)); // Reculer au lundi précédent
+
+    // Fin du mois (toujours 0-indexé dans `Date`)
+    const endOfMonth = new Date(year, month + 1, 0); // Dernier jour du mois courant
+    const endDay = endOfMonth.getDay();
+    const endDate = new Date(endOfMonth);
+    endDate.setDate(endOfMonth.getDate() + (7 - endDay)); // Avancer au dimanche suivant
+
+    console.log('Calculated Month Range:', { startDate, endDate });
+
+    return { startDate, endDate };
+  }
+
+  async calculateMonthlyHoursWithRates(
+    userId: string,
+    year: number,
+    month: number,
+  ) {
+    const { startDate, endDate } = this.getMonthRange(year, month);
+    console.log('Entrées récupérées pour la période :', { startDate, endDate });
+
+    // const baseResult = await this.calculateHours(
+    //   userId,
+    //   startDate.toISOString(),
+    //   endDate.toISOString(),
+    // );
+
+    const timeEntries = await this.getTimeEntriesBetweenDates(
+      userId,
+      startDate.toISOString(),
+      endDate.toISOString(),
+    );
+
+    // Regrouper par semaines
+    const weeks = this.groupEntriesByWeek(timeEntries);
+
+    // Calculer les heures supplémentaires et majorations pour chaque semaine
+    const weeklyHours = weeks.map(({ weekStart, weekEnd, entries }) => {
+      const workedHours = this.calculateTotalHours(
+        entries.map((entry) => ({
+          startTime: entry.startTime,
+          endTime: entry.endTime || new Date(),
+        })),
+      );
+
+      const extraHours = Math.max(0, workedHours - 35);
+
+      let extra25Hours = 0;
+      let extra50Hours = 0;
+
+      if (extraHours > 0) {
+        // Les 8 premières heures au-delà de 35h sont majorées à 25%
+        if (extraHours <= 8) {
+          extra25Hours = extraHours;
+        } else {
+          extra25Hours = 8;
+          extra50Hours = extraHours - 8; // Le reste est majoré à 50%
+        }
+      }
+
+      return {
+        weekStart,
+        weekEnd,
+        workedHours,
+        extra25Hours,
+        extra50Hours,
+      };
+    });
+
+    return {
+      totalExtra25Hours: weeklyHours.reduce(
+        (sum, week) => sum + week.extra25Hours,
+        0,
+      ),
+      totalExtra50Hours: weeklyHours.reduce(
+        (sum, week) => sum + week.extra50Hours,
+        0,
+      ),
+      weeklyDetails: weeklyHours,
+    };
+  }
+
+  private groupEntriesByWeek(entries: TimeEntry[]) {
+    const grouped = new Map<string, TimeEntry[]>();
+
+    entries.forEach((entry) => {
+      const weekKey = this.getWeekKey(entry.startTime);
+      if (!grouped.has(weekKey)) {
+        grouped.set(weekKey, []);
+      }
+      grouped.get(weekKey).push(entry);
+    });
+
+    return Array.from(grouped.entries()).map(([weekKey, entries]) => {
+      const [year, week] = weekKey.split('-');
+      const weekStart = this.getStartOfWeek(
+        parseInt(year, 10),
+        parseInt(week, 10),
+      );
+      const weekEnd = new Date(weekStart);
+      weekEnd.setDate(weekEnd.getDate() + 6);
+      return { weekStart, weekEnd, entries };
+    });
+  }
+
+  private getWeekKey(date: Date): string {
+    const year = date.getFullYear();
+    const week = Math.ceil(
+      ((date.getTime() - this.getStartOfYear(date).getTime()) /
+        (1000 * 60 * 60 * 24) +
+        1) /
+        7,
+    );
+    return `${year}-${week}`;
+  }
+
+  private getStartOfYear(date: Date): Date {
+    const start = new Date(date.getFullYear(), 0, 1);
+    start.setDate(
+      start.getDate() - (start.getDay() === 0 ? 6 : start.getDay() - 1),
+    );
+    return start;
+  }
+
+  private getStartOfWeek(year: number, week: number): Date {
+    const start = new Date(year, 0, 1);
+    start.setDate(start.getDate() + (week - 1) * 7);
+    start.setDate(
+      start.getDate() - (start.getDay() === 0 ? 6 : start.getDay() - 1),
+    );
+    return start;
+  }
+
   private async countCustomWorkingDaysExcludingVacations(
     startDate: Date,
     endDate: Date,

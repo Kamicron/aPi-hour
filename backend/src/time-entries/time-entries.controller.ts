@@ -9,6 +9,8 @@ import {
   UseGuards,
   Req,
   Query,
+  HttpException,
+  HttpStatus,
 } from '@nestjs/common';
 import { TimeEntriesService } from './time-entries.service';
 import { AuthGuard } from '../auth/auth.guard';
@@ -95,6 +97,32 @@ export class TimeEntriesController {
     const userId = req.user.userId;
     const userRole = req.user.role;
     return this.timeEntriesService.softDelete(id, userId, userRole);
+  }
+
+  @Post('calculate-with-rates')
+  async calculateHoursWithRates(
+    @Body() body: { month: string },
+    @Req() req: any,
+  ) {
+    try {
+      const userId = req.user.userId;
+      console.log('Mois reçu :', body.month);
+
+      // Extraire année et mois du format "YYYY-MM"
+      const [year, month] = body.month.split('-').map(Number);
+
+      return await this.timeEntriesService.calculateMonthlyHoursWithRates(
+        userId,
+        year,
+        month - 1, // Convertir en 0-indexé (janvier = 0)
+      );
+    } catch (error) {
+      console.error('Erreur dans calculate-with-rates :', error);
+      throw new HttpException(
+        { message: 'Erreur lors du calcul des heures', details: error.message },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 
   @Post('calculate-hours')
