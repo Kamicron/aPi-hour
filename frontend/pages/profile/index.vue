@@ -1,6 +1,6 @@
 <template>
   <div class="profile">
-    <h1 class="profile__title">Mon Profil</h1>
+    <h1>Mon Profil</h1>
     <form class="profile__form" @submit.prevent="updateSettings">
       <div class="profile__form-group">
         <label for="weeklyHoursGoal" class="profile__label">Heures mensuelles prévues</label>
@@ -122,10 +122,7 @@ async function saveWorkingDays() {
   margin: $spacing-large;
 
   &__title {
-    text-align: center;
     margin-bottom: $spacing-large;
-    color: $color-text-primary;
-    font-size: $font-size-large-xl;
   }
 
   &__form {

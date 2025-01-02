@@ -4,7 +4,7 @@
       <i class="fa-solid fa-arrow-left"></i> Retour
     </button>
 
-    <h1 class="session-details__title">Détails de la session</h1>
+    <h1>Détails de la session</h1>
     <p class="session-details__current-time">{{ currentTime }}</p>
 
     <div v-if="session" class="session-details__info">
@@ -311,11 +311,6 @@ onMounted(() => {
   background-color: $color-background;
   padding: $spacing-large;
   border-radius: $border-radius;
-
-  &__title {
-    font-size: $font-size-large;
-    margin-bottom: $spacing-medium;
-  }
 
   &__current-time {
     font-size: $font-size-small;

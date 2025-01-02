@@ -1,5 +1,6 @@
 <template>
   <div class="calendar">
+    <h1>Calendrier</h1>
     <div class="calendar__header">
       <button class="btn" @click="changeMonth(-1)">&lt;</button>
       <h2>{{ monthName }} {{ currentYear }}</h2>
@@ -171,7 +172,7 @@ const changeMonth = (direction) => {
     currentMonth.value = 0;
     currentYear.value++;
   }
-  const formattedMonth = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, "0")}`  ;
+  const formattedMonth = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, "0")}`;
   console.log("currentMonth.value", formattedMonth);
 
   emits("currentMonth", formattedMonth); // Emit dans le format 'YYYY-MM'
@@ -213,6 +214,13 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
 
 <style lang="scss">
 .calendar {
+  background-color: $color-surface;
+  color: $color-text-primary;
+  padding: $spacing-large;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow-light;
+  min-width: 450px;
+
   &__header {
     display: flex;
     justify-content: space-between;

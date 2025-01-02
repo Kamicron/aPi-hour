@@ -1,8 +1,9 @@
 <template>
   <div class="extra-hours-display">
     <div class="extra-hours-display__header">
-      <h1 class="extra-hours-display__title">Calcul des Heures Supplémentaires</h1>
+      <h1>Calcul des heures supplémentaires</h1>
     </div>
+
     <div class="extra-hours-display__inputs">
       <label class="extra-hours-display__label">
         Date de début :
@@ -15,20 +16,26 @@
     </div>
 
     <div class="extra-hours-display__content">
-      <div v-if="loading" class="extra-hours-display__loading"><pi-loader /></div>
-      <div v-if="!loading && !error" class="extra-hours-display__results">
-        <p class="extra-hours-display__result">
-          <strong>Heures Travaillées :</strong> {{ workedHours.toFixed(2) }} h
-        </p>
-        <p class="extra-hours-display__result">
-          <strong>Heures de Pause :</strong> {{ pauseHours.toFixed(2) }} h
-        </p>
-        <p class="extra-hours-display__result">
-          <strong>Heures Contractuelles :</strong> {{ contractualHours.toFixed(2) }} h
-        </p>
-        <p class="extra-hours-display__result">
-          <strong>Heures Supplémentaires :</strong>
+      <div v-if="loading" class="extra-hours-display__loading">
+        <pi-loader />
+      </div>
+      <div v-if="!loading && !error" class="extra-hours-display__table">
+        <div class="extra-hours-display__row">
+          <span class="extra-hours-display__cell">Heures Travaillées</span>
+          <span class="extra-hours-display__cell">{{ workedHours.toFixed(2) }} h</span>
+        </div>
+        <div class="extra-hours-display__row">
+          <span class="extra-hours-display__cell">Heures de Pause</span>
+          <span class="extra-hours-display__cell">{{ pauseHours.toFixed(2) }} h</span>
+        </div>
+        <div class="extra-hours-display__row">
+          <span class="extra-hours-display__cell">Heures Contractuelles</span>
+          <span class="extra-hours-display__cell">{{ contractualHours.toFixed(2) }} h</span>
+        </div>
+        <div class="extra-hours-display__row">
+          <span class="extra-hours-display__cell">Heures Supplémentaires</span>
           <span
+            class="extra-hours-display__cell"
             :class="{
               'extra-hours-display__positive': extraHours >= 0,
               'extra-hours-display__negative': extraHours < 0,
@@ -36,7 +43,7 @@
           >
             {{ extraHours.toFixed(2) }} h
           </span>
-        </p>
+        </div>
       </div>
       <div v-if="error" class="extra-hours-display__error">{{ error }}</div>
     </div>
@@ -49,13 +56,13 @@ import { ref } from "vue";
 import { useCookie, useNuxtApp } from "#app";
 // ------------------
 
-// ------ Const ------
+// ------ Const ----- 
 const { $api } = useNuxtApp();
 const token = useCookie("token");
 // ------------------
 
 // ---- Reactive ----
-const startDate = ref<string>("");
+const startDate = ref<string>(""); 
 const endDate = ref<string>("");
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -65,16 +72,14 @@ const contractualHours = ref<number>(0);
 const extraHours = ref<number>(0);
 // ------------------
 
-// --- Async Func ---
-const fetchExtraHours = async () => {
+// --- Async Func --- 
+const fetchExtraHours = async () => { 
   if (!startDate.value || !endDate.value) {
     error.value = "Veuillez sélectionner les deux dates.";
-    return;
+    return; 
   }
-
-  loading.value = true;
+  loading.value = true; 
   error.value = null;
-
   try {
     const response = await $api.post(
       "/time-entries/calculate-hours",
@@ -88,9 +93,8 @@ const fetchExtraHours = async () => {
         },
       }
     );
-
-    const data = response.data;
-    workedHours.value = data.workedHours;
+    const data = response.data; 
+    workedHours.value = data.workedHours; 
     pauseHours.value = data.pauseHours;
     contractualHours.value = data.contractualHours;
     extraHours.value = data.extraHours;
@@ -100,9 +104,9 @@ const fetchExtraHours = async () => {
     } else {
       error.value = "Une erreur est survenue lors de la récupération des données.";
     }
-    console.error(err);
+    console.error(err); 
   } finally {
-    loading.value = false;
+    loading.value = false; 
   }
 };
 </script>
@@ -114,84 +118,59 @@ const fetchExtraHours = async () => {
   padding: $spacing-large;
   border-radius: $border-radius;
   box-shadow: $box-shadow-light;
-  max-width: 700px;
-  margin: 0 auto;
+  min-width: 420px;
 
   &__header {
     text-align: center;
     margin-bottom: $spacing-large;
-  }
 
-  &__title {
-    font-size: $font-size-large-xl;
-    font-weight: bold;
-    color: $color-primary;
-    margin: 0;
   }
 
   &__inputs {
     display: flex;
-    justify-content: space-between;
     gap: $spacing-medium;
-    margin-bottom: $spacing-large;
+    margin-bottom: $spacing-medium;
 
-    @media (max-width: $breakpoint-md) {
-      flex-direction: column;
-    }
-  }
-
-  &__label {
-    font-size: $font-size-small;
-    color: $color-text-secondary;
-  }
-
-  &__input {
-    width: 100%;
-    padding: $spacing-small;
-    font-size: $font-size-base;
-    color: $color-text-primary;
-    background-color: $color-surface;
-    border: 1px solid $color-primary;
-    border-radius: $border-radius;
-
-    &:focus {
-      outline: none;
-      border-color: $color-secondary;
+    label {
+      flex: 1;
     }
   }
 
   &__content {
     text-align: center;
-    min-height: 150px; /* Fixe une hauteur minimale */
-    display: flex;
-    justify-content: center;
-    align-items: center;
   }
 
   &__loading {
-    display: flex;
-    max-height: 150px; /* Fixe une hauteur minimale */
-    justify-content: center;
-    align-items: center;
     font-size: $font-size-base;
     font-weight: bold;
     color: $color-primary;
   }
 
-  &__results {
-    margin-top: $spacing-medium;
+  &__table {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: $spacing-small;
+  }
 
-    &__result {
-      font-size: $font-size-base;
-      margin: $spacing-small 0;
-      color: $color-text-primary;
+  &__row {
+    display: contents; /* Permet à chaque cellule d'occuper son espace */
+  }
+
+  &__cell {
+    padding: $spacing-small $spacing-medium;
+    text-align: left;
+    border-bottom: 1px solid $color-text-secondary;
+
+    &:nth-child(2) {
+      text-align: right;
+      font-weight: bold;
     }
 
-    .extra-hours-display__positive {
+    &.extra-hours-display__positive {
       color: $color-success;
     }
 
-    .extra-hours-display__negative {
+    &.extra-hours-display__negative {
       color: $color-danger;
     }
   }
@@ -200,6 +179,7 @@ const fetchExtraHours = async () => {
     color: $color-danger;
     font-weight: bold;
     font-size: $font-size-base;
+    margin-top: $spacing-medium;
   }
 }
 </style>

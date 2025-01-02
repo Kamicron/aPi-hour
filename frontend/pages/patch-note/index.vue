@@ -79,7 +79,6 @@ header {
 }
 
 header h1 {
-  font-size: $font-size-large-xl;
   color: $color-primary-light;
 }
 

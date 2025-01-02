@@ -1,5 +1,28 @@
 [
   {
+    "version": "0.8.1",
+    "date": "2024-12-02",
+    "changes": {
+      "fix": [
+        "Pied de page avec versionning automatique"
+      ]
+    }
+  },
+  {
+    "version": "0.8.0",
+    "date": "2024-12-02",
+    "changes": {
+      "feat": [
+        "Composant permettant compter le nombre d'heure suppplémentaire a 25% et 50%.",
+        "Ajout d'une favicon"
+      ],
+      "fix": [
+        "Responsive de la page index",
+        "Style des titres"
+      ]
+    }
+  },
+  {
     "version": "0.7.0",
     "date": "2024-12-30",
     "changes": {

@@ -12,7 +12,7 @@
   </footer>
 </template>
 
-<script setup lang='ts'>
+<script setup lang="ts">
 // ----- Import -----
 
 // ------------------
@@ -26,10 +26,13 @@
 // ------------------
 
 // ------ Const -----
-const version = 0.5
+
 // ------------------
 
 // ---- Reactive ----
+import { ref, onMounted } from 'vue';
+
+const version = ref('');
 
 // ------------------
 
@@ -38,6 +41,23 @@ const version = 0.5
 // ------------------
 
 // ------ Hooks -----
+onMounted(async () => {
+  try {
+    // Charger le fichier JSON depuis le dossier public
+    const response = await fetch('/patch-notes.json');
+    if (!response.ok) {
+      throw new Error('Impossible de charger le fichier patch-notes.json');
+    }
+
+    const patchNotes = await response.json();
+
+    // La version la plus récente est la première dans le tableau
+    version.value = patchNotes[0]?.version || 'Inconnue';
+  } catch (error) {
+    console.error('Erreur lors du chargement de la version:', error);
+    version.value = 'Erreur';
+  }
+});
 
 // ------------------
 
@@ -49,14 +69,12 @@ const version = 0.5
 
 // ------------------
 
-
 // ------ Watch -----
 
 // ------------------
-
 </script>
 
-<style lang='scss' scoped>
+<style lang="scss" scoped>
 .footer {
   background-color: $color-surface;
   color: $color-text-primary;
@@ -76,19 +94,17 @@ const version = 0.5
     gap: $spacing-small;
     justify-content: center;
     align-items: center;
-    transition: color 0.3s ease-in-out; // Corrigé : durée plus réaliste pour une transition de couleur
 
     a {
       color: $color-primary-light;
-      text-decoration: none; // Ajout : pour éviter les soulignements non désirés
-      transition: color 0.3s ease-in-out; // Ajout : transition pour l'effet de hover
+      text-decoration: none;
+      transition: color 0.3s ease-in-out;
 
       &:hover {
         color: $color-secondary;
       }
     }
   }
-
 
   &__copyright {
     margin-top: $spacing-large;
