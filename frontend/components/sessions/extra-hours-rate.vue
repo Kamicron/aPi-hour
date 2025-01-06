@@ -95,13 +95,6 @@ watch(
   border-radius: $border-radius;
   box-shadow: $box-shadow-light;
 
-  &__title {
-    font-family: $font-family-base;
-    font-size: $font-size-large-xl;
-    color: $color-text-primary;
-    margin-bottom: $spacing-large;
-  }
-
   &__totals {
     background-color: $color-background;
     padding: $spacing-medium;

@@ -57,9 +57,6 @@
   background-color: $color-background;
   padding: $spacing-medium;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-  position: sticky;
-  top: 0;
-  z-index: 1000;
 
   &__list {
     display: flex;

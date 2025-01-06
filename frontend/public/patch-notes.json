@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.8.2",
+    "date": "2024-12-04",
+    "changes": {
+      "fix": [
+        "style"
+      ]
+    }
+  },
+  {
     "version": "0.8.1",
     "date": "2024-12-02",
     "changes": {

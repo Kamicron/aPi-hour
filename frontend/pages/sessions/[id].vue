@@ -4,7 +4,7 @@
       <i class="fa-solid fa-arrow-left"></i> Retour
     </button>
 
-    <h1>Détails de la session</h1>
+    <h2>Détails de la session</h2>
     <p class="session-details__current-time">{{ currentTime }}</p>
 
     <div v-if="session" class="session-details__info">

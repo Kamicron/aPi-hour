@@ -1,7 +1,7 @@
 <template>
   <div class="patch-notes">
     <header>
-      <h1>Historique des Versions</h1>
+      <h2>Historique des Versions</h2>
     </header>
     <main>
       <section v-for="version in patchNotes" :key="version.version" class="version-section">

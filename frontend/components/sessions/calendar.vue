@@ -1,6 +1,6 @@
 <template>
   <div class="calendar">
-    <h1>Calendrier</h1>
+    <h2>Calendrier</h2>
     <div class="calendar__header">
       <button class="btn" @click="changeMonth(-1)">&lt;</button>
       <h2>{{ monthName }} {{ currentYear }}</h2>

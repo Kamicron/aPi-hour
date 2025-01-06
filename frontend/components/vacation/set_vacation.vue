@@ -1,7 +1,7 @@
 <template>
   <div class="vacation">
     <form @submit.prevent="submitVacation" class="vacation__form">
-      <h1 class="vacation__title">Vacances et jours fériés</h1>
+      <h2 class="vacation__title">Vacances et jours fériés</h2>
 
       <div class="vacation__fields">
         <div class="vacation__field">

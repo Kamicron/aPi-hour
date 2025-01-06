@@ -18,7 +18,7 @@ Assurez-vous que le composable `useDateFormatter.js` est disponible dans le doss
 Dans un composant Vue, importez et utilisez le composable :
 
 ```javascript
-import useDateFormatter from '../../composables/useDate';
+import useDateFormatter from '../../composable/useDate';
 ```
 
 ---
@@ -60,11 +60,35 @@ L'objet `customOptions` permet de passer des options détaillées directement à
 | `dayPeriod`          | `String`   | Format des périodes du jour : `"narrow"`, `"short"`, `"long"`.           |
 | `fractionalSecondDigits` | `Number` | Nombre de chiffres pour les fractions de secondes (1-3).                   |
 
+#### Exemples sans `customOptions`
+
+**Exemple 1 : Date avec le format long**
+```javascript
+import useDateFormatter from '../../composable/useDate';
+const formattedDate1 = useDateFormatter().formatDate(new Date(), { format: 'long' });
+// Résultat : "dimanche 22 décembre 2024"
+```
+
+**Exemple 2 : Date avec heure incluse**
+```javascript
+import useDateFormatter from '../../composable/useDate';
+const formattedDate2 = useDateFormatter().formatDate(new Date(), { format: 'long', includeTime: true });
+// Résultat : "dimanche 22 décembre 2024 à 15:30"
+```
+
+**Exemple 3 : Format court sans heure**
+```javascript
+import useDateFormatter from '../../composable/useDate';
+const formattedDate3 = useDateFormatter().formatDate(new Date(), { format: 'short' });
+// Résultat : "22 déc. 2024"
+```
+
 #### Exemples avec `customOptions`
 
 **Exemple 1 : Date avec jour et mois longs**
 ```javascript
-const customDate1 = formatDate('2024-12-22', {
+import useDateFormatter from '../../composable/useDate';
+const formattedDate1 = useDateFormatter().formatDate('2024-12-22', {
   customOptions: {
     weekday: 'long',
     year: 'numeric',
@@ -77,7 +101,8 @@ const customDate1 = formatDate('2024-12-22', {
 
 **Exemple 2 : Date avec jour court et mois abrégé**
 ```javascript
-const customDate2 = formatDate('2024-12-22', {
+import useDateFormatter from '../../composable/useDate';
+const formattedDate2 = useDateFormatter().formatDate('2024-12-22', {
   customOptions: {
     weekday: 'short',
     year: 'numeric',
@@ -90,7 +115,8 @@ const customDate2 = formatDate('2024-12-22', {
 
 **Exemple 3 : Heure avec fuseau horaire**
 ```javascript
-const customDate3 = formatDate('2024-12-22T15:30:45', {
+import useDateFormatter from '../../composable/useDate';
+const formattedDate3 = useDateFormatter().formatDate('2024-12-22T15:30:45', {
   customOptions: {
     hour: '2-digit',
     minute: '2-digit',
@@ -104,7 +130,8 @@ const customDate3 = formatDate('2024-12-22T15:30:45', {
 
 **Exemple 4 : Format 12 heures avec AM/PM**
 ```javascript
-const customDate4 = formatDate('2024-12-22T15:30:45', {
+import useDateFormatter from '../../composable/useDate';
+const formattedDate4 = useDateFormatter().formatDate('2024-12-22T15:30:45', {
   customOptions: {
     hour: '2-digit',
     minute: '2-digit',
@@ -115,9 +142,11 @@ const customDate4 = formatDate('2024-12-22T15:30:45', {
 // Résultat : "03:30 PM"
 ```
 
+
 **Exemple 5 : Format avec fractions de secondes et fuseau horaire long**
 ```javascript
-const customDate5 = formatDate('2024-12-22T15:30:45.123', {
+import useDateFormatter from '../../composable/useDate';
+const formattedDate5 = useDateFormatter().formatDate('2024-12-22T15:30:45.123', {
   customOptions: {
     hour: '2-digit',
     minute: '2-digit',
@@ -150,7 +179,8 @@ Calcule et formate la durée entre deux dates en fonction des options spécifié
 
 **Exemple 1 : Durée avec toutes les unités**
 ```javascript
-const duration1 = calculateDuration('2024-12-20T08:30:00', '2024-12-22T18:45:30', {
+import useDateFormatter from '../../composable/useDate';
+const duration1 = useDateFormatter().calculateDuration('2024-12-20T08:30:00', '2024-12-22T18:45:30', {
   customOptions: {
     day: '2-digit',
     hour: '2-digit',
@@ -163,7 +193,8 @@ const duration1 = calculateDuration('2024-12-20T08:30:00', '2024-12-22T18:45:30'
 
 **Exemple 2 : Durée limitée à 24 heures**
 ```javascript
-const duration2 = calculateDuration('2024-12-20T08:30:00', '2024-12-22T18:45:30', {
+import useDateFormatter from '../../composable/useDate';
+const duration2 = useDateFormatter().calculateDuration('2024-12-20T08:30:00', '2024-12-22T18:45:30', {
   customOptions: {
     hour: '2-digit',
     minute: '2-digit',
@@ -185,18 +216,19 @@ Retourne une date relative (ex : "il y a 2 jours", "dans 3 jours").
 #### Exemple d'utilisation
 
 ```javascript
+import useDateFormatter from '../../composable/useDate';
 const { formatRelativeDate } = useDateFormatter();
 
 // Exemple 1 : Date dans le passé
-const relativePast = formatRelativeDate('2024-12-20');
+const relativePast = useDateFormatter().formatRelativeDate('2024-12-20');
 // Résultat : "il y a 2 jours"
 
 // Exemple 2 : Date dans le futur
-const relativeFuture = formatRelativeDate('2024-12-25');
+const relativeFuture = useDateFormatter().formatRelativeDate('2024-12-25');
 // Résultat : "dans 3 jours"
 
 // Exemple 3 : Aujourd'hui ou demain
-const today = formatRelativeDate(new Date());
+const today = useDateFormatter().formatRelativeDate(new Date());
 // Résultat : "Aujourd’hui"
 ```
 

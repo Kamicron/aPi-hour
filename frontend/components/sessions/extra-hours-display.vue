@@ -1,7 +1,7 @@
 <template>
   <div class="extra-hours-display">
     <div class="extra-hours-display__header">
-      <h1>Calcul des heures supplémentaires</h1>
+      <h2>Calcul des heures supplémentaires</h2>
     </div>
 
     <div class="extra-hours-display__inputs">

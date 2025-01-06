@@ -1,7 +1,7 @@
 <template>
   <div class="work-sessions__content-column">
     <section v-if="summary" class="work-sessions__summary">
-      <h1 class="work-sessions__summary--title">Résumé de la journée</h1>
+      <h2 class="work-sessions__summary--title">Résumé de la journée</h2>
 
       <div class="work-sessions__summary-item">
         <span class="work-sessions__label">Total de travail :</span>

@@ -1,6 +1,6 @@
 <template>
   <div class="profile">
-    <h1>Mon Profil</h1>
+    <h2>Mon Profil</h2>
     <form class="profile__form" @submit.prevent="updateSettings">
       <div class="profile__form-group">
         <label for="weeklyHoursGoal" class="profile__label">Heures mensuelles prévues</label>
