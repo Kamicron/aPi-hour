@@ -1,29 +1,30 @@
 [
   {
-    "version": "0.8.3",
+    "version": "0.8.4",
     "date": "2025-01-07",
     "changes": {
-      "fix": [
-        "save weekhourly"
-      ]
+      "fix": ["Suppression des données mocké pour le nombre d'heure travaillé par semaine"]
+    }
+  },
+  {
+    "version": "0.8.3",
+    "date": "2025-01-06",
+    "changes": {
+      "fix": ["Sauvegarde des jours travaillé et du nombre d'heure par semaine"]
     }
   },
   {
     "version": "0.8.2",
     "date": "2025-01-04",
     "changes": {
-      "fix": [
-        "style"
-      ]
+      "fix": ["style"]
     }
   },
   {
     "version": "0.8.1",
     "date": "2024-12-02",
     "changes": {
-      "fix": [
-        "Pied de page avec versionning automatique"
-      ]
+      "fix": ["Pied de page avec versionning automatique"]
     }
   },
   {
@@ -34,10 +35,7 @@
         "Composant permettant compter le nombre d'heure suppplémentaire a 25% et 50%.",
         "Ajout d'une favicon"
       ],
-      "fix": [
-        "Responsive de la page index",
-        "Style des titres"
-      ]
+      "fix": ["Responsive de la page index", "Style des titres"]
     }
   },
   {
@@ -64,7 +62,6 @@
       "feat": [
         "Ajout d'un loader.",
         "Ajout des jours ouvré personnalisé dans le profil."
-
       ],
       "fix": [
         "Réactivité lors de la connexion / deconnexion.",
@@ -128,9 +125,7 @@
         "Ajout des fonctions pour démarrer, mettre en pause, reprendre et arrêter une session.",
         "Ajout de la gestion des utilisateurs pour les administrateurs (création, lecture, mise à jour, suppression et restauration)."
       ],
-      "fix": [
-        "Correction du fonctionnement du garde d'authentification."
-      ]
+      "fix": ["Correction du fonctionnement du garde d'authentification."]
     }
   },
   {
@@ -141,18 +136,14 @@
         "Sécurisation des liens (fonctionnalité encore non terminée).",
         "Ajout d'une authentification pour récupérer tous les utilisateurs en tant qu'administrateur."
       ],
-      "init": [
-        "Initialisation du backend et du frontend."
-      ]
+      "init": ["Initialisation du backend et du frontend."]
     }
   },
   {
     "version": "0.1.0",
     "date": "2024-12-01",
     "changes": {
-      "init": [
-        "Première initialisation du projet."
-      ]
+      "init": ["Première initialisation du projet."]
     }
   }
 ]

@@ -1,13 +1,12 @@
 <template>
   <div class="work-sessions">
     <div v-if="profileStore.profile" class="work-sessions__layout">
-      <calendar class="work-sessions__layout--calendar"
-          @pick-date="handleDatePicked"
-          @currentMonth="updateCurrentMonth" />
-        <resume-session class="work-sessions__layout--resume" :selected-date="selectedDate" />
-        <extra-hours-display class="work-sessions__layout--display" />
-        <set_vacation class="work-sessions__layout--vacation" />
-        <extra-hours-rate :currentMonth="currentMonth" class="work-sessions__layout--rate" />
+      <calendar class="work-sessions__layout--calendar" @pick-date="handleDatePicked"
+        @currentMonth="updateCurrentMonth" />
+      <resume-session class="work-sessions__layout--resume" :selected-date="selectedDate" />
+      <extra-hours-display class="work-sessions__layout--display" />
+      <set_vacation class="work-sessions__layout--vacation" />
+      <extra-hours-rate :currentMonth="currentMonth" class="work-sessions__layout--rate" />
     </div>
     <div v-else>
       Veuillez vous connecter
@@ -37,34 +36,42 @@ const selectedDate = ref(new Date().toISOString().slice(0, 10));
 const summary = ref<any | null>(null);
 
 
-//TODO: ATTENTION DONNE NON VARIALBE
 // Calcul dynamique de l'objectif quotidien en fonction du profil
-const userProfile = ref({ weeklyHoursGoal: 35, workingDaysPerWeek: 5 }); // Exemple de profil utilisateur
-const dailyWorkGoal = computed(() => {
-  if (!profileStore.profile || !profileStore.profile.weeklyHoursGoal || !profileStore.profile.workingDays) {
-    return 0; // Retourne 0 si les données du profil sont manquantes
+const userProfile = computed(() => {
+  if (!profileStore.profile) {
+    return { weeklyHoursGoal: 35, workingDaysPerWeek: 5 }; // Valeurs par défaut si le profil n'est pas encore chargé
   }
 
-  console.log('eles');
-  
-
-  // Nombre de jours travaillés par semaine (longueur de la liste `workingDays`)
-  const workingDaysPerWeek = profileStore.profile.workingDays.length;
-  console.log('workingDaysPerWeek', workingDaysPerWeek);
-  console.log('profileStore.profile.weeklyHoursGoal', profileStore.profile.weeklyHoursGoal);
-  
-  
-
-  // Calcul de l'objectif quotidien en secondes
-  return (profileStore.profile.weeklyHoursGoal / workingDaysPerWeek) * 3600;
+  console.log('profileStore.profile.workingDaysPerWeek', profileStore.profile.workingDaysPerWeek)
+  return {
+    weeklyHoursGoal: profileStore.profile.weeklyHoursGoal || 35,
+    workingDaysPerWeek: profileStore.profile.workingDaysPerWeek || 5,
+  };
 });
 
+const dailyWorkGoal = computed(() => {
+  if (!userProfile.value) return 0;
+  console.log('userProfile', userProfile.value);
+  return (userProfile.value.weeklyHoursGoal / userProfile.value.workingDaysPerWeek) * 3600; // En secondes
+});
 
+// Gestion du profil lors de sa mise à jour
+watch(
+  () => profileStore.profile,
+  (newValue) => {
+    if (newValue) {
+      console.log('Profil mis à jour:', newValue);
+    }
+  },
+  { immediate: true }
+);
+
+// Suivi des modifications de dailyWorkGoal
 watch(
   () => dailyWorkGoal.value,
   (newValue) => {
-    console.log('newValue:', newValue);
-  }, {immediate: true}
+    console.log('Nouvel objectif quotidien:', newValue);
+  }
 );
 
 // Méthode pour récupérer les sessions par date
@@ -130,7 +137,7 @@ fetchSessions();
     &__layout {
       grid-template-columns: 1fr 1fr 1fr;
       grid-template-rows: auto auto auto;
-      
+
       &--calendar {
         grid-area: 1 / 1 / 2 / 4; // Pleine largeur
       }
@@ -183,4 +190,3 @@ fetchSessions();
   }
 }
 </style>
-

@@ -66,24 +66,24 @@ const formattedElapsedTime = computed(() => {
 });
 
 onMounted(() => {
-  getProfile();
+  startTimeString.value = useDateFormatter().formatDate('2024-12-22T15:30:45', {
+    customOptions: {
+      weekday: 'long',
+      year: 'numeric',
+      Week: 'short',
+      day: '2-digit',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      timeZone: 'Europe/Paris',
+    },
+  });
 
-  if (profile.value?.sessions[0]?.status === 'started') {
-    startTime.value = new Date(profile.value.sessions[0].startTime);
-
-    if (startTime.value) {
-      const now = new Date();
-      elapsedTime.value = Math.floor((now - new Date(startTime.value)) / 1000);
-
-      // Démarrer le compteur
-      interval = setInterval(() => {
-        elapsedTime.value = Math.floor((new Date() - new Date(startTime.value)) / 1000);
-      }, 1000);
-    }
-  }
+  interval = setInterval(() => {
+    const now = new Date();
+    elapsedTime.value = Math.floor((now - new Date(startTime.value)) / 1000);
+  }, 1000);
 });
-
-
 
 onUnmounted(() => {
   if (interval) clearInterval(interval);
@@ -105,7 +105,6 @@ async function start() {
       sessionStore.startSession();
       getProfile();
       startTime.value = response.data.startTime;
-      startTimeString.value = useDateFormatter().formatDate(startTime.value, { format: 'long', includeTime: true });
     } else {
       throw new Error('ID de session non reçu du serveur');
     }
@@ -125,13 +124,7 @@ onMounted(() => {
 
 async function getProfile() {
   profile.value = await userStore.fetchProfile($api);
-
-  if (profile.value?.sessions[0]?.status === 'started') {
-    const sessionStartTime = new Date(profile.value.sessions[0].startTime);
-    elapsedTime.value = Math.floor((new Date() - sessionStartTime) / 1000);
-  }
 }
-
 
 async function pause() {
   try {
@@ -187,9 +180,9 @@ watch(isLogged, (newValue) => {
   if (newValue) {
     console.log('newValue', newValue);
 
-    getProfile();
+    getProfile(); // Récupère le profil si l'utilisateur est connecté
   } else {
-    profile.value = null;
+    profile.value = null; // Nettoie le profil si déconnecté
   }
 });
 </script>

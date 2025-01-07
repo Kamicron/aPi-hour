@@ -66,6 +66,7 @@ import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { useUserStore } from '../../stores/user';
 
 const props = defineProps({
   selectedDate: String,
@@ -73,6 +74,7 @@ const props = defineProps({
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
+const profileStore = useUserStore();
 
 // Variables réactives
 const summary = ref<any | null>(null);
@@ -83,9 +85,23 @@ const newSession = ref({
 });
 
 // Exemple de profil utilisateur (peut être remplacé par une prop si nécessaire)
-const userProfile = { weeklyHoursGoal: 35, workingDaysPerWeek: 5 };
+// Calcul dynamique de l'objectif quotidien en fonction du profil
+const userProfile = computed(() => {
+  if (!profileStore.profile) {
+    return { weeklyHoursGoal: 35, workingDaysPerWeek: 5 }; // Valeurs par défaut si le profil n'est pas encore chargé
+  }
+
+  console.log('profileStore.profile.workingDaysPerWeek', profileStore.profile.workingDaysPerWeek)
+  return {
+    weeklyHoursGoal: profileStore.profile.weeklyHoursGoal || 35,
+    workingDaysPerWeek: profileStore.profile.workingDaysPerWeek || 5,
+  };
+});
+
 const dailyWorkGoal = computed(() => {
-  return (userProfile.weeklyHoursGoal / userProfile.workingDaysPerWeek) * 3600; // En secondes
+  if (!userProfile.value) return 0;
+  console.log('userProfile', userProfile.value);
+  return (userProfile.value.weeklyHoursGoal / userProfile.value.workingDaysPerWeek) * 3600; // En secondes
 });
 
 // Calcul des heures supplémentaires ou manquantes
