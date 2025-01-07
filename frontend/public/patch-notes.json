@@ -1,7 +1,16 @@
 [
   {
+    "version": "0.8.3",
+    "date": "2025-01-07",
+    "changes": {
+      "fix": [
+        "save weekhourly"
+      ]
+    }
+  },
+  {
     "version": "0.8.2",
-    "date": "2024-12-04",
+    "date": "2025-01-04",
     "changes": {
       "fix": [
         "style"

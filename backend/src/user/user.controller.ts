@@ -50,8 +50,8 @@ export class UserController {
     console.log('Request headers:', req.headers);
 
     // Remplacement temporaire si req.user est undefined
-    const userId = req.user?.sub || '4fceef20-3c27-4474-9242-adb6828d42f9'; // Par défaut, un userId de test
-    console.log('Extracted userId:', userId);
+    const userId = req.user?.userId; // Par défaut, un userId de test
+    console.log('Extracted userId:', req.user.userId);
 
     if (!userId) {
       throw new UnauthorizedException('Invalid token or userId not found');

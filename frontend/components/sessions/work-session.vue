@@ -24,7 +24,7 @@ const { $api } = useNuxtApp();
 const token = useCookie('token');
 const profileStore = useUserStore();
 
-console.log('profileStore', profileStore);
+console.log('profileStore workSession', profileStore);
 
 const currentMonth = ref('2025-01'); // Initialisation avec un mois valide
 
@@ -41,15 +41,30 @@ const summary = ref<any | null>(null);
 // Calcul dynamique de l'objectif quotidien en fonction du profil
 const userProfile = ref({ weeklyHoursGoal: 35, workingDaysPerWeek: 5 }); // Exemple de profil utilisateur
 const dailyWorkGoal = computed(() => {
-  if (!userProfile.value) return 0;
-  return (userProfile.value.weeklyHoursGoal / userProfile.value.workingDaysPerWeek) * 3600; // En secondes
+  if (!profileStore.profile || !profileStore.profile.weeklyHoursGoal || !profileStore.profile.workingDays) {
+    return 0; // Retourne 0 si les données du profil sont manquantes
+  }
+
+  console.log('eles');
+  
+
+  // Nombre de jours travaillés par semaine (longueur de la liste `workingDays`)
+  const workingDaysPerWeek = profileStore.profile.workingDays.length;
+  console.log('workingDaysPerWeek', workingDaysPerWeek);
+  console.log('profileStore.profile.weeklyHoursGoal', profileStore.profile.weeklyHoursGoal);
+  
+  
+
+  // Calcul de l'objectif quotidien en secondes
+  return (profileStore.profile.weeklyHoursGoal / workingDaysPerWeek) * 3600;
 });
+
 
 watch(
   () => dailyWorkGoal.value,
   (newValue) => {
     console.log('newValue:', newValue);
-  }
+  }, {immediate: true}
 );
 
 // Méthode pour récupérer les sessions par date

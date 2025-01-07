@@ -1,29 +1,31 @@
 <template>
   <div v-if="profile && isLogged" class="time-session">
+    <h2>Sessions</h2>
     <div v-if="profile.sessions.length === 0" class="time-session__idle">
       <div class="time-session__card">
-      <button @click="start" class="btn">Démarrer</button>
-    </div>
+        <div class="status-bar status-bar--idle"></div>
+        <button @click="start" class="btn">Démarrer</button>
+      </div>
     </div>
     <div v-else>
       <div v-if="profile.sessions[0].status === 'started'" class="time-session__running">
         <div class="time-session__card">
-          <h4 class="time-session__title">Session en cours...</h4>
-          <p><strong>Heure de début :</strong> {{ startTime }}</p>
-          <p><strong>Temps écoulé :</strong> {{ formattedElapsedTime }}</p>
+          <div class="status-bar status-bar--running"></div>
+          <p>Temps écoulé : <strong>{{ formattedElapsedTime }}</strong></p>
+          <p>Heure de début : <strong>{{ startTimeString }}</strong></p>
           <div class="time-session__actions">
-            <button @click="pause" class="btn --pause">Pause</button>
-            <button @click="stop" class="btn --stop">Stop</button>
+            <button @click="pause" class="btn btn--warning">Pause</button>
+            <button @click="stop" class="btn btn--danger">Stop</button>
           </div>
         </div>
       </div>
 
       <div v-if="profile.sessions[0].status === 'paused'" class="time-session__paused">
         <div class="time-session__card">
-          <h4 class="time-session__title">Session en pause...</h4>
+          <div class="status-bar status-bar--paused"></div>
           <div class="time-session__actions">
-            <button @click="resume" class="btn --resume">Reprendre</button>
-            <button @click="stop" class="btn --stop">Stop</button>
+            <button @click="resume" class="btn btn--success">Reprendre</button>
+            <button @click="stop" class="btn btn--danger">Stop</button>
           </div>
         </div>
       </div>
@@ -64,24 +66,24 @@ const formattedElapsedTime = computed(() => {
 });
 
 onMounted(() => {
-  startTimeString.value = useDateFormatter().formatDate('2024-12-22T15:30:45', {
-    customOptions: {
-      weekday: 'long',
-      year: 'numeric',
-      Week: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'Europe/Paris',
-    },
-  });
+  getProfile();
 
-  interval = setInterval(() => {
-    const now = new Date();
-    elapsedTime.value = Math.floor((now - new Date(startTime.value)) / 1000);
-  }, 1000);
+  if (profile.value?.sessions[0]?.status === 'started') {
+    startTime.value = new Date(profile.value.sessions[0].startTime);
+
+    if (startTime.value) {
+      const now = new Date();
+      elapsedTime.value = Math.floor((now - new Date(startTime.value)) / 1000);
+
+      // Démarrer le compteur
+      interval = setInterval(() => {
+        elapsedTime.value = Math.floor((new Date() - new Date(startTime.value)) / 1000);
+      }, 1000);
+    }
+  }
 });
+
+
 
 onUnmounted(() => {
   if (interval) clearInterval(interval);
@@ -103,6 +105,7 @@ async function start() {
       sessionStore.startSession();
       getProfile();
       startTime.value = response.data.startTime;
+      startTimeString.value = useDateFormatter().formatDate(startTime.value, { format: 'long', includeTime: true });
     } else {
       throw new Error('ID de session non reçu du serveur');
     }
@@ -122,7 +125,13 @@ onMounted(() => {
 
 async function getProfile() {
   profile.value = await userStore.fetchProfile($api);
+
+  if (profile.value?.sessions[0]?.status === 'started') {
+    const sessionStartTime = new Date(profile.value.sessions[0].startTime);
+    elapsedTime.value = Math.floor((new Date() - sessionStartTime) / 1000);
+  }
 }
+
 
 async function pause() {
   try {
@@ -178,56 +187,77 @@ watch(isLogged, (newValue) => {
   if (newValue) {
     console.log('newValue', newValue);
 
-    getProfile(); // Récupère le profil si l'utilisateur est connecté
+    getProfile();
   } else {
-    profile.value = null; // Nettoie le profil si déconnecté
+    profile.value = null;
   }
 });
 </script>
 
 <style lang="scss" scoped>
 .time-session {
+  margin: $spacing-large;
+  background-color: $color-surface;
+  border-radius: $border-radius;
+  box-shadow: $box-shadow-light;
+  padding: $spacing-large;
+  margin-bottom: 0 0 $spacing-medium $spacing-medium;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
   &__card {
-    margin: $spacing-large;
-    background-color: $color-surface;
+    position: relative;
+    background-color: $color-background;
     border-radius: $border-radius;
     box-shadow: $box-shadow-light;
-    padding: $spacing-large;
-    margin-bottom: $spacing-medium;
+    padding: $spacing-large $spacing-large $spacing-large 24px;
+    margin: $spacing-medium;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-
-    &-header {
-      margin-bottom: $spacing-medium;
-      border-bottom: 1px solid $color-text-secondary;
-      padding-bottom: $spacing-small;
-    }
 
     &-title {
       font-size: $font-size-large;
       font-weight: bold;
       color: $color-primary-light;
+      margin-bottom: $spacing-medium;
     }
 
-    &-body {
-      p {
-        margin: $spacing-small 0;
-        font-size: $font-size-base;
-        color: $color-text-primary;
+    p {
+      margin: $spacing-small 0;
+      font-size: $font-size-base;
+      color: $color-text-primary;
 
-        strong {
-          color: $color-text-secondary;
-        }
+      strong {
+        color: $color-secondary;
       }
     }
 
-    &__actions {
-      margin-top: $spacing-medium;
-      display: flex;
-      gap: $spacing-medium;
+  }
 
-      .btn {
-        flex: 1;
-      }
+  &__actions {
+    margin-top: $spacing-medium;
+    display: flex;
+    gap: $spacing-medium;
+
+
+  }
+
+  .status-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 8px;
+    border-radius: $border-radius 0 0 $border-radius;
+
+    &--idle {
+      background-color: $color-danger;
+    }
+
+    &--running {
+      background-color: $color-success;
+    }
+
+    &--paused {
+      background-color: $color-warning;
     }
   }
 }
