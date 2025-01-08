@@ -23,6 +23,9 @@
       <div v-if="profile.sessions[0].status === 'paused'" class="time-session__paused">
         <div class="time-session__card">
           <div class="status-bar status-bar--paused"></div>
+          <p>Temps écoulé : <strong>{{ formattedElapsedTime }}</strong></p>
+          <p>Heure de début : <strong>{{ startTimeString }}</strong></p>
+
           <div class="time-session__actions">
             <button @click="resume" class="btn btn--success">Reprendre</button>
             <button @click="stop" class="btn btn--danger">Stop</button>
@@ -50,13 +53,16 @@ const token = useCookie('token');
 const profile = ref();
 const isLogged = ref<boolean>(false);
 
-const startTime = ref(new Date()); // Exemple de startTime
-const startTimeString = ref<string>('');
+const startTime = ref<Date | null>(null); // Date de début réelle de la session
+const startTimeString = ref<string>(''); // Heure de début formatée
+const elapsedTime = ref(0); // Temps écoulé en secondes
+let interval: NodeJS.Timeout | null = null;
 
-const elapsedTime = ref(0);
-let interval = null;
+// const elapsedTime = ref(0);
+// let interval = null;
 
 const formattedElapsedTime = computed(() => {
+  if (elapsedTime.value < 0 || isNaN(elapsedTime.value)) return '00:00:00';
   const hours = Math.floor(elapsedTime.value / 3600);
   const minutes = Math.floor((elapsedTime.value % 3600) / 60);
   const seconds = elapsedTime.value % 60;
@@ -65,30 +71,22 @@ const formattedElapsedTime = computed(() => {
     .padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 });
 
-onMounted(() => {
-  startTimeString.value = useDateFormatter().formatDate('2024-12-22T15:30:45', {
-    customOptions: {
-      weekday: 'long',
-      year: 'numeric',
-      Week: 'short',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
-      timeZone: 'Europe/Paris',
-    },
-  });
 
+onMounted(() => {
+  getProfile();
+
+  // Mise à jour régulière du temps écoulé
   interval = setInterval(() => {
-    const now = new Date();
-    elapsedTime.value = Math.floor((now - new Date(startTime.value)) / 1000);
+    if (startTime.value instanceof Date && !isNaN(startTime.value.getTime())) {
+      const now = new Date();
+      elapsedTime.value = Math.floor((now.getTime() - startTime.value.getTime()) / 1000);
+    }
   }, 1000);
 });
 
 onUnmounted(() => {
   if (interval) clearInterval(interval);
 });
-
 // ----- Functions -----
 async function start() {
   try {
@@ -96,17 +94,17 @@ async function start() {
       headers: { Authorization: `Bearer ${token.value}` },
     });
 
-    console.log('response', response);
+    if (response.data.startTime) {
+      startTime.value = new Date(response.data.startTime); // Mise à jour de la date de début
+      startTimeString.value = useDateFormatter().formatDate(new Date(response.data.startTime), { format: 'long', includeTime: true });
 
-    // Supposons que la réponse contient { id: 'session-id' }
-    const sessionIdFromApi = response.data.id;
-    if (sessionIdFromApi) {
-      sessionStore.sessionId = sessionIdFromApi;
-      sessionStore.startSession();
+      elapsedTime.value = 0; // Réinitialisation du temps écoulé
+      console.log('startTime.value', startTime.value);
+      
+      
       getProfile();
-      startTime.value = response.data.startTime;
     } else {
-      throw new Error('ID de session non reçu du serveur');
+      throw new Error('Date de début manquante dans la réponse du serveur');
     }
   } catch (err) {
     console.error('Erreur lors du démarrage de la session', err);
@@ -123,7 +121,32 @@ onMounted(() => {
 });
 
 async function getProfile() {
-  profile.value = await userStore.fetchProfile($api);
+  try {
+    const fetchedProfile = await userStore.fetchProfile($api);
+    profile.value = fetchedProfile;
+
+    console.log('profile', profile.value.currentSession.createdAt);
+    
+
+    // Synchroniser la date de début si une session est active
+    if (profile.value?.sessions?.length > 0 && profile.value.sessions[0].status === 'started') {
+      const startTimeFromApi = profile.value.currentSession.createdAt;
+
+      console.log('startTimeFromApi', startTimeFromApi);
+      
+      startTimeString.value = useDateFormatter().formatDate(startTimeFromApi, { format: 'long', includeTime: true });
+      if (startTimeFromApi) {
+        startTime.value = new Date(startTimeFromApi); // Conversion en Date valide
+      } else {
+        startTime.value = null; // Aucun startTime disponible
+      }
+    } else {
+      startTime.value = null; // Pas de session active
+    }
+  } catch (err) {
+    console.error('Erreur lors de la récupération du profil', err);
+    startTime.value = null; // Nettoyage en cas d'erreur
+  }
 }
 
 async function pause() {
@@ -178,8 +201,6 @@ async function stop() {
 
 watch(isLogged, (newValue) => {
   if (newValue) {
-    console.log('newValue', newValue);
-
     getProfile(); // Récupère le profil si l'utilisateur est connecté
   } else {
     profile.value = null; // Nettoie le profil si déconnecté

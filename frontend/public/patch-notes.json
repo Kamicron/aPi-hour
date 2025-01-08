@@ -1,5 +1,12 @@
 [
   {
+    "version": "0.8.5",
+    "date": "2025-01-07",
+    "changes": {
+      "fix": ["Calcule du temps écoulé"]
+    }
+  },
+  {
     "version": "0.8.4",
     "date": "2025-01-07",
     "changes": {
