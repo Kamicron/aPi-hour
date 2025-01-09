@@ -234,8 +234,43 @@ export class TimeEntriesService {
       throw new NotFoundException('Time entry not found');
     }
 
-    // Mettre à jour l'heure de fin
-    timeEntry.endTime = new Date();
+    const endTime = new Date();
+    
+    // Vérifier si la session dépasse minuit
+    if (this.isSessionCrossingMidnight(timeEntry.startTime, endTime)) {
+      // Créer une date à 23:59:30 du jour de début
+      const midnightEnd = new Date(timeEntry.startTime);
+      midnightEnd.setHours(23, 59, 30, 0);
+      
+      // Terminer la session actuelle à 23:59:30
+      timeEntry.endTime = midnightEnd;
+      await this.timeEntriesRepository.save(timeEntry);
+
+      // Créer une nouvelle session à partir de 00:00:30
+      const nextDayStart = new Date(timeEntry.startTime);
+      nextDayStart.setDate(nextDayStart.getDate() + 1);
+      nextDayStart.setHours(0, 0, 30, 0);
+
+      // Créer la nouvelle session
+      const newTimeEntry = await this.create(userId, {
+        startTime: nextDayStart,
+        endTime: endTime,
+      });
+
+      // Mettre à jour la session utilisateur
+      const session = await this.sessionRepository.findOne({
+        where: { user: { id: userId } },
+      });
+
+      if (session) {
+        await this.sessionRepository.remove(session);
+      }
+
+      return newTimeEntry;
+    }
+
+    // Comportement normal si la session ne dépasse pas minuit
+    timeEntry.endTime = endTime;
     const updatedTimeEntry = await this.timeEntriesRepository.save(timeEntry);
 
     // Mettre à jour le statut dans user_sessions
@@ -243,13 +278,18 @@ export class TimeEntriesService {
       where: { user: { id: userId } },
     });
 
-    console.log('session', session);
-
     if (session) {
       await this.sessionRepository.remove(session);
     }
 
     return updatedTimeEntry;
+  }
+
+  // Vérifier si une session dépasse minuit
+  private isSessionCrossingMidnight(startTime: Date, endTime: Date): boolean {
+    const startDay = startTime.getDate();
+    const endDay = endTime.getDate();
+    return startDay !== endDay;
   }
 
   // Méthode privée pour valider l'accès à une session
@@ -450,9 +490,6 @@ export class TimeEntriesService {
   }
 
   private getMonthRange(year: number, month: number) {
-    console.log('*******************');
-    console.log('month', month);
-
     // Vérifier si le mois est déjà 0-indexé
     if (month < 0 || month > 11) {
       throw new Error(
@@ -460,19 +497,38 @@ export class TimeEntriesService {
       );
     }
 
-    // Début du mois (toujours 0-indexé dans `Date`)
-    const startOfMonth = new Date(year, month, 1);
-    const startDay = startOfMonth.getDay() || 7; // Dimanche = 0 devient 7
-    const startDate = new Date(startOfMonth);
-    startDate.setDate(startOfMonth.getDate() - (startDay - 1)); // Reculer au lundi précédent
+    // Premier jour du mois
+    const firstDayOfMonth = new Date(year, month, 1);
+    // Dernier jour du mois
+    const lastDayOfMonth = new Date(year, month + 1, 0);
 
-    // Fin du mois (toujours 0-indexé dans `Date`)
-    const endOfMonth = new Date(year, month + 1, 0); // Dernier jour du mois courant
-    const endDay = endOfMonth.getDay();
-    const endDate = new Date(endOfMonth);
-    endDate.setDate(endOfMonth.getDate() + (7 - endDay)); // Avancer au dimanche suivant
+    // Trouver le lundi précédant le premier jour du mois si le mois ne commence pas un lundi
+    const startDate = new Date(firstDayOfMonth);
+    const firstDayWeekday = firstDayOfMonth.getDay(); // 0 = dimanche, 1 = lundi, etc.
+    if (firstDayWeekday !== 1) { // Si ce n'est pas un lundi
+      // Reculer jusqu'au lundi précédent
+      startDate.setDate(firstDayOfMonth.getDate() - ((firstDayWeekday === 0 ? 7 : firstDayWeekday) - 1));
+    }
 
-    console.log('Calculated Month Range:', { startDate, endDate });
+    // Trouver le dernier dimanche complet du mois
+    const endDate = new Date(lastDayOfMonth);
+    const lastDayWeekday = lastDayOfMonth.getDay();
+    if (lastDayWeekday !== 0) { // Si ce n'est pas un dimanche
+      // Reculer jusqu'au dimanche précédent
+      endDate.setDate(lastDayOfMonth.getDate() - lastDayWeekday);
+    }
+
+    // S'assurer que endDate est à 23:59:59
+    endDate.setHours(23, 59, 59, 999);
+
+    console.log('Calculated Month Range:', {
+      firstDayOfMonth,
+      lastDayOfMonth,
+      startDate,
+      endDate,
+      firstDayWeekday,
+      lastDayWeekday
+    });
 
     return { startDate, endDate };
   }
@@ -483,65 +539,76 @@ export class TimeEntriesService {
     month: number,
   ) {
     const { startDate, endDate } = this.getMonthRange(year, month);
-    console.log('Entrées récupérées pour la période :', { startDate, endDate });
+    console.log('Période de calcul :', { startDate, endDate });
 
-    // const baseResult = await this.calculateHours(
-    //   userId,
-    //   startDate.toISOString(),
-    //   endDate.toISOString(),
-    // );
-
+    // Récupérer toutes les entrées pour la période
     const timeEntries = await this.getTimeEntriesBetweenDates(
       userId,
       startDate.toISOString(),
       endDate.toISOString(),
     );
 
-    // Regrouper par semaines
-    const weeks = this.groupEntriesByWeek(timeEntries);
+    // Regrouper les entrées par semaine
+    const weeklyEntries = this.groupEntriesByWeek(timeEntries);
 
-    // Calculer les heures supplémentaires et majorations pour chaque semaine
-    const weeklyHours = weeks.map(({ weekStart, weekEnd, entries }) => {
-      const workedHours = this.calculateTotalHours(
-        entries.map((entry) => ({
-          startTime: entry.startTime,
-          endTime: entry.endTime || new Date(),
-        })),
-      );
+    // Calculer les heures pour chaque semaine
+    const weeklyHours = await Promise.all(
+      weeklyEntries.map(async ({ weekStart, weekEnd, entries }) => {
+        // Calculer les heures travaillées pour la semaine
+        const weeklyResult = await this.calculateHours(
+          userId,
+          weekStart.toISOString(),
+          weekEnd.toISOString(),
+        );
 
-      const extraHours = Math.max(0, workedHours - 35);
+        // Les heures réellement travaillées (sans les pauses)
+        const workedHours = weeklyResult.workedHours;
 
-      let extra25Hours = 0;
-      let extra50Hours = 0;
+        // Calcul des heures supplémentaires
+        const extraHours = Math.max(0, workedHours - 35);
 
-      if (extraHours > 0) {
-        // Les 8 premières heures au-delà de 35h sont majorées à 25%
-        if (extraHours <= 8) {
-          extra25Hours = extraHours;
-        } else {
-          extra25Hours = 8;
-          extra50Hours = extraHours - 8; // Le reste est majoré à 50%
+        // Application des taux de majoration
+        let extra25Hours = 0;
+        let extra50Hours = 0;
+
+        if (extraHours > 0) {
+          // Les 8 premières heures sont à 25%
+          extra25Hours = Math.min(8, extraHours);
+          // Les heures suivantes sont à 50%
+          if (extraHours > 8) {
+            extra50Hours = extraHours - 8;
+          }
         }
-      }
 
-      return {
-        weekStart,
-        weekEnd,
-        workedHours,
-        extra25Hours,
-        extra50Hours,
-      };
-    });
+        return {
+          weekStart,
+          weekEnd,
+          normalHours: Math.min(35, workedHours),
+          workedHours,
+          extra25Hours,
+          extra50Hours,
+        };
+      }),
+    );
+
+    // Calculer les totaux pour le mois
+    const monthlyTotals = weeklyHours.reduce(
+      (totals, week) => ({
+        totalWorkedHours: totals.totalWorkedHours + week.workedHours,
+        totalNormalHours: totals.totalNormalHours + week.normalHours,
+        totalExtra25Hours: totals.totalExtra25Hours + week.extra25Hours,
+        totalExtra50Hours: totals.totalExtra50Hours + week.extra50Hours,
+      }),
+      {
+        totalWorkedHours: 0,
+        totalNormalHours: 0,
+        totalExtra25Hours: 0,
+        totalExtra50Hours: 0,
+      },
+    );
 
     return {
-      totalExtra25Hours: weeklyHours.reduce(
-        (sum, week) => sum + week.extra25Hours,
-        0,
-      ),
-      totalExtra50Hours: weeklyHours.reduce(
-        (sum, week) => sum + week.extra50Hours,
-        0,
-      ),
+      ...monthlyTotals,
       weeklyDetails: weeklyHours,
     };
   }

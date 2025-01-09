@@ -84,6 +84,12 @@ const newSession = ref({
   endTime: '',
 });
 
+useGlobalEvents().subscribeTo<boolean | undefined>(EGlobalEvent.UPDATE_DAY, () => {
+  console.log('Event UPDATE_DAY reçu')
+  console.log('selectedDate:', props.selectedDate)
+  fetchSessions()
+});
+
 // Exemple de profil utilisateur (peut être remplacé par une prop si nécessaire)
 // Calcul dynamique de l'objectif quotidien en fonction du profil
 const userProfile = computed(() => {

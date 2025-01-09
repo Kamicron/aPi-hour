@@ -1,7 +1,22 @@
 [
   {
+    "version": "0.8.6",
+    "date": "2025-01-09",
+    "changes": {
+      "feat": [
+        "Ajout d'un bouton de suppression rapide sur les cartes de session"
+      ],
+      "fix": [
+        "Correction du calcul des heures pour les sessions dépassant minuit",
+        "Correction du calcul des heures supplémentaires hebdomadaires",
+        "Prise en compte correcte des pauses dans le calcul des heures majorées",
+        "Correction du calcul des semaines pour un mois donné (prise en compte des semaines complètes uniquement)"
+      ]
+    }
+  },
+  {
     "version": "0.8.5",
-    "date": "2025-01-07",
+    "date": "2025-01-08",
     "changes": {
       "fix": ["Calcule du temps écoulé"]
     }

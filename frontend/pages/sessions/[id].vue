@@ -78,6 +78,8 @@ import { useNuxtApp, useCookie } from "#app";
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
 import useDateFormatter from "../../composable/useDate";
+import { EGlobalEvent } from "~/assets/ts/enums/global/globalEvent.enum";
+import { useGlobalEvents } from "~/composable/useGlobalEvent";
 
 const { $api } = useNuxtApp();
 const isUpdateSessionModal = ref<boolean>(false)
@@ -292,6 +294,9 @@ async function deleteSession() {
     console.log('formattedDate', formattedDate);
 
     window.location.href = `/?date=${formattedDate}`;
+
+    useGlobalEvents().emitEvent(EGlobalEvent.UPDATE_DAY);
+
     // window.location.href = "/sessions"; // Remplacez par votre route
   } catch (error) {
     console.error("Erreur lors de la suppression de la session :", error);

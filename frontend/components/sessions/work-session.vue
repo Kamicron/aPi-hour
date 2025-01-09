@@ -7,6 +7,7 @@
       <extra-hours-display class="work-sessions__layout--display" />
       <set_vacation class="work-sessions__layout--vacation" />
       <extra-hours-rate :currentMonth="currentMonth" class="work-sessions__layout--rate" />
+      <bento-card class="work-sessions__layout--other" title="Autre" />
     </div>
     <div v-else>
       Veuillez vous connecter
@@ -128,7 +129,11 @@ fetchSessions();
     }
 
     &--rate {
-      grid-area: 3 / 1 / 4 / 7;
+      grid-area: 3 / 1 / 4 / 4;
+    }
+
+    &--other {
+      grid-area: 3 / 4 / 4 / 7;
     }
   }
 
@@ -157,6 +162,10 @@ fetchSessions();
       &--rate {
         grid-area: 5 / 1 / 6 / 4; // Pleine largeur
       }
+
+      &--other {
+        grid-area: 6 / 1 / 7 / 4; // Pleine largeur
+    }
     }
   }
 

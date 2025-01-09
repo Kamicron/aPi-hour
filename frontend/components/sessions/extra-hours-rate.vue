@@ -1,38 +1,39 @@
 <template>
-  <div class="time-entry-summary">
-    <h2 class="time-entry-summary__title">Résumé des heures travaillées</h2>
-    <div class="time-entry-summary__totals">
-      <p class="time-entry-summary__total-line">
-        <span class="time-entry-summary__label">Total heures à 25 % :</span>
-        <span class="time-entry-summary__value">{{ totalExtra25Hours }} h</span>
-      </p>
-      <p class="time-entry-summary__total-line">
-        <span class="time-entry-summary__label">Total heures à 50 % :</span>
-        <span class="time-entry-summary__value">{{ totalExtra50Hours }} h</span>
-      </p>
-    </div>
-    <div class="time-entry-summary__weekly-details">
-      <div v-for="week in sortedWeeklyHours" :key="week.weekStart" class="time-entry-summary__week">
-        <h3 class="time-entry-summary__week-title">
-          Semaine du {{ formatDate(week.weekStart) }} au {{ formatDate(week.weekEnd) }}
-        </h3>
-        <ul class="time-entry-summary__week-details">
-          <li>
-            <span class="time-entry-summary__label">Heures travaillées :</span>
-            <span class="time-entry-summary__value">{{ week.workedHours }} h</span>
-          </li>
-          <li>
-            <span class="time-entry-summary__label">Heures à 25 % :</span>
-            <span class="time-entry-summary__value">{{ week.extra25Hours }} h</span>
-          </li>
-          <li>
-            <span class="time-entry-summary__label">Heures à 50 % :</span>
-            <span class="time-entry-summary__value">{{ week.extra50Hours }} h</span>
-          </li>
-        </ul>
+  <bento-card title="Résumé des heures travaillées">
+    <div class="time-entry-summary">
+      <div class="time-entry-summary__totals">
+        <p class="time-entry-summary__total-line">
+          <span class="time-entry-summary__label">Total heures à 25 % :</span>
+          <span class="time-entry-summary__value">{{ totalExtra25Hours }} h</span>
+        </p>
+        <p class="time-entry-summary__total-line">
+          <span class="time-entry-summary__label">Total heures à 50 % :</span>
+          <span class="time-entry-summary__value">{{ totalExtra50Hours }} h</span>
+        </p>
+      </div>
+      <div class="time-entry-summary__weekly-details">
+        <div v-for="week in sortedWeeklyHours" :key="week.weekStart" class="time-entry-summary__week">
+          <h3 class="time-entry-summary__week-title">
+            Semaine du {{ formatDate(week.weekStart) }} au {{ formatDate(week.weekEnd) }}
+          </h3>
+          <ul class="time-entry-summary__week-details">
+            <li>
+              <span class="time-entry-summary__label">Heures travaillées :</span>
+              <span class="time-entry-summary__value">{{ week.workedHours }} h</span>
+            </li>
+            <li>
+              <span class="time-entry-summary__label">Heures à 25 % :</span>
+              <span class="time-entry-summary__value">{{ week.extra25Hours }} h</span>
+            </li>
+            <li>
+              <span class="time-entry-summary__label">Heures à 50 % :</span>
+              <span class="time-entry-summary__value">{{ week.extra50Hours }} h</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
+  </bento-card>
 </template>
 
 <script setup lang="ts">
@@ -90,56 +91,53 @@ watch(
 
 <style lang="scss" scoped>
 .time-entry-summary {
-  background-color: $color-surface;
-  padding: $spacing-large;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow-light;
-
   &__totals {
     background-color: $color-background;
     padding: $spacing-medium;
     border-radius: $border-radius;
-    box-shadow: $box-shadow-light;
     margin-bottom: $spacing-large;
+  }
 
-    &__total-line {
-      display: flex;
-      justify-content: space-between;
-      font-family: $font-family-base;
-      font-size: $font-size-base;
-      color: $color-text-primary;
-      margin: $spacing-small 0;
+  &__total-line {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-small;
+    margin: $spacing-small 0;
 
-      &__label {
-        font-weight: bold;
-        color: $color-primary;
-      }
+    .time-entry-summary__label {
+      font-weight: bold;
+      color: $color-primary;
+    }
 
-      &__value {
-        font-weight: bold;
-        color: $color-secondary;
-      }
+    .time-entry-summary__value {
+      font-weight: bold;
+      color: $color-secondary;
+      min-width: 80px;
+      text-align: right;
     }
   }
 
   &__weekly-details {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: $spacing-large;
   }
 
   &__week {
     background-color: $color-background;
-    margin-bottom: $spacing-large;
     padding: $spacing-medium;
     border-radius: $border-radius;
     box-shadow: $box-shadow-dark;
 
     &-title {
       font-family: $font-family-base;
-      font-size: $font-size-large;
+      font-size: $font-size-base;
       color: $color-primary;
       margin-bottom: $spacing-medium;
+      text-align: center;
+      padding-bottom: $spacing-small;
+      border-bottom: 2px solid $color-primary-light;
     }
 
     &-details {
@@ -150,10 +148,16 @@ watch(
       li {
         display: flex;
         justify-content: space-between;
+        align-items: center;
         font-family: $font-family-base;
         font-size: $font-size-small;
         color: $color-text-secondary;
-        margin-bottom: $spacing-small;
+        padding: $spacing-small 0;
+        border-bottom: 1px solid $color-text-secondary;
+
+        &:last-child {
+          border-bottom: none;
+        }
 
         & .time-entry-summary__label {
           font-weight: bold;
@@ -162,8 +166,18 @@ watch(
 
         & .time-entry-summary__value {
           color: $color-secondary;
+          min-width: 60px;
+          text-align: right;
         }
       }
+    }
+  }
+}
+
+@media (max-width: $breakpoint-md) {
+  .time-entry-summary {
+    &__weekly-details {
+      grid-template-columns: 1fr;
     }
   }
 }
