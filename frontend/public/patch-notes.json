@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.8.7",
+    "date": "2025-01-10",
+    "changes": {
+      "feat": [
+        "Refonte complète du style du PDF des heures supplémentaires",
+        "Ajout d'un en-tête avec logo dans le PDF",
+        "Ajout d'un pied de page avec numérotation dans le PDF"
+      ],
+      "fix": [
+        "Optimisation de la mise en page des tableaux dans le PDF",
+        "Amélioration de la présentation des périodes de congés",
+        "Uniformisation des styles et des largeurs de colonnes"
+      ]
+    }
+  },
+  {
     "version": "0.8.6",
     "date": "2025-01-09",
     "changes": {
