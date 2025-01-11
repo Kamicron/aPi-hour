@@ -21,9 +21,12 @@
     "pinia": "^2.3.0",
     "sass": "^1.83.0",
     "vue": "latest",
+    "vue-grid-layout-v3": "^3.1.2",
     "vue-router": "latest"
   },
   "devDependencies": {
-    "@nuxt/types": "^2.18.1"
+    "@nuxt/types": "^2.18.1",
+    "css-loader": "^7.1.2",
+    "style-loader": "^4.0.0"
   }
 }

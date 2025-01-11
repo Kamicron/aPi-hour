@@ -214,11 +214,8 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
 
 <style lang="scss">
 .calendar {
-  background-color: $color-surface;
   color: $color-text-primary;
   padding: $spacing-large;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow-light;
   min-width: 450px;
 
   &__header {

@@ -1,6 +1,6 @@
 <template>
-  <bento-card title="Générer PDF des heures supplémentaires">
     <div class="extra-hours-pdf">
+      <h2>Générer PDF des heures supplémentaires</h2>
       <div class="extra-hours-pdf__input">
         <label>
           Mois:
@@ -21,7 +21,6 @@
         <span v-else>Générer PDF</span>
       </button>
     </div>
-  </bento-card>
 </template>
 
 <script setup lang="ts">

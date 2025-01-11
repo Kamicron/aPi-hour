@@ -76,11 +76,10 @@ const submitVacation = async () => {
 
 <style lang="scss" scoped>
 .vacation {
-  background-color: $color-surface;
   padding: $spacing-large;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow-light;
   color: $color-text-primary;
+  width: 100%;
+  height: 100%;
 
   &__form {
     display: flex;

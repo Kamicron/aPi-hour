@@ -193,10 +193,7 @@ function formatOvertime(seconds: number) {
 <style lang="scss" scoped>
 .work-sessions {
   font-family: $font-family-base;
-  background-color: $color-background;
-  color: $color-text-primary;
-  padding: $spacing-large;
-  border-radius: $border-radius;
+
   height: 100%;
   max-height: 100%;
   overflow-y: auto; /* Active un défilement vertical si nécessaire */
@@ -209,20 +206,10 @@ function formatOvertime(seconds: number) {
 
   &__calendar-column {
     flex: 1;
-    background-color: $color-surface;
-    padding: $spacing-large;
-    border-radius: $border-radius;
-    box-shadow: $box-shadow-light;
-    box-shadow: $box-shadow-dark;
-
   }
 
   &__content-column {
     flex: 2;
-    background-color: $color-surface;
-    padding: $spacing-large;
-    border-radius: $border-radius;
-    box-shadow: $box-shadow-light;
     display: flex;
     flex-direction: column;
     overflow: hidden;

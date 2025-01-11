@@ -6,6 +6,9 @@ export default defineNuxtConfig({
   devServer: {
     port: 3001,
   },
+  plugins: [
+    { src: '~/plugins/grid.client.ts', ssr: false },
+  ],
   css: ['~/assets/scss/stylesheet.scss'],
   vite: {
     css: {

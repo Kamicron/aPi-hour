@@ -1,6 +1,6 @@
 <template>
-  <bento-card title="Résumé des heures travaillées">
     <div class="time-entry-summary">
+      <h2>Résumé des heures travaillées</h2>
       <div class="time-entry-summary__totals">
         <p class="time-entry-summary__total-line">
           <span class="time-entry-summary__label">Total heures à 25 % :</span>
@@ -33,7 +33,6 @@
         </div>
       </div>
     </div>
-  </bento-card>
 </template>
 
 <script setup lang="ts">

@@ -113,11 +113,8 @@ const fetchExtraHours = async () => {
 
 <style lang="scss" scoped>
 .extra-hours-display {
-  background-color: $color-surface;
   color: $color-text-primary;
   padding: $spacing-large;
-  border-radius: $border-radius;
-  box-shadow: $box-shadow-light;
   min-width: 420px;
 
   &__header {

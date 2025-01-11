@@ -1,0 +1,26 @@
+.grid-layout {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .grid-item {
+    position: absolute;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    background-color: #f0f0f0;
+    overflow: hidden;
+    cursor: move;
+  }
+  
+  .grid-item .text {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    line-height: 40px;
+    font-size: 14px;
+  }
+  
