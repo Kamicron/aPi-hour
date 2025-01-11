@@ -1,13 +1,18 @@
 <template>
   <div class="work-sessions">
     <div v-if="profileStore.profile" class="work-sessions__layout">
-      <calendar class="work-sessions__layout--calendar" @pick-date="handleDatePicked"
-        @currentMonth="updateCurrentMonth" />
-      <resume-session class="work-sessions__layout--resume" :selected-date="selectedDate" />
-      <extra-hours-display class="work-sessions__layout--display" />
-      <set_vacation class="work-sessions__layout--vacation" />
-      <extra-hours-rate :currentMonth="currentMonth" class="work-sessions__layout--rate" />
-      <extra-hours-pdf class="work-sessions__layout--generate" title="Autre" />
+      <div
+        v-for="(component, index) in components"
+        :key="component.id"
+        class="work-sessions__layout--item"
+        :style="{ gridArea: component.gridArea }"
+        draggable="true"
+        @dragstart="onDragStart(index)"
+        @dragover.prevent
+        @drop="onDrop(index)"
+      >
+        <component class="work-sessions__layout--component" :is="componentsMap[component.name]" v-bind="component.props" />
+      </div>
     </div>
     <div v-else>
       Veuillez vous connecter
@@ -20,85 +25,109 @@ import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
 import { useUserStore } from '../../stores/user';
 
+// Import des composants
+import Calendar from './calendar.vue';
+import ResumeSession from './resume-session.vue';
+import ExtraHoursDisplay from './extra-hours-display.vue';
+import SetVacation from '../vacation/set_vacation.vue';
+import ExtraHoursRate from './extra-hours-rate.vue';
+import ExtraHoursPdf from './extra-hours-pdf.vue';
+
+// Mapping des composants
+const componentsMap = {
+  calendar: Calendar,
+  "resume-session": ResumeSession,
+  "extra-hours-display": ExtraHoursDisplay,
+  "set_vacation": SetVacation,
+  "extra-hours-rate": ExtraHoursRate,
+  "extra-hours-pdf": ExtraHoursPdf,
+};
+
+// Variables globales
 const { $api } = useNuxtApp();
 const token = useCookie('token');
 const profileStore = useUserStore();
 
-console.log('profileStore workSession', profileStore);
-
-const currentMonth = ref('2025-01'); // Initialisation avec un mois valide
-
-const updateCurrentMonth = (newMonth) => {
-  console.log('Mois reçu de l’enfant :', newMonth);
-  currentMonth.value = newMonth; // Met à jour le mois dans le parent
-};
-// Variables réactives
-const selectedDate = ref(new Date().toISOString().slice(0, 10));
+const currentMonth = ref('2025-01'); // Mois actuel
+const selectedDate = ref(new Date().toISOString().slice(0, 10)); // Date sélectionnée
 const summary = ref<any | null>(null);
 
+// Composants dynamiques avec positions
+const components = ref([
+  { id: "calendar", name: "calendar", gridArea: "1 / 1 / 3 / 3", props: {} },
+  { id: "resume", name: "resume-session", gridArea: "1 / 3 / 3 / 5", props: { selectedDate } },
+  { id: "display", name: "extra-hours-display", gridArea: "1 / 5 / 2 / 7", props: {} },
+  { id: "vacation", name: "set_vacation", gridArea: "3 / 4 / 4 / 7", props: {} },
+  { id: "rate", name: "extra-hours-rate", gridArea: "3 / 1 / 4 / 4", props: { currentMonth } },
+  { id: "generate", name: "extra-hours-pdf", gridArea: "2 / 5 / 3 / 7", props: { title: "Autre" } },
+]);
 
-// Calcul dynamique de l'objectif quotidien en fonction du profil
-const userProfile = computed(() => {
-  if (!profileStore.profile) {
-    return { weeklyHoursGoal: 35, workingDaysPerWeek: 5 }; // Valeurs par défaut si le profil n'est pas encore chargé
+// Drag and Drop
+const draggedIndex = ref<number | null>(null);
+
+const onDragStart = (index: number) => {
+  draggedIndex.value = index;
+};
+
+const onDrop = (index: number) => {
+  if (draggedIndex.value !== null && draggedIndex.value !== index) {
+    const draggedComponent = components.value[draggedIndex.value];
+    const targetComponent = components.value[index];
+
+    // Échanger leurs positions dans la grille
+    [draggedComponent.gridArea, targetComponent.gridArea] = [
+      targetComponent.gridArea,
+      draggedComponent.gridArea,
+    ];
+
+    draggedIndex.value = null; // Réinitialisation
   }
+};
 
-  console.log('profileStore.profile.workingDaysPerWeek', profileStore.profile.workingDaysPerWeek)
-  return {
-    weeklyHoursGoal: profileStore.profile.weeklyHoursGoal || 35,
-    workingDaysPerWeek: profileStore.profile.workingDaysPerWeek || 5,
-  };
-});
+// Calcul des objectifs
+const userProfile = computed(() => ({
+  weeklyHoursGoal: profileStore.profile?.weeklyHoursGoal || 35,
+  workingDaysPerWeek: profileStore.profile?.workingDaysPerWeek || 5,
+}));
 
 const dailyWorkGoal = computed(() => {
-  if (!userProfile.value) return 0;
-  console.log('userProfile', userProfile.value);
-  return (userProfile.value.weeklyHoursGoal / userProfile.value.workingDaysPerWeek) * 3600; // En secondes
+  return userProfile.value.weeklyHoursGoal / userProfile.value.workingDaysPerWeek * 3600; // En secondes
 });
 
-// Gestion du profil lors de sa mise à jour
-watch(
-  () => profileStore.profile,
-  (newValue) => {
-    if (newValue) {
-      console.log('Profil mis à jour:', newValue);
-    }
-  },
-  { immediate: true }
-);
-
-// Suivi des modifications de dailyWorkGoal
-watch(
-  () => dailyWorkGoal.value,
-  (newValue) => {
-    console.log('Nouvel objectif quotidien:', newValue);
-  }
-);
-
-// Méthode pour récupérer les sessions par date
-async function fetchSessions() {
+// Gestion des sessions
+const fetchSessions = async () => {
   try {
     const response = await $api.get(`/time-entries/date/${selectedDate.value}`, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     summary.value = response.data;
-
-    console.log('summary', summary);
-
   } catch (error) {
-    console.error('Erreur lors de la récupération des sessions', error);
+    console.error('Erreur lors de la récupération des sessions :', error);
   }
-}
+};
 
-
-
-function handleDatePicked(date: Date) {
+const handleDatePicked = (date: Date) => {
   selectedDate.value = date.toISOString().slice(0, 10);
   fetchSessions();
-}
+};
 
-// Récupérer les sessions au montage
+// Mise à jour au chargement
 fetchSessions();
+
+// Suivi des changements dans le profil et les objectifs
+watch(
+  () => profileStore.profile,
+  (newProfile) => {
+    if (newProfile) console.log('Profil mis à jour :', newProfile);
+  },
+  { immediate: true }
+);
+watch(
+  () => dailyWorkGoal.value,
+  (newGoal) => {
+    console.log('Nouvel objectif quotidien :', newGoal);
+  }
+);
 </script>
 
 <style lang="scss" scoped>
@@ -112,90 +141,23 @@ fetchSessions();
     grid-column-gap: $spacing-large;
     grid-row-gap: $spacing-large;
 
-    &--calendar {
-      grid-area: 1 / 1 / 3 / 3;
+    &--component {
+      width: 100%;
+      height: 100%
     }
 
-    &--resume {
-      grid-area: 1 / 3 / 3 / 5;
-    }
+    &--item {
+      // border: 1px solid $color-background;
+      // border-radius: $border-radius;
+      // background-color: $color-surface;
+      padding: $spacing-medium;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: grab;
 
-    &--display {
-      grid-area: 1 / 5 / 2 / 7;
-    }
-
-    &--vacation {
-      grid-area: 3 / 4 / 4 / 7;
-
-    }
-
-    &--rate {
-      grid-area: 3 / 1 / 4 / 4;
-    }
-
-    &--generate {
-      grid-area: 2 / 5 / 3 / 7;
-
-    }
-  }
-
-  // Media queries pour l'adaptation sur les appareils
-  @media (max-width: 1280px) {
-    &__layout {
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: auto auto auto;
-
-      &--calendar {
-        grid-area: 1 / 1 / 2 / 4; // Pleine largeur
-      }
-
-      &--resume {
-        grid-area: 2 / 1 / 3 / 4; // Pleine largeur
-      }
-
-      &--display {
-        grid-area: 3 / 1 / 4 / 4; // Pleine largeur
-      }
-
-      &--vacation {
-        grid-area: 4 / 1 / 5 / 4; // Pleine largeur
-      }
-
-      &--rate {
-        grid-area: 5 / 1 / 6 / 4; // Pleine largeur
-      }
-
-      &--generate {
-        grid-area: 6 / 1 / 7 / 4; // Pleine largeur
-    }
-    }
-  }
-
-  @media (max-width: 768px) {
-    &__layout {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto auto auto;
-      grid-column-gap: $spacing-large;
-      grid-row-gap: $spacing-large;
-
-      &--calendar {
-        grid-area: 1 / 1 / 2 / 2; // Colonne unique
-      }
-
-      &--resume {
-        grid-area: 2 / 1 / 3 / 2; // Colonne unique
-      }
-
-      &--display {
-        grid-area: 3 / 1 / 4 / 2; // Colonne unique
-      }
-
-      &--vacation {
-        grid-area: 4 / 1 / 5 / 2; // Colonne unique
-      }
-
-      &--rate {
-        grid-area: 5 / 1 / 6 / 2; // Colonne unique
+      &:active {
+        cursor: grabbing;
       }
     }
   }
