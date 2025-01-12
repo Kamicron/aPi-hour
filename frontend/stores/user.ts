@@ -24,7 +24,7 @@ export const useUserStore = defineStore('user', () => {
     }
   }
 
-  async function updateSettings($api: any, settings: { weeklyHoursGoal: number }) {
+  async function updateSettings($api: any, settings: { weeklyHoursGoal?: number, dashboardLayout?: any }) {
     try {
       const response = await $api.patch('/users/settings', settings, {
         headers: {
@@ -44,7 +44,10 @@ export const useUserStore = defineStore('user', () => {
       throw error;
     }
   }
-  
+
+  async function saveDashboardLayout($api: any, layout: any) {
+    return updateSettings($api, { dashboardLayout: layout });
+  }
 
   function logout() {
     
@@ -62,6 +65,7 @@ export const useUserStore = defineStore('user', () => {
     profile,
     fetchProfile,
     updateSettings,
+    saveDashboardLayout,
     logout,
   };
 });

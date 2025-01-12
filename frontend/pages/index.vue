@@ -1,41 +1,49 @@
 <template>
   <div class="index">
     <client-only>
-      <grid-layout
-        :layout.sync="components"
-        :col-num="12"
-        :row-height="30"
-        :is-draggable="true"
-        :is-resizable="true"
-        :responsive="true"
-        :is-bounded="true"
-        :vertical-compact="true"
-        :use-css-transforms="true"
-
-        @layout-updated="onLayoutUpdated"
-      >
-        <grid-item
-          v-for="(component, index) in components"
-          :key="component.id"
-          :x="component.x"
-          :y="component.y"
-          :w="component.w"
-          :h="component.h"
-          :i="component.i"
-          drag-allow-from=".vue-draggable-handle"
-          drag-ignore-from=".no-drag"
+      <div class="work-sessions">
+        <grid-layout
+          v-model:layout="components"
+          :col-num="12"
+          :row-height="30"
+          :is-draggable="true"
+          :is-resizable="true"
+          :vertical-compact="true"
+          :use-css-transforms="true"
+          @layout-updated="onLayoutUpdated"
         >
-        <div class="work-sessions__layout--item">
-          <div class="vue-draggable-handle">
-            <i class="vue-draggable-handle__icon fa-solid fa-up-down-left-right"></i>
-          </div>
-          <div class="no-drag">
-            <component class="work-sessions__layout--component" :is="componentsMap[component.name]" v-bind="component.props" />
-            <!-- {{ component.x }} {{ component.y }} {{ component.w }} {{ component.h }} -->
-          </div>
-        </div>
-      </grid-item>
-      </grid-layout>
+          <grid-item
+            v-for="component in components"
+            :key="component.i"
+            :x="component.x"
+            :y="component.y"
+            :w="component.w"
+            :h="component.h"
+            :i="component.i"
+            drag-allow-from=".vue-draggable-handle"
+            drag-ignore-from=".no-drag"
+          >
+            <div class="work-sessions__layout--item">
+              <div class="vue-draggable-handle">
+                <i class="vue-draggable-handle__icon fa-solid fa-up-down-left-right"></i>
+              </div>
+              <div class="no-drag">
+                <component class="work-sessions__layout--component" :is="componentsMap[component.name]" v-bind="component.props" />
+              </div>
+            </div>
+          </grid-item>
+        </grid-layout>
+        
+        <v-btn
+          color="primary"
+          class="save-layout-btn"
+          @click="saveLayoutToServer"
+          :loading="isSaving"
+        >
+          <i class="fas fa-save mr-2"></i>
+          Sauvegarder la disposition
+        </v-btn>
+      </div>
     </client-only>
   </div>
 </template>
@@ -49,6 +57,13 @@ import ExtraHoursDisplay from '../components/sessions/extra-hours-display.vue';
 import SetVacation from '../components/vacation/set_vacation.vue';
 import ExtraHoursRate from '../components/sessions/extra-hours-rate.vue';
 import ExtraHoursPdf from '../components/sessions/extra-hours-pdf.vue';
+import { useUserStore } from '~/stores/user';
+import { useNuxtApp, useCookie } from '#app';
+
+const userStore = useUserStore();
+const { $api } = useNuxtApp();
+const token = useCookie('token');
+const isSaving = ref(false);
 
 const componentsMap = {
   calendar: Calendar,
@@ -81,11 +96,30 @@ const onLayoutUpdated = (newLayout) => {
   }
 };
 
-onMounted(() => {
+const saveLayoutToServer = async () => {
+  try {
+    isSaving.value = true;
+    await userStore.saveDashboardLayout($api, components.value);
+    alert('Disposition sauvegardée avec succès');
+  } catch (error) {
+    console.error('Erreur lors de la sauvegarde:', error);
+    alert('Erreur lors de la sauvegarde de la disposition');
+  } finally {
+    isSaving.value = false;
+  }
+};
+
+onMounted(async () => {
   if (process.client) {
-    const savedLayout = localStorage.getItem('dashboardLayout');
-    if (savedLayout) {
-      components.value = JSON.parse(savedLayout);
+    // Essayer de charger depuis le profil utilisateur
+    if (userStore.profile?.dashboardLayout) {
+      components.value = userStore.profile.dashboardLayout;
+    } else {
+      // Fallback vers localStorage
+      const savedLayout = localStorage.getItem('dashboardLayout');
+      if (savedLayout) {
+        components.value = JSON.parse(savedLayout);
+      }
     }
   }
 });
@@ -93,6 +127,10 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .work-sessions {
+  position: relative;
+  height: 100%;
+  width: 100%;
+
   &__layout {
    &--component {
     display: flex;
@@ -219,5 +257,12 @@ onMounted(() => {
   flex-direction: column;
   height: 100%;
   width: 100%;
+}
+
+.save-layout-btn {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
 }
 </style>

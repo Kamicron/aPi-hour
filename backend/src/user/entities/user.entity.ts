@@ -50,6 +50,9 @@ export class User {
   @Column({ type: 'simple-array', default: '1,2,3,4,5' })
   workingDays: number[];
 
+  @Column({ type: 'json', nullable: true })
+  dashboardLayout: any;
+
   @OneToMany(() => Declaration, (declaration) => declaration.user)
   declarations: Declaration[];
 

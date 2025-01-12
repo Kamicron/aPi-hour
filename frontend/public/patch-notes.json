@@ -1,5 +1,21 @@
 [
   {
+    "version": "0.8.8",
+    "date": "2025-01-11",
+    "changes": {
+      "feat": [
+        "Ajout d'une interface drag & drop pour réorganiser les composants du tableau de bord",
+        "Sauvegarde automatique de la disposition des composants dans le localStorage",
+        "Possibilité de redimensionner les composants du tableau de bord",
+        "Nouvelle mise en page par défaut optimisée pour une meilleure expérience utilisateur"
+      ],
+      "fix": [
+        "Amélioration du style des composants pour une meilleure intégration dans la grille",
+        "Optimisation de l'affichage des icônes de drag & drop"
+      ]
+    }
+  },
+  {
     "version": "0.8.7",
     "date": "2025-01-10",
     "changes": {
