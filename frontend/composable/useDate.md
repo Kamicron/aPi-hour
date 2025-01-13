@@ -142,7 +142,6 @@ const formattedDate4 = useDateFormatter().formatDate('2024-12-22T15:30:45', {
 // Résultat : "03:30 PM"
 ```
 
-
 **Exemple 5 : Format avec fractions de secondes et fuseau horaire long**
 ```javascript
 import useDateFormatter from '../../composable/useDate';
@@ -157,6 +156,20 @@ const formattedDate5 = useDateFormatter().formatDate('2024-12-22T15:30:45.123', 
   },
 });
 // Résultat : "15:30:45.123 Temps universel coordonné"
+```
+
+**Exemple 6 : Format YYYY-MM-DD**
+```javascript
+import useDateFormatter from '../../composable/useDate';
+const formattedDate6 = useDateFormatter().formatDate('2024-12-22', {
+  customOptions: {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    formatMatcher: 'basic'
+  }
+});
+// Résultat : "2024-12-22"
 ```
 
 ---

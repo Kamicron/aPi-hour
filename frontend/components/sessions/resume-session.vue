@@ -67,14 +67,16 @@ import { useNuxtApp, useCookie } from '#app';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 import { useGlobalEvents } from '~/composable/useGlobalEvent';
 import { useUserStore } from '../../stores/user';
+import useDateFormatter from '~/composable/useDate';
 
-const props = defineProps({
-  selectedDate: String,
-});
+const props = defineProps<{
+  selectedDate: Date | null;
+}>();
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
 const profileStore = useUserStore();
+const { formatDate } = useDateFormatter();
 
 // Variables réactives
 const summary = ref<any | null>(null);
@@ -90,7 +92,6 @@ useGlobalEvents().subscribeTo<boolean | undefined>(EGlobalEvent.UPDATE_DAY, () =
   fetchSessions()
 });
 
-// Exemple de profil utilisateur (peut être remplacé par une prop si nécessaire)
 // Calcul dynamique de l'objectif quotidien en fonction du profil
 const userProfile = computed(() => {
   if (!profileStore.profile) {
@@ -118,13 +119,22 @@ const overtime = computed(() => {
 
 // Récupérer les sessions par date
 async function fetchSessions() {
+  if (!props.selectedDate) return;
+  
   try {
-    const response = await $api.get(`/time-entries/date/${props.selectedDate}`, {
+    const formattedDate = formatDate(props.selectedDate, {
+      customOptions: {
+        dateStyle: 'YYYY-MM-DD'
+      }
+    });
+    if (!formattedDate) return;
+
+    const response = await $api.get(`/time-entries/date/${formattedDate}`, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     summary.value = response.data;
   } catch (error) {
-    console.error('Erreur lors de la récupération des sessions', error);
+    console.error('Erreur lors de la récupération des sessions:', error);
   }
 }
 
@@ -166,10 +176,10 @@ function cancelCreateSession() {
 }
 
 // Récupérer les sessions lorsque la date change
-watch(() => props.selectedDate, fetchSessions);
-
-// Charger les données initiales
-fetchSessions();
+watch(() => props.selectedDate, (newDate) => {
+  console.log('Date sélectionnée changée:', newDate);
+  fetchSessions();
+}, { immediate: true });
 
 // Formatage des données
 function formatTime(seconds: number) {
@@ -177,11 +187,6 @@ function formatTime(seconds: number) {
   const m = Math.floor((seconds % 3600) / 60).toString().padStart(2, '0');
   const s = Math.floor(seconds % 60).toString().padStart(2, '0');
   return `${h}:${m}:${s}`;
-}
-
-function formatDate(date: string | Date) {
-  const d = new Date(date);
-  return d.toLocaleString();
 }
 
 function formatOvertime(seconds: number) {
@@ -366,6 +371,5 @@ function formatOvertime(seconds: number) {
     }
   }
 }
-
 
 </style>

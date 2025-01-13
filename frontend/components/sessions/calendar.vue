@@ -440,7 +440,7 @@ const handleDateInput = (event: Event) => {
   }
 
 
-  @container calendar (min-height: 500px) and (min-width: 420px) {
+  @container calendar (min-height: 545px) and (min-width: 491px) {
     .calendar__small {
       display: none;
     }

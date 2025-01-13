@@ -4,7 +4,8 @@
     "date": "2025-01-11",
     "changes": {
       "fix": [
-        "Amélioration du composant calendar afin de le rendre responsive"
+        "Amélioration du composant calendar afin de le rendre responsive",
+        "Réactivité lors de la selection d'une date du calendrier"
       ]
     }
   },

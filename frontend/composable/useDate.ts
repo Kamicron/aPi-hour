@@ -1,6 +1,14 @@
 export default function useDateFormatter() {
   const defaultLocale = "fr-FR";
 
+  // Fonction pour formater les dates en YYYY-MM-DD
+  const formatToYYYYMMDD = (date: Date | string | null): string | null => {
+    if (!date) return null;
+    const d = new Date(date);
+    if (isNaN(d.getTime())) return null;
+    return d.toISOString().split('T')[0];
+  };
+
   // Fonction pour formater les dates
   const formatDate = (date, options = {}) => {
     const {
@@ -14,6 +22,13 @@ export default function useDateFormatter() {
     try {
       // Si customOptions est défini, utiliser uniquement ces options
       if (Object.keys(customOptions).length > 0) {
+        // Si un style de date personnalisé est demandé
+        if (customOptions.dateStyle === 'YYYY-MM-DD') {
+          const d = new Date(date);
+          if (isNaN(d.getTime())) return null;
+          return d.toISOString().split('T')[0];
+        }
+        
         return new Intl.DateTimeFormat(locale, customOptions).format(
           new Date(date)
         );
@@ -127,5 +142,6 @@ export default function useDateFormatter() {
     formatDate,
     formatRelativeDate,
     calculateDuration,
+    formatToYYYYMMDD,
   };
 }

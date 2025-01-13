@@ -13,7 +13,7 @@
               </div>
               <div class="no-drag">
                 <component class="work-sessions__layout--component" :is="componentsMap[component.name]"
-                  v-bind="component.props" />
+                  v-bind="getComponentProps(component)" @pick-date="handleDatePick" />
               </div>
             </div>
           </grid-item>
@@ -44,6 +44,7 @@ const userStore = useUserStore();
 const { $api } = useNuxtApp();
 const token = useCookie('token');
 const isSaving = ref(false);
+const selectedDate = ref(null);
 
 const componentsMap = {
   calendar: Calendar,
@@ -54,23 +55,48 @@ const componentsMap = {
   "extra-hours-pdf": ExtraHoursPdf,
 };
 
-const components = ref([
+const getInitialComponents = () => [
   { id: "calendar", name: "calendar", x: 0, y: 0, w: 4, h: 16, i: "calendar", props: {} },
-  { id: "resume", name: "resume-session", x: 4, y: 0, w: 5, h: 16, i: "resume", props: { selectedDate: null } },
+  { id: "resume", name: "resume-session", x: 4, y: 0, w: 5, h: 16, i: "resume", props: { selectedDate: selectedDate.value } },
   { id: "display", name: "extra-hours-display", x: 9, y: 0, w: 3, h: 9, i: "display", props: {} },
   { id: "vacation", name: "set_vacation", x: 7, y: 16, w: 5, h: 8, i: "vacation", props: {} },
   { id: "rate", name: "extra-hours-rate", x: 0, y: 16, w: 7, h: 8, i: "rate", props: { currentMonth: null } },
   { id: "generate", name: "extra-hours-pdf", x: 9, y: 9, w: 3, h: 7, i: "generate", props: { title: "Autre" } },
-]);
+];
+
+const components = ref(getInitialComponents());
+
+const handleDatePick = (date: Date) => {
+  selectedDate.value = date;
+  // Mettre à jour les props du composant resume-session
+  const resumeComponent = components.value.find(c => c.id === "resume");
+  if (resumeComponent) {
+    resumeComponent.props = { ...resumeComponent.props, selectedDate: date };
+  }
+
+  console.log('selectedDate', selectedDate.value);
+};
+
+const getComponentProps = (component) => {
+  if (component.name === "resume-session") {
+    return { ...component.props, selectedDate: selectedDate.value };
+  }
+  return component.props;
+};
 
 const onLayoutUpdated = (newLayout) => {
-  components.value = newLayout.map((item, index) => ({
-    ...components.value[index],
-    x: item.x,
-    y: item.y,
-    w: item.w,
-    h: item.h,
-  }));
+  components.value = newLayout.map((item, index) => {
+    const comp = { ...components.value[index] };
+    comp.x = item.x;
+    comp.y = item.y;
+    comp.w = item.w;
+    comp.h = item.h;
+    // Préserver les props mis à jour
+    if (comp.name === "resume-session") {
+      comp.props = { ...comp.props, selectedDate: selectedDate.value };
+    }
+    return comp;
+  });
   if (process.client) {
     localStorage.setItem('dashboardLayout', JSON.stringify(components.value));
   }
@@ -91,15 +117,26 @@ const saveLayoutToServer = async () => {
 
 onMounted(async () => {
   if (process.client) {
+    let loadedComponents;
     // Essayer de charger depuis le profil utilisateur
     if (userStore.profile?.dashboardLayout) {
-      components.value = userStore.profile.dashboardLayout;
+      loadedComponents = userStore.profile.dashboardLayout;
     } else {
       // Fallback vers localStorage
       const savedLayout = localStorage.getItem('dashboardLayout');
       if (savedLayout) {
-        components.value = JSON.parse(savedLayout);
+        loadedComponents = JSON.parse(savedLayout);
       }
+    }
+
+    if (loadedComponents) {
+      // S'assurer que les props sont correctement initialisés
+      components.value = loadedComponents.map(comp => {
+        if (comp.name === "resume-session") {
+          return { ...comp, props: { ...comp.props, selectedDate: selectedDate.value } };
+        }
+        return comp;
+      });
     }
   }
 });
