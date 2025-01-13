@@ -2,44 +2,24 @@
   <div class="index">
     <client-only>
       <div class="work-sessions">
-        <grid-layout
-          v-model:layout="components"
-          :col-num="12"
-          :row-height="30"
-          :is-draggable="true"
-          :is-resizable="true"
-          :vertical-compact="true"
-          :use-css-transforms="true"
-          @layout-updated="onLayoutUpdated"
-        >
-          <grid-item
-            v-for="component in components"
-            :key="component.i"
-            :x="component.x"
-            :y="component.y"
-            :w="component.w"
-            :h="component.h"
-            :i="component.i"
-            drag-allow-from=".vue-draggable-handle"
-            drag-ignore-from=".no-drag"
-          >
+        <grid-layout v-model:layout="components" :col-num="12" :row-height="30" :is-draggable="true"
+          :is-resizable="true" :vertical-compact="true" :use-css-transforms="true" @layout-updated="onLayoutUpdated">
+          <grid-item v-for="component in components" :key="component.i" :x="component.x" :y="component.y"
+            :w="component.w" :h="component.h" :i="component.i" drag-allow-from=".vue-draggable-handle"
+            drag-ignore-from=".no-drag">
             <div class="work-sessions__layout--item">
               <div class="vue-draggable-handle">
                 <i class="vue-draggable-handle__icon fa-solid fa-up-down-left-right"></i>
               </div>
               <div class="no-drag">
-                <component class="work-sessions__layout--component" :is="componentsMap[component.name]" v-bind="component.props" />
+                <component class="work-sessions__layout--component" :is="componentsMap[component.name]"
+                  v-bind="component.props" />
               </div>
             </div>
           </grid-item>
         </grid-layout>
-        
-        <v-btn
-          color="primary"
-          class="save-layout-btn"
-          @click="saveLayoutToServer"
-          :loading="isSaving"
-        >
+
+        <v-btn color="primary" class="save-layout-btn" @click="saveLayoutToServer" :loading="isSaving">
           <i class="fas fa-save mr-2"></i>
           Sauvegarder la disposition
         </v-btn>
@@ -132,26 +112,25 @@ onMounted(async () => {
   width: 100%;
 
   &__layout {
-   &--component {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-    width: 100%;
-
-
 
     &--item {
-      height:  100%;
-      width: 100%;
+      height: 100% !important;
+      width: 100% !important;
+
+      .no-drag {
+        height: 100%;
+        width: 100%;
+      }
     }
 
-    .no-drag {
-      height:  100%;
+    &--component {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
       width: 100%;
     }
   }
-   }
-  }
+}
 
 .index {
   display: flex;
@@ -173,40 +152,38 @@ onMounted(async () => {
   }
 
   :deep(.vue-grid-item.vue-grid-placeholder) {
-        background: green;
-      }
+    background: green;
+  }
 
-    .vue-grid-item:not(.vue-grid-placeholder) {
-      // background: #ccc;
-      // border: 1px solid black;
-      background-color: $color-surface;
-      color: $color-text-primary;
-      padding: $spacing-large;
-      border-radius: $border-radius;
-    }
+  .vue-grid-item:not(.vue-grid-placeholder) {
+    background-color: $color-surface;
+    color: $color-text-primary;
+    padding: $spacing-large;
+    border-radius: $border-radius;
+  }
 
+  .vue-grid-item.static {
+    background: #cce;
+  }
 
-
-    .vue-grid-item.static {
-        background: #cce;
-    }
-
-    .vue-grid-item .text {
-        font-size: 24px;
-        text-align: center;
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-        height: 100%;
-        width: 100%;
-    }
+  .vue-grid-item .text {
+    font-size: 24px;
+    text-align: center;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    height: 100%;
+    width: 100%;
+  }
 }
+
 .grid-layout {
   background-color: #f8f9fa;
 }
+
 .text {
   background-color: #ddd;
   display: block;

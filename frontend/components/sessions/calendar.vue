@@ -1,32 +1,56 @@
 <template>
   <div class="calendar">
     <h2>Calendrier</h2>
-    <div class="calendar__header">
-      <button class="btn" @click="changeMonth(-1)">&lt;</button>
-      <h2>{{ monthName }} {{ currentYear }}</h2>
-      <button class="btn" @click="changeMonth(1)">&gt;</button>
-    </div>
-    <div class="calendar__grid">
-      <div class="calendar__day" v-for="day in daysOfWeek" :key="day">
-        {{ day }}
-      </div>
-      <div v-for="day in paddedDays" :key="day.date.toISOString()" :class="[
-        'calendar__cell',
-        {
-          'calendar__cell--inactive': day.isInactive,
-          'calendar__cell--today': isToday(day.date),
-          'calendar__cell--selected': isSelected(day.date),
-          'calendar__cell--session': day.hasSession,
-          'calendar__cell--vacation': day.hasVacation,
-          'calendar__cell--public-holiday': day.isPublicHoliday, // Nouvelle classe pour les jours fériés
-        },
-      ]" @click="selectDay(day.date)">
-        <span class="date">{{ day.date.getDate() }}</span>
+    <div class="calendar__small">
+      <div class="small">
+        <div class="small__header">
+          <button class="btn" @click="changeDayInSmall(-1)">&lt;</button>
+          <div class="small__date-selector">
+            <input type="date" :value="selectedDate ? formatDateForInput(selectedDate) : ''" @input="handleDateInput"
+              class="small__date-input pi-input" />
+            <div class="small__current-date">
+              {{ selectedDate ? new Date(selectedDate).toLocaleDateString('fr-FR', {
+                weekday: 'long', day: 'numeric',
+                month: 'long'
+              }) : '' }}
+            </div>
+          </div>
+          <button class="btn" @click="changeDayInSmall(1)">&gt;</button>
+        </div>
       </div>
     </div>
-    <div class="calendar__footer" v-if="selectedDate">
-      Date sélectionnée : {{ new Date(selectedDate).toLocaleDateString('fr-FR') }}
+    <div class="calendar__large">
+      <div class="large">
+        <div class="calendar__header">
+          <button class="btn" @click="changeMonth(-1)">&lt;</button>
+          <h2>{{ monthName }} {{ currentYear }}</h2>
+          <button class="btn" @click="changeMonth(1)">&gt;</button>
+        </div>
+        <div class="calendar__grid">
+          <div class="calendar__day" v-for="day in daysOfWeek" :key="day">
+            {{ day }}
+          </div>
+          <div v-for="day in paddedDays" :key="day.date.toISOString()" :class="[
+            'calendar__cell',
+            {
+              'calendar__cell--inactive': day.isInactive,
+              'calendar__cell--today': isToday(day.date),
+              'calendar__cell--selected': isSelected(day.date),
+              'calendar__cell--session': day.hasSession,
+              'calendar__cell--vacation': day.hasVacation,
+              'calendar__cell--public-holiday': day.isPublicHoliday, // Nouvelle classe pour les jours fériés
+            },
+          ]" @click="selectDay(day.date)">
+            <span class="date">{{ day.date.getDate() }}</span>
+          </div>
+        </div>
+        <div class="calendar__footer" v-if="selectedDate">
+          Date sélectionnée : {{ new Date(selectedDate).toLocaleDateString('fr-FR') }}
+        </div>
+      </div>
     </div>
+
+
   </div>
 </template>
 
@@ -210,13 +234,102 @@ async function fetchTimeEntriesAndVacations() {
 }
 
 watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: true });
+
+// Fonctions pour la vue "small"
+const changeDayInSmall = (direction: number) => {
+  if (!selectedDate.value) {
+    selectedDate.value = new Date();
+  }
+
+  const newDate = new Date(selectedDate.value);
+  newDate.setDate(newDate.getDate() + direction);
+  newDate.setHours(12, 0, 0); // Pour éviter les problèmes de timezone
+
+  selectDay(newDate);
+
+  if (newDate.getMonth() !== currentMonth.value || newDate.getFullYear() !== currentYear.value) {
+    currentMonth.value = newDate.getMonth();
+    currentYear.value = newDate.getFullYear();
+  }
+};
+
+const formatDateForInput = (date: Date) => {
+  const d = new Date(date);
+  return d.toISOString().split('T')[0];
+};
+
+const handleDateInput = (event: Event) => {
+  const input = event.target as HTMLInputElement;
+  const date = new Date(input.value);
+  date.setHours(12, 0, 0);
+  selectDay(date);
+
+  currentMonth.value = date.getMonth();
+  currentYear.value = date.getFullYear();
+};
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .calendar {
   color: $color-text-primary;
   padding: $spacing-large;
-  min-width: 450px;
+  width: 100%;
+  height: 100%;
+  min-height: 200px;
+  box-sizing: border-box;
+  position: relative;
+
+  h2 {
+    text-align: center;
+    margin-bottom: $spacing-medium;
+  }
+
+  .small {
+    display: block;
+    height: 100%;
+
+    &__header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: $spacing-small;
+    }
+
+    &__date-selector {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: $spacing-small;
+      min-width: 0;
+    }
+
+    &__date-input {
+      width: 100%;
+      max-width: 150px;
+      text-align: center;
+
+      &::-webkit-calendar-picker-indicator {
+        filter: invert(1);
+      }
+    }
+
+    &__current-date {
+      text-align: center;
+      color: $color-primary;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      width: 100%;
+    }
+
+    .btn {
+      padding: $spacing-small;
+      min-width: 32px;
+    }
+  }
+
 
   &__header {
     display: flex;
@@ -242,7 +355,6 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
     cursor: pointer;
     border: 1px solid $color-text-primary;
     border-radius: 4px;
-
 
     &--inactive {
       background-color: $color-surface;
@@ -306,6 +418,36 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
     margin-top: 1rem;
     text-align: center;
     font-weight: bold;
+  }
+}
+
+.calendar {
+  container-type: size;
+  container-name: calendar;
+  position: relative;
+  width: 100%;
+  height: 100%;
+
+  &__small {
+    display: block;
+    color: white;
+  }
+
+  &__large {
+    display: none;
+    color: white;
+    padding: 20px;
+  }
+
+
+  @container calendar (min-height: 500px) and (min-width: 420px) {
+    .calendar__small {
+      display: none;
+    }
+
+    .calendar__large {
+      display: block;
+    }
   }
 }
 </style>

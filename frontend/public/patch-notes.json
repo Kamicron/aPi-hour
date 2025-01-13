@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.9.1",
+    "date": "2025-01-11",
+    "changes": {
+      "fix": [
+        "Amélioration du composant calendar afin de le rendre responsive"
+      ]
+    }
+  },
+  {
     "version": "0.9.0",
     "date": "2025-01-11",
     "changes": {
