@@ -1,21 +1,22 @@
 <template>
-  <transition name="modal-fade">
-    <div v-if="isOpen" class="modal" @click.self="closeModal">
-      <div class="modal__content">
-        <header class="modal__header">
-          <p class="modal__header--text">{{ title }}</p>
-          <div class="modal__close" @click="closeModal">
-            <i class="fa-solid fa-xmark"></i>
+  <teleport to="body">
+    <transition name="modal-fade">
+      <div v-if="isOpen" class="modal" @click.self="closeModal">
+        <div class="modal__content">
+          <header class="modal__header">
+            <p class="modal__header--text">{{ title }}</p>
+            <div class="modal__close" @click="closeModal">
+              <i class="fa-solid fa-xmark"></i>
+            </div>
+          </header>
+
+          <div class="modal__slot">
+            <slot></slot>
           </div>
-        </header>
-
-        <div class="modal__slot">
-          <slot></slot>
         </div>
-
       </div>
-    </div>
-  </transition>
+    </transition>
+  </teleport>
 </template>
 
 <script setup lang="ts">

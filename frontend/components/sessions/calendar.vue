@@ -1,7 +1,11 @@
 <template>
   <div class="calendar">
-    <h2>Calendrier</h2>
+    <div class="calendar__ultra-small">
+      <button class="btn" @click="toggleCalendarView = true"><i class="fa-regular fa-calendar"></i></button>
+    </div>
     <div class="calendar__small">
+      <h2>Calendrier</h2>
+
       <div class="small">
         <div class="small__header">
           <button class="btn" @click="changeDayInSmall(-1)">&lt;</button>
@@ -20,6 +24,8 @@
       </div>
     </div>
     <div class="calendar__large">
+      <h2>Calendrier</h2>
+
       <div class="large">
         <div class="calendar__header">
           <button class="btn" @click="changeMonth(-1)">&lt;</button>
@@ -49,9 +55,38 @@
         </div>
       </div>
     </div>
-
-
   </div>
+
+  <modal v-model="toggleCalendarView" title="Calendrier">
+    <div class="large">
+      <div class="calendar__header">
+        <button class="btn" @click="changeMonth(-1)">&lt;</button>
+        <h2>{{ monthName }} {{ currentYear }}</h2>
+        <button class="btn" @click="changeMonth(1)">&gt;</button>
+      </div>
+      <div class="calendar__grid">
+        <div class="calendar__day" v-for="day in daysOfWeek" :key="day">
+          {{ day }}
+        </div>
+        <div v-for="day in paddedDays" :key="day.date.toISOString()" :class="[
+          'calendar__cell',
+          {
+            'calendar__cell--inactive': day.isInactive,
+            'calendar__cell--today': isToday(day.date),
+            'calendar__cell--selected': isSelected(day.date),
+            'calendar__cell--session': day.hasSession,
+            'calendar__cell--vacation': day.hasVacation,
+            'calendar__cell--public-holiday': day.isPublicHoliday, // Nouvelle classe pour les jours fériés
+          },
+        ]" @click="selectDay(day.date)">
+          <span class="date">{{ day.date.getDate() }}</span>
+        </div>
+      </div>
+      <div class="calendar__footer" v-if="selectedDate">
+        Date sélectionnée : {{ new Date(selectedDate).toLocaleDateString('fr-FR') }}
+      </div>
+    </div>
+  </modal>
 </template>
 
 <script setup lang="ts">
@@ -59,7 +94,8 @@ import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie, useRoute } from '#app';
 import { useGlobalEvents } from '~/composable/useGlobalEvent';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
-import { emit } from 'process';
+
+const toggleCalendarView = ref<boolean>(false)
 
 const currentYear = ref(new Date().getFullYear());
 const currentMonth = ref(new Date().getMonth());
@@ -134,8 +170,6 @@ const hasVacationOnDay = (date: Date) => {
   return null;
 };
 
-
-
 const paddedDays = computed(() => {
   const days = [];
   const firstDayOfMonth = new Date(currentYear.value, currentMonth.value, 1);
@@ -185,7 +219,6 @@ const paddedDays = computed(() => {
 
   return days;
 });
-
 
 const changeMonth = (direction) => {
   currentMonth.value += direction;
@@ -272,10 +305,8 @@ const handleDateInput = (event: Event) => {
 <style lang="scss" scoped>
 .calendar {
   color: $color-text-primary;
-  padding: $spacing-large;
   width: 100%;
-  height: 100%;
-  min-height: 200px;
+  height: inherit !important;
   box-sizing: border-box;
   position: relative;
 
@@ -329,7 +360,6 @@ const handleDateInput = (event: Event) => {
       min-width: 32px;
     }
   }
-
 
   &__header {
     display: flex;
@@ -425,29 +455,71 @@ const handleDateInput = (event: Event) => {
   container-type: size;
   container-name: calendar;
   position: relative;
-  width: 100%;
-  height: 100%;
+  width: inherit;
+  // height: 100%;
 
-  &__small {
-    display: block;
-    color: white;
+  // États par défaut
+  .calendar__ultra-small {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%
   }
 
-  &__large {
+  .calendar__small {
     display: none;
-    color: white;
-    padding: 20px;
   }
 
+  .calendar__large {
+    display: none;
+  }
 
-  @container calendar (min-height: 545px) and (min-width: 491px) {
+  @container calendar ((min-height: 100px) and (max-height: 545px)) and (min-width: 200px) {
+    .calendar {
+      padding: 0;
+    }
+
+    .calendar__ultra-small {
+      display: none;
+    }
+
+    .calendar__small {
+      display: block;
+    }
+  }
+
+  @container calendar (min-height: 545px) and (min-width: 400px) {
+    .calendar__large {
+      display: block;
+    }
+
     .calendar__small {
       display: none;
     }
 
-    .calendar__large {
-      display: block;
+    .calendar__ultra-small {
+      display: none;
     }
   }
 }
-</style>
+
+// // Style pour la modale du calendrier
+// :deep(.modal) {
+//   position: fixed !important;
+//   top: 0 !important;
+//   left: 0 !important;
+//   width: 100vw !important;
+//   height: 100vh !important;
+//   z-index: 9999 !important;
+//   container-type: initial !important;
+
+//   .modal__content {
+//     width: 90% !important;
+//     max-width: 800px !important;
+//     height: 80vh !important;
+//     max-height: 800px !important;
+//     margin: auto !important;
+//     overflow: auto !important;
+//   }
+// }</style>
