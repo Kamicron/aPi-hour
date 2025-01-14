@@ -8,7 +8,8 @@
         "Ajout d'une modale lorsque le composant calendar est trop petit",
         "Amélioration du composant générateur de pdf afin de le rendre responsive",
         "Amélioration du composant d'affichage des heures supplémentaires afin de le rendre responsive",
-        "Amélioration du composant de gestion des congés afin de le rendre responsive"
+        "Amélioration du composant de gestion des congés afin de le rendre responsive",
+        "Amélioration du composant d'affichage des majorations afin de le rendre responsive"
       ]
     }
   },

@@ -1,5 +1,22 @@
 <template>
-    <div class="time-entry-summary">
+  <div class="time-entry-summary">
+    <div class="time-entry-summary__ultra-small">
+      <button class="btn" @click="toggleRateView = true">
+        <i class="fa-solid fa-percent"></i>
+      </button>
+    </div>
+
+    <div class="time-entry-summary__small">
+      <h2>Majorations</h2>
+      <div class="time-entry-summary__totals">
+        <p class="time-entry-summary__total-line">
+          <span class="time-entry-summary__value">{{ totalExtra25Hours }}h (+25%)</span>
+          <span class="time-entry-summary__value">{{ totalExtra50Hours }}h (+50%)</span>
+        </p>
+      </div>
+    </div>
+
+    <div class="time-entry-summary__large">
       <h2>Résumé des heures travaillées</h2>
       <div class="time-entry-summary__totals">
         <p class="time-entry-summary__total-line">
@@ -33,25 +50,82 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <modal v-model="toggleRateView" title="Résumé des heures travaillées">
+    <div class="time-entry-summary__modal">
+      <h2>Résumé des heures travaillées</h2>
+      <div class="time-entry-summary__totals">
+        <p class="time-entry-summary__total-line">
+          <span class="time-entry-summary__label">Total heures à 25 % :</span>
+          <span class="time-entry-summary__value">{{ totalExtra25Hours }} h</span>
+        </p>
+        <p class="time-entry-summary__total-line">
+          <span class="time-entry-summary__label">Total heures à 50 % :</span>
+          <span class="time-entry-summary__value">{{ totalExtra50Hours }} h</span>
+        </p>
+      </div>
+      <div class="time-entry-summary__weekly-details">
+        <div v-for="week in sortedWeeklyHours" :key="week.weekStart" class="time-entry-summary__week">
+          <h3 class="time-entry-summary__week-title">
+            Semaine du {{ formatDate(week.weekStart) }} au {{ formatDate(week.weekEnd) }}
+          </h3>
+          <ul class="time-entry-summary__week-details">
+            <li>
+              <span class="time-entry-summary__label">Heures travaillées :</span>
+              <span class="time-entry-summary__value">{{ week.workedHours }} h</span>
+            </li>
+            <li>
+              <span class="time-entry-summary__label">Heures à 25 % :</span>
+              <span class="time-entry-summary__value">{{ week.extra25Hours }} h</span>
+            </li>
+            <li>
+              <span class="time-entry-summary__label">Heures à 50 % :</span>
+              <span class="time-entry-summary__value">{{ week.extra50Hours }} h</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </modal>
 </template>
 
 <script setup lang="ts">
+// ---- Import ----- 
 import { ref, computed, watch } from "vue";
 import { useCookie, useNuxtApp } from "#app";
+// ------------------
 
+// ---- Props ----
 const props = defineProps({
   currentMonth: {
     type: String,
-    required: true, // Format attendu : 'YYYY-MM'
+    required: true,
   },
 });
+// ------------------
 
+// ---- Reactive ----
 const { $api } = useNuxtApp();
 const token = useCookie("token");
 const userId = useCookie("userId");
 const weeklyDetails = ref([]);
 const totalExtra25Hours = ref(0);
 const totalExtra50Hours = ref(0);
+const toggleRateView = ref(false);
+// ------------------
+
+// ---- Computed ----
+const sortedWeeklyHours = computed(() => {
+  return [...weeklyDetails.value].sort((a, b) => new Date(a.weekStart) - new Date(b.weekStart));
+});
+// ------------------
+
+// ---- Methods ----
+const formatDate = (dateString) => {
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  return new Date(dateString).toLocaleDateString("fr-FR", options);
+};
 
 const fetchMonthlyHours = async () => {
   try {
@@ -69,16 +143,9 @@ const fetchMonthlyHours = async () => {
     console.error("Erreur lors du chargement des heures :", error);
   }
 };
+// ------------------
 
-const formatDate = (dateString) => {
-  const options = { year: "numeric", month: "long", day: "numeric" };
-  return new Date(dateString).toLocaleDateString("fr-FR", options);
-};
-
-const sortedWeeklyHours = computed(() => {
-  return [...weeklyDetails.value].sort((a, b) => new Date(a.weekStart) - new Date(b.weekStart));
-});
-
+// ---- Watch ----
 watch(
   () => props.currentMonth,
   () => {
@@ -86,10 +153,24 @@ watch(
   },
   { immediate: true }
 );
+// ------------------
 </script>
 
 <style lang="scss" scoped>
 .time-entry-summary {
+  color: $color-text-primary;
+  width: 100%;
+  height: inherit !important;
+  box-sizing: border-box;
+  position: relative;
+  container-type: size;
+  container-name: time-entry-summary;
+
+  h2 {
+    text-align: center;
+    margin-bottom: $spacing-medium;
+  }
+
   &__totals {
     background-color: $color-background;
     padding: $spacing-medium;
@@ -171,13 +252,72 @@ watch(
       }
     }
   }
+
+  // États par défaut
+  &__ultra-small {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+
+  &__small {
+    display: none;
+  }
+
+  &__large {
+    display: none;
+  }
+
+  // Règles de container
+  @container time-entry-summary ((min-height: 70px) and (max-height: 245px)) and (min-width: 200px) {
+    .time-entry-summary {
+      padding: 0;
+    }
+
+    .time-entry-summary__ultra-small {
+      display: none;
+    }
+
+    .time-entry-summary__small {
+      display: block;
+      padding: $spacing-medium;
+
+      .time-entry-summary__totals {
+        margin-bottom: 0;
+      }
+
+      .time-entry-summary__total-line {
+        gap: $spacing-medium;
+        justify-content: center;
+        margin: 0;
+      }
+    }
+  }
+
+  @container time-entry-summary (min-height: 245px) and (min-width: 300px) {
+    .time-entry-summary__large {
+      display: block;
+      padding: $spacing-large;
+    }
+
+    .time-entry-summary__small {
+      display: none;
+    }
+
+    .time-entry-summary__ultra-small {
+      display: none;
+    }
+  }
 }
 
-@media (max-width: $breakpoint-md) {
-  .time-entry-summary {
-    &__weekly-details {
-      grid-template-columns: 1fr;
-    }
+// Style pour la modale
+.time-entry-summary__modal {
+  padding: $spacing-large;
+
+  h2 {
+    margin-bottom: $spacing-large;
   }
 }
 </style>
