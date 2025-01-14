@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.8.8",
+    "date": "2025-01-10",
+    "changes": {
+      "fix": [
+        "Repositionnement des yeux du loader"
+      ]
+    }
+  },
+  {
     "version": "0.8.7",
     "date": "2025-01-10",
     "changes": {
@@ -41,7 +50,9 @@
     "version": "0.8.4",
     "date": "2025-01-07",
     "changes": {
-      "fix": ["Suppression des données mocké pour le nombre d'heure travaillé par semaine"]
+      "fix": [
+        "Suppression des données mocké pour le nombre d'heure travaillé par semaine"
+      ]
     }
   },
   {

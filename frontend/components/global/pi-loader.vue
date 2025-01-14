@@ -21,8 +21,8 @@
         y2="350.32"
       />
       <!-- Pupilles -->
-      <circle class="pupil left-pupil" cx="310.06" cy="170.78" r="18" />
-      <circle class="pupil right-pupil" cx="580.06" cy="170.78" r="18" />
+      <circle class="pupil left-pupil" cx="250.06" cy="120.78" r="18" />
+      <circle class="pupil right-pupil" cx="650.06" cy="110.78" r="18" />
     </svg>
   </div>
 </template>
