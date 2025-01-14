@@ -1,26 +1,56 @@
 <template>
-    <div class="extra-hours-pdf">
-      <h2>Générer PDF des heures supplémentaires</h2>
+  <div class="extra-hours-pdf">
+    <div class="extra-hours-pdf__ultra-small">
+      <button class="btn" @click="toggleExtraHoursView = true">
+        <i class="fa-solid fa-file-pdf"></i>
+      </button>
+    </div>
+
+    <div class="extra-hours-pdf__small">
+      <h2>Récapitulatif mensuel</h2>
       <div class="extra-hours-pdf__input">
         <label>
           Mois:
-          <input
-            class="pi-input"
-            type="month"
-            v-model="selectedMonth"
-            :max="currentMonth"
-          />
+          <input class="pi-input" type="month" v-model="selectedMonth" :max="currentMonth" />
         </label>
       </div>
-      <button
-        class="btn"
-        @click="generatePDF"
-        :disabled="!selectedMonth || loading"
-      >
+      <button class="btn" @click="generatePDF" :disabled="!selectedMonth || loading">
         <pi-loader v-if="loading" />
         <span v-else>Générer PDF</span>
       </button>
     </div>
+
+    <div class="extra-hours-pdf__large">
+      <h2>Récapitulatif mensuel</h2>
+      <div class="extra-hours-pdf__input">
+        <label>
+          Mois:
+          <input class="pi-input" type="month" v-model="selectedMonth" :max="currentMonth" />
+        </label>
+      </div>
+      <button class="btn" @click="generatePDF" :disabled="!selectedMonth || loading">
+        <pi-loader v-if="loading" />
+        <span v-else>Générer PDF</span>
+      </button>
+    </div>
+
+  </div>
+
+  <modal v-model="toggleExtraHoursView" title="Générer PDF">
+    <div class="extra-hours-pdf__modal">
+      <h2>Récapitulatif mensuel</h2>
+      <div class="extra-hours-pdf__input">
+        <label>
+          Mois:
+          <input class="pi-input" type="month" v-model="selectedMonth" :max="currentMonth" />
+        </label>
+      </div>
+      <button class="btn" @click="generatePDF" :disabled="!selectedMonth || loading">
+        <pi-loader v-if="loading" />
+        <span v-else>Générer PDF</span>
+      </button>
+    </div>
+  </modal>
 </template>
 
 <script setup lang="ts">
@@ -35,7 +65,7 @@ const token = useCookie('token');
 const selectedMonth = ref('');
 const loading = ref(false);
 const logoBase64 = ref('');
-
+const toggleExtraHoursView = ref(false);
 // Get current month in YYYY-MM format
 const currentMonth = computed(() => {
   const now = new Date();
@@ -60,7 +90,7 @@ const loadLogo = async () => {
 
 const generatePDF = async () => {
   if (!selectedMonth.value) return;
-  
+
   loading.value = true;
   try {
     // Charger le logo
@@ -78,8 +108,8 @@ const generatePDF = async () => {
     // Récupérer les congés
     const [year, month] = selectedMonth.value.split('-');
     const vacationsResponse = await $api.get('/time-entries/month', {
-      params: { 
-        year: parseInt(year), 
+      params: {
+        year: parseInt(year),
         month: parseInt(month)
       },
       headers: { Authorization: `Bearer ${token.value}` },
@@ -195,7 +225,7 @@ const generatePDF = async () => {
         const startDate = new Date(vacation.startDate);
         const endDate = new Date(vacation.endDate);
         const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-        
+
         return [
           `${startDate.toLocaleDateString('fr-FR')} au ${endDate.toLocaleDateString('fr-FR')}`,
           vacation.status,
@@ -245,7 +275,7 @@ const generatePDF = async () => {
         { align: 'center' }
       );
     }
-    
+
     // Save the PDF
     doc.save(`heures-sup-${selectedMonth.value}.pdf`);
   } catch (error) {
@@ -258,16 +288,85 @@ const generatePDF = async () => {
 
 <style lang="scss" scoped>
 .extra-hours-pdf {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-medium;
+  color: $color-text-primary;
+  width: 100%;
+  height: inherit !important;
+  box-sizing: border-box;
+  position: relative;
+  container-type: size;
+  container-name: extra-hours-pdf;
+
+  h2 {
+    text-align: center;
+    margin-bottom: $spacing-medium;
+  }
 
   &__input {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-small;
+    margin-bottom: $spacing-medium;
+
     label {
       display: flex;
       flex-direction: column;
       gap: $spacing-small;
     }
+  }
+
+  // États par défaut
+  &__ultra-small {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+  }
+
+  &__small {
+    display: none;
+  }
+
+  &__large {
+    display: none;
+  }
+
+  // Règles de container
+  @container extra-hours-pdf ((min-height: 150px) and (max-height: 545px)) and (min-width: 200px) {
+    .extra-hours-pdf {
+      padding: 0;
+    }
+
+    .extra-hours-pdf__ultra-small {
+      display: none;
+    }
+
+    .extra-hours-pdf__small {
+      display: block;
+    }
+  }
+
+  @container extra-hours-pdf (min-height: 545px) and (min-width: 400px) {
+    .extra-hours-pdf__large {
+      display: block;
+    }
+
+    .extra-hours-pdf__small {
+      display: none;
+    }
+
+    .extra-hours-pdf__ultra-small {
+      display: none;
+    }
+  }
+}
+
+// Style pour la modale
+.extra-hours-pdf__modal {
+  padding: $spacing-large;
+
+  h2 {
+    margin-bottom: $spacing-large;
   }
 }
 </style>

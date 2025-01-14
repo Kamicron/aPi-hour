@@ -5,7 +5,8 @@
     "changes": {
       "fix": [
         "Amélioration du composant calendar afin de le rendre responsive dans tout les cas",
-        "Ajout d'une modale lorsque le composant calendar est trop petit"
+        "Ajout d'une modale lorsque le composant calendar est trop petit",
+        "Amélioration du composant générateur de pdf afin de le rendre responsive"
       ]
     }
   },
