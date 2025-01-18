@@ -220,6 +220,7 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
   border-radius: $border-radius;
   box-shadow: $box-shadow-light;
   min-width: 450px;
+  min-height: 489px;
 
   &__header {
     display: flex;

@@ -180,9 +180,12 @@ fetchSessions();
 
       &--calendar {
         grid-area: 1 / 1 / 2 / 2; // Colonne unique
+        height: 622px;
       }
 
       &--resume {
+        max-height: 622px !important;
+
         grid-area: 2 / 1 / 3 / 2; // Colonne unique
       }
 

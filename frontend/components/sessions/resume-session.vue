@@ -25,7 +25,7 @@
 
     <section v-if="summary && summary.details.length" class="work-sessions__details">
       <h3 class="work-sessions__details-title">Détails des sessions :</h3>
-      <ul class="work-sessions__list">
+      <ul class="work-sessions__list scrollable">
         <li v-for="detail in summary.details" :key="detail.sessionId" class="work-sessions__card">
           <single-session :sessionId="detail.sessionId" :start-time="formatDate(detail.startTime)"
             :end-time="formatDate(detail.endTime)" :work-time="formatTime(detail.workTime)"
@@ -197,41 +197,22 @@ function formatOvertime(seconds: number) {
   color: $color-text-primary;
   padding: $spacing-large;
   border-radius: $border-radius;
-  height: 100%;
-  max-height: 100%;
-  overflow-y: auto; /* Active un défilement vertical si nécessaire */
+  height: 622px;
+  display: flex;
+  flex-direction: column;
 
-  &__layout {
-    display: flex;
-    flex-direction: row;
-    gap: $spacing-large;
-  }
-
-  &__calendar-column {
+  &__content-column {
     flex: 1;
     background-color: $color-surface;
     padding: $spacing-large;
     border-radius: $border-radius;
     box-shadow: $box-shadow-light;
-    box-shadow: $box-shadow-dark;
-
-  }
-
-  &__content-column {
-    flex: 2;
-    background-color: $color-surface;
-    padding: $spacing-large;
-    border-radius: $border-radius;
-    box-shadow: $box-shadow-light;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-  }
-
-  &__content--column {
     display: flex;
     flex-direction: column;
     gap: $spacing-large;
+    height: 100%;
+    overflow: hidden;
+    max-height: 622px;
   }
 
   &__summary {
@@ -264,69 +245,23 @@ function formatOvertime(seconds: number) {
 
   &__details {
     flex: 1;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
 
     &-title {
-      font-size: $font-size-base;
       margin-bottom: $spacing-medium;
     }
-
-    &__list {
-      list-style: none;
-      padding: 0;
-
-      &-item {
-        margin-bottom: $spacing-medium;
-
-        .work-sessions__card {
-          background-color: $color-surface;
-          border-radius: $border-radius;
-          box-shadow: $box-shadow-light;
-          padding: $spacing-medium;
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-
-          &:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-          }
-
-          &-content {
-            display: flex;
-            flex-direction: column;
-          }
-
-          &-header {
-            border-bottom: 1px solid $color-text-secondary;
-            margin-bottom: $spacing-medium;
-            padding-bottom: $spacing-small;
-          }
-
-          &-title {
-            font-size: $font-size-large;
-            font-weight: bold;
-          }
-
-          &-body p {
-            margin: $spacing-small 0;
-          }
-        }
-      }
-    }
   }
 
-  &__no-data {
-    text-align: center;
-    margin-top: $spacing-large;
-    font-size: $font-size-base;
-    color: $color-warning;
-  }
-}
-
-@media screen and (max-width: $breakpoint-lg) {
-  .work-sessions {
-    &__layout {
-      flex-direction: column;
-    }
+  &__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+    flex: 1;
+    max-height: calc(622px - 300px); /* Ajustez cette valeur selon vos besoins */
   }
 }
 
@@ -380,5 +315,11 @@ function formatOvertime(seconds: number) {
   }
 }
 
-
+@media screen and (max-width: $breakpoint-lg) {
+  .work-sessions {
+    &__layout {
+      flex-direction: column;
+    }
+  }
+}
 </style>

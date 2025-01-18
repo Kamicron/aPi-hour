@@ -4,11 +4,11 @@
       <div class="time-entry-summary__totals">
         <p class="time-entry-summary__total-line">
           <span class="time-entry-summary__label">Total heures à 25 % :</span>
-          <span class="time-entry-summary__value">{{ totalExtra25Hours }} h</span>
+          <span class="time-entry-summary__value">{{ roundNumber(totalExtra25Hours) }} h</span>
         </p>
         <p class="time-entry-summary__total-line">
           <span class="time-entry-summary__label">Total heures à 50 % :</span>
-          <span class="time-entry-summary__value">{{ totalExtra50Hours }} h</span>
+          <span class="time-entry-summary__value">{{ roundNumber(totalExtra50Hours) }} h</span>
         </p>
       </div>
       <div class="time-entry-summary__weekly-details">
@@ -19,15 +19,15 @@
           <ul class="time-entry-summary__week-details">
             <li>
               <span class="time-entry-summary__label">Heures travaillées :</span>
-              <span class="time-entry-summary__value">{{ week.workedHours }} h</span>
+              <span class="time-entry-summary__value">{{ roundNumber(week.workedHours) }} h</span>
             </li>
             <li>
               <span class="time-entry-summary__label">Heures à 25 % :</span>
-              <span class="time-entry-summary__value">{{ week.extra25Hours }} h</span>
+              <span class="time-entry-summary__value">{{ roundNumber(week.extra25Hours) }} h</span>
             </li>
             <li>
               <span class="time-entry-summary__label">Heures à 50 % :</span>
-              <span class="time-entry-summary__value">{{ week.extra50Hours }} h</span>
+              <span class="time-entry-summary__value">{{ roundNumber(week.extra50Hours) }} h</span>
             </li>
           </ul>
         </div>
@@ -53,6 +53,10 @@ const userId = useCookie("userId");
 const weeklyDetails = ref([]);
 const totalExtra25Hours = ref(0);
 const totalExtra50Hours = ref(0);
+
+const roundNumber = (value: number) => {
+  return Number(Math.round(value * 100) / 100).toFixed(2);
+};
 
 const fetchMonthlyHours = async () => {
   try {

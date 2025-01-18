@@ -1,0 +1,55 @@
+/* Styles personnalisés pour la barre de défilement */
+* {
+  /* Barre de défilement pour Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: $color-primary $color-surface;
+}
+
+/* Barre de défilement pour Chrome, Edge, et Safari */
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: $color-surface;
+  border-radius: $border-radius;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: $color-primary;
+  border-radius: $border-radius;
+  border: 2px solid $color-surface;
+
+  &:hover {
+    background-color: $color-primary-light;
+  }
+}
+
+/* Style pour les éléments avec défilement */
+.scrollable {
+  &::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: $color-surface;
+    border-radius: $border-radius;
+    margin: 4px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background-color: $color-primary;
+    border-radius: $border-radius;
+    border: 2px solid $color-surface;
+
+    &:hover {
+      background-color: $color-primary-light;
+    }
+  }
+
+  /* Firefox */
+  scrollbar-width: thin;
+  scrollbar-color: $color-primary $color-surface;
+}

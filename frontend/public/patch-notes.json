@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.8.9",
+    "date": "2025-01-18",
+    "changes": {
+      "feat": [
+        "Ajout d'une barre de défilement personnalisée avec la charte graphique",
+        "Hauteur fixe de 622px pour les composants calendar et resume"
+      ],
+      "fix": [
+        "Arrondi des valeurs numériques à 2 décimales dans le composant de calcul des heures supplémentaires",
+        "Optimisation du défilement dans la liste des sessions"
+      ]
+    }
+  },
+  {
     "version": "0.8.8",
     "date": "2025-01-10",
     "changes": {
