@@ -1,5 +1,5 @@
 <template>
-  <bento-card title="Générer PDF des heures supplémentaires">
+  <bento-card title="Rapport mensuel">
     <div class="extra-hours-pdf">
       <div class="extra-hours-pdf__input">
         <label>

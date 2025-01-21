@@ -738,4 +738,124 @@ export class TimeEntriesService {
 
     return count;
   }
+
+  async getExtraHoursHeatmap(userId: string) {
+    console.log('userId', userId);
+    
+    try {
+      // Calculer la période d'un an
+      const endDate = new Date();
+      endDate.setMonth(endDate.getMonth() + 1, 0); // Dernier jour du mois actuel
+      endDate.setHours(23, 59, 59, 999);
+
+      const startDate = new Date();
+      startDate.setMonth(startDate.getMonth() - 11); // 12 mois en arrière
+      startDate.setDate(1); // Premier jour du mois
+      startDate.setHours(0, 0, 0, 0);
+
+      console.log('Period:', { startDate, endDate });
+      
+      // Récupérer l'utilisateur et ses paramètres
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      
+      if (!user || !user.weeklyHoursGoal || !user.workingDays) {
+        return {};
+      }
+
+      // Récupérer toutes les entrées de temps pour la période
+      const timeEntries = await this.getTimeEntriesBetweenDates(
+        userId,
+        startDate.toISOString().split('T')[0],
+        endDate.toISOString().split('T')[0]
+      );
+
+      if (!timeEntries.length) {
+        return {};
+      }
+
+      // Récupérer toutes les pauses pour la période
+      const allPauses = await this.getPausesBetweenDates(
+        userId,
+        startDate.toISOString().split('T')[0],
+        endDate.toISOString().split('T')[0]
+      );
+
+      // Récupérer tous les congés pour la période
+      const allVacations = await this.getVacationsBetweenDates(
+        userId,
+        startDate,
+        endDate
+      );
+
+      // Préparer un tableau pour stocker les résultats
+      const dailyHours: Record<string, number> = {};
+      
+      // Pour chaque jour de la période
+      let currentDate = new Date(startDate);
+      const hoursPerDay = user.weeklyHoursGoal / user.workingDays.length;
+
+      while (currentDate <= endDate) {
+        const dateStr = currentDate.toISOString().split('T')[0];
+        
+        // Filtrer les entrées pour ce jour
+        const dayEntries = timeEntries.filter(entry => {
+          const entryDate = new Date(entry.startTime);
+          return entryDate.toISOString().split('T')[0] === dateStr;
+        });
+
+        if (dayEntries.length > 0) {
+          // Filtrer les pauses pour ce jour
+          const dayPauses = allPauses.filter(pause => {
+            const pauseDate = new Date(pause.pauseStart);
+            return pauseDate.toISOString().split('T')[0] === dateStr;
+          });
+
+          // Vérifier si c'est un jour de congé
+          const isVacationDay = allVacations.some(vacation => {
+            const vacationStart = new Date(vacation.startDate);
+            const vacationEnd = new Date(vacation.endDate);
+            return currentDate >= vacationStart && currentDate <= vacationEnd;
+          });
+
+          if (!isVacationDay) {
+            // Calculer les heures travaillées
+            const workedHours = this.calculateTotalHours(
+              dayEntries.map(entry => ({
+                startTime: entry.startTime,
+                endTime: entry.endTime || new Date(),
+              }))
+            );
+
+            // Calculer les pauses
+            const pauseHours = this.calculateTotalHours(
+              dayPauses.map(pause => ({
+                startTime: pause.pauseStart,
+                endTime: pause.pauseEnd || new Date(),
+              }))
+            );
+
+            // Vérifier si c'est un jour ouvré
+            const dayOfWeek = currentDate.getDay();
+            const isWorkingDay = user.workingDays.map(Number).includes(dayOfWeek);
+
+            // Calculer les heures supplémentaires
+            const contractualHours = isWorkingDay ? hoursPerDay : 0;
+            const extraHours = workedHours - pauseHours - contractualHours;
+
+            if (extraHours > 0) {
+              dailyHours[dateStr] = extraHours;
+            }
+          }
+        }
+
+        // Passer au jour suivant
+        currentDate.setDate(currentDate.getDate() + 1);
+      }
+
+      return dailyHours;
+    } catch (error) {
+      console.error('Error in getExtraHoursHeatmap:', error);
+      throw error;
+    }
+  }
 }

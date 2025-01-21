@@ -21,6 +21,25 @@ import { RolesGuard } from '../auth/roles.guard';
 export class TimeEntriesController {
   constructor(private readonly timeEntriesService: TimeEntriesService) {}
 
+  @Get('extra-hours-heatmap')
+  @UseGuards(AuthGuard)
+  async getExtraHoursHeatmap(@Req() req: any) {
+    console.log('=== HEATMAP REQUEST ===');
+    console.log('Headers:', req.headers);
+    console.log('URL:', req.url);
+    console.log('Method:', req.method);
+    console.log('======================');
+    
+    try {
+      const userId = req.user.userId;
+      console.log('UserId from request:', userId);
+      return await this.timeEntriesService.getExtraHoursHeatmap(userId);
+    } catch (error) {
+      console.error('Error in getExtraHoursHeatmap:', error);
+      throw error;
+    }
+  }
+
   // Créer une entrée de pointage
   @Post()
   async create(@Body() data: any, @Req() req: any) {

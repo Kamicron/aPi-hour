@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.9.0",
+    "date": "2025-01-22",
+    "changes": {
+      "feat": [
+        "Ajout d'une visualisation heatmap des heures supplémentaires sur les 12 derniers mois",
+        "Amélioration de l'interface avec un nouveau titre pour le composant de génération de rapport"
+      ],
+      "fix": [
+        "Optimisation de l'affichage des composants dans la page principale",
+        "Correction du calcul des heures supplémentaires sur la période d'un an"
+      ]
+    }
+  },
+  {
     "version": "0.8.9",
     "date": "2025-01-18",
     "changes": {
