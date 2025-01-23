@@ -1,5 +1,5 @@
 <template>
-  <bento-card title="Heat map">
+  <bento-card title="Heures supplémentaires (12 derniers mois)">
     <div class="heatmap-container">
       <div class="months-row">
         <div v-for="month in monthLabels" :key="month.date" class="month-label">{{ month.label }}</div>
@@ -19,8 +19,14 @@
         </div>
       </div>
       <div class="legend">
-        <div class="legend-item">Moins</div>
-        <div v-for="level in 5" :key="level" 
+        <div class="legend-item">Manque</div>
+        <div v-for="level in [-5, -4, -3, -2, -1]" :key="'neg-'+level" 
+             class="legend-cell" 
+             :class="`negative-${Math.abs(level)}`"
+             :title="getLegendTitle(level)">
+        </div>
+        <div class="legend-item">Neutre</div>
+        <div v-for="level in [1, 2, 3, 4, 5]" :key="level" 
              class="legend-cell" 
              :class="`level-${level}`"
              :title="getLegendTitle(level)">
@@ -49,7 +55,14 @@ const legendLevels = [
 
 // Fonction pour obtenir la classe CSS en fonction du nombre d'heures
 function getCellClass(hours: number | null) {
-  if (!hours) return 'empty';
+  if (hours === null) return 'empty';
+  if (hours < 0) {
+    if (hours <= -5) return 'negative-5';
+    if (hours <= -3) return 'negative-4';
+    if (hours <= -2) return 'negative-3';
+    if (hours <= -1) return 'negative-2';
+    return 'negative-1';
+  }
   if (hours <= 1) return 'level-1';
   if (hours <= 2) return 'level-2';
   if (hours <= 3) return 'level-3';
@@ -84,11 +97,20 @@ function formatDateToISO(date: Date): string {
 function getCellTitle(day: { date: string, hours: number | null }) {
   const date = createDate(day.date);
   if (!day.hours) return `${formatDate(date)} : Pas d'heures supplémentaires`;
-  return `${formatDate(date)} : ${day.hours.toFixed(1)}h supplémentaires`;
+  const prefix = day.hours < 0 ? 'Manque' : 'Heures supplémentaires';
+  const hours = Math.abs(day.hours);
+  return `${formatDate(date)} : ${prefix} de ${hours.toFixed(1)}h`;
 }
 
 function getLegendTitle(level: number) {
+  const prefix = level < 0 ? 'Manque de' : 'Jusqu\'à';
+  const hours = Math.abs(level);
   switch(level) {
+    case -5: return 'Plus de 5 heures manquantes'
+    case -4: return 'Jusqu\'à 5 heures manquantes'
+    case -3: return 'Jusqu\'à 3 heures manquantes'
+    case -2: return 'Jusqu\'à 2 heures manquantes'
+    case -1: return 'Jusqu\'à 1 heure manquante'
     case 1: return 'Jusqu\'à 1 heure'
     case 2: return 'Jusqu\'à 2 heures'
     case 3: return 'Jusqu\'à 3 heures'
@@ -267,9 +289,28 @@ onMounted(() => {
   background-color: #20242b;
 }
 
+.negative-1 {
+  background-color: #4c1c1c;
+}
+
+.negative-2 {
+  background-color: #771c1c;
+}
+
+.negative-3 {
+  background-color: #a61c1c;
+}
+
+.negative-4 {
+  background-color: #d41c1c;
+}
+
+.negative-5 {
+  background-color: #ff1c1c;
+}
+
 .level-1 {
   background-color: #0a4020;
-
 }
 
 .level-2 {
@@ -282,7 +323,6 @@ onMounted(() => {
 
 .level-4 {
   background-color: #40c463;
-
 }
 
 .level-5 {

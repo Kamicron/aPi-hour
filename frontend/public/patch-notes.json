@@ -1,5 +1,19 @@
 [
   {
+    "version": "0.9.1",
+    "date": "2025-01-23",
+    "changes": {
+      "feat": [
+        "Ajout d'une visualisation des heures manquantes dans la heatmap (en rouge)",
+        "Amélioration de la légende avec distinction entre heures manquantes et supplémentaires"
+      ],
+      "fix": [
+        "Correction du calcul des jours ouvrés dans la heatmap",
+        "Amélioration des tooltips pour mieux distinguer les heures manquantes et supplémentaires"
+      ]
+    }
+  },
+  {
     "version": "0.9.0",
     "date": "2025-01-22",
     "changes": {

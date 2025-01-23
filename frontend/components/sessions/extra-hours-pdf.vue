@@ -104,28 +104,29 @@ const generatePDF = async () => {
     const colorSecondary = '#ecc130';
     const colorTextPrimary = '#e1e1e1';
 
-    // Configuration des styles de tableau communs
+    // Style de base unique pour tous les tableaux
     const tableStyles = {
+      margin: 0,
+      styles: {
+        cellPadding: 5
+      },
+      theme: 'plain',
       headStyles: {
         fillColor: colorPrimary,
         textColor: colorTextPrimary,
-        fontSize: 11,
-        fontStyle: 'bold',
-        halign: 'left',
-        cellPadding: { top: 6, right: 4, bottom: 6, left: 4 },
-        overflow: 'linebreak'
+        fontStyle: 'bold'
       },
       bodyStyles: {
-        textColor: colorBackground,
-        fontSize: 10,
-        cellPadding: { top: 4, right: 4, bottom: 4, left: 4 },
-        overflow: 'linebreak'
+        margin: 0,
+        cellPadding: 5
       },
       alternateRowStyles: {
         fillColor: '#f4f6f8'
       },
-      margin: { top: 20, left: 15, right: 15 },
-      tableWidth: 180 // Largeur fixe pour tous les tableaux
+      footStyles: {
+        fillColor: colorSecondary,
+        fontStyle: 'bold'
+      }
     };
 
     // Ajouter un en-tête avec fond coloré
@@ -144,18 +145,34 @@ const generatePDF = async () => {
     doc.setFontSize(14);
     doc.text(`${month}/${year}`, 45, 30);
 
+    // Add title for summary table
+    doc.setFontSize(16);
+    doc.setTextColor(colorPrimary);
+    doc.text('Récapitulatif du mois', 15, 50);
+
     // Add total summary with custom styling
     doc.autoTable({
-      startY: 50,
-      head: [['Type', 'Heures']],
+      startY: 60,
+      margin: { left: 15 },
+      head: [
+        [
+          { content: 'Type', styles: { halign: 'left' } },
+          { content: 'Heures', styles: { halign: 'right' } }
+        ]
+      ],
       body: [
         ['Total heures à 25%', `${Number(hoursData.totalExtra25Hours).toFixed(2)}h`],
         ['Total heures à 50%', `${Number(hoursData.totalExtra50Hours).toFixed(2)}h`],
       ],
+      foot: [
+        [
+          { content: 'Total heures supplémentaires', styles: { halign: 'left' } },
+          { content: `${(Number(hoursData.totalExtra25Hours) + Number(hoursData.totalExtra50Hours)).toFixed(2)}h`, styles: { halign: 'right' } }
+        ]
+      ],
       ...tableStyles,
       columnStyles: {
-        0: { cellWidth: 140 },
-        1: { cellWidth: 40, halign: 'right' }
+        1: { halign: 'right' }
       }
     });
 
@@ -163,7 +180,7 @@ const generatePDF = async () => {
     let yPosition = doc.lastAutoTable.finalY + 20;
     doc.setFontSize(16);
     doc.setTextColor(colorPrimary);
-    doc.text('Détails par semaine', 15, yPosition);
+    doc.text('Détails des heures supplémentaires', 15, yPosition);
 
     const weeklyTableData = hoursData.weeklyDetails.map(week => [
       `${new Date(week.weekStart).toLocaleDateString('fr-FR')} au ${new Date(week.weekEnd).toLocaleDateString('fr-FR')}`,
@@ -174,63 +191,87 @@ const generatePDF = async () => {
 
     doc.autoTable({
       startY: yPosition + 10,
-      head: [['Semaine', 'H. travaillées', 'H. 25%', 'H. 50%']],
+      head: [
+        [
+          { content: 'Semaine', styles: { halign: 'left' } },
+          { content: 'H. travaillées', styles: { halign: 'right' } },
+          { content: 'H. 25%', styles: { halign: 'right' } },
+          { content: 'H. 50%', styles: { halign: 'right' } }
+        ]
+      ],
       body: weeklyTableData,
       ...tableStyles,
       columnStyles: {
-        0: { cellWidth: 80 },
-        1: { cellWidth: 40, halign: 'right' },
-        2: { cellWidth: 30, halign: 'right' },
-        3: { cellWidth: 30, halign: 'right' }
+        1: { halign: 'right' },
+        2: { halign: 'right' },
+        3: { halign: 'right' }
       }
     });
 
     // Add vacation details if any
     if (vacations && vacations.length > 0) {
-      yPosition = doc.lastAutoTable.finalY + 20;
-      doc.setFontSize(16);
-      doc.setTextColor(colorPrimary);
-      doc.text('Périodes de congés', 15, yPosition);
+      // Filtrer les jours fériés
+      const filteredVacations = vacations.filter(vacation => vacation.status !== 'public_holiday');
+      
+      if (filteredVacations.length > 0) {
+        yPosition = doc.lastAutoTable.finalY + 20;
+        doc.setFontSize(16);
+        doc.setTextColor(colorPrimary);
+        doc.text('Périodes de congés', 15, yPosition);
 
-      const vacationTableData = vacations.map(vacation => {
-        const startDate = new Date(vacation.startDate);
-        const endDate = new Date(vacation.endDate);
-        const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-        
-        return [
-          `${startDate.toLocaleDateString('fr-FR')} au ${endDate.toLocaleDateString('fr-FR')}`,
-          vacation.status,
-          vacation.reason || 'Non spécifié',
-          `${daysCount} jour${daysCount > 1 ? 's' : ''}`
-        ];
-      });
+        const translateStatus = (status) => {
+          const statusMap = {
+            'pending': 'En attente',
+            'approved': 'Approuvé',
+            'rejected': 'Refusé',
+            'cancelled': 'Annulé'
+          };
+          return statusMap[status] || status;
+        };
 
-      // Calculer le total des jours de congés
-      const totalDays = vacationTableData.reduce((total, vacation) => {
-        return total + parseInt(vacation[3]);
-      }, 0);
+        const vacationTableData = filteredVacations.map(vacation => {
+          const startDate = new Date(vacation.startDate);
+          const endDate = new Date(vacation.endDate);
+          const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+          
+          return [
+            `${startDate.toLocaleDateString('fr-FR')} au ${endDate.toLocaleDateString('fr-FR')}`,
+            translateStatus(vacation.status),
+            vacation.reason || 'Non spécifié',
+            `${daysCount} jour${daysCount > 1 ? 's' : ''}`
+          ];
+        });
 
-      doc.autoTable({
-        startY: yPosition + 10,
-        head: [['Période', 'Statut', 'Motif', 'Durée']],
-        body: vacationTableData,
-        foot: [['Total', '', '', `${totalDays} jour${totalDays > 1 ? 's' : ''}`]],
-        ...tableStyles,
-        columnStyles: {
-          0: { cellWidth: 70 },
-          1: { cellWidth: 30 },
-          2: { cellWidth: 50 },
-          3: { cellWidth: 30, halign: 'right' }
-        },
-        footStyles: {
-          fillColor: colorSecondary,
-          textColor: colorBackground,
-          fontStyle: 'bold',
-          halign: 'right',
-          fontSize: 11
-        },
-        showFoot: 'lastPage'
-      });
+        // Calculer le total des jours de congés
+        const totalDays = vacationTableData.reduce((total, vacation) => {
+          return total + parseInt(vacation[3]);
+        }, 0);
+
+        doc.autoTable({
+          startY: yPosition + 10,
+          head: [
+            [
+              { content: 'Période', styles: { halign: 'left' } },
+              { content: 'Statut', styles: { halign: 'left' } },
+              { content: 'Motif', styles: { halign: 'left' } },
+              { content: 'Durée', styles: { halign: 'right' } }
+            ]
+          ],
+          body: vacationTableData,
+          foot: [
+            [
+              { content: 'Total', styles: { halign: 'left' } },
+              { content: '', styles: { halign: 'left' } },
+              { content: '', styles: { halign: 'left' } },
+              { content: `${totalDays} jour${totalDays > 1 ? 's' : ''}`, styles: { halign: 'right' } }
+            ]
+          ],
+          ...tableStyles,
+          columnStyles: {
+            3: { halign: 'right' }
+          }
+        });
+      }
     }
 
     // Add footer with page numbers

@@ -170,7 +170,11 @@ fetchSessions();
 
       &--generate {
         grid-area: 6 / 1 / 7 / 4; // Pleine largeur
-    }
+      }
+
+      &--heatmap {
+        grid-area: 7 / 1 / 8 / 4; // Pleine largeur
+      }
     }
   }
 

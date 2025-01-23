@@ -794,6 +794,18 @@ export class TimeEntriesService {
       let currentDate = new Date(startDate);
       const hoursPerDay = user.weeklyHoursGoal / user.workingDays.length;
 
+      // Convertir les jours de travail en format JavaScript
+      // Dans notre DB: 0 = Lundi, 1 = Mardi, ..., 6 = Dimanche
+      // En JS: 0 = Dimanche, 1 = Lundi, ..., 6 = Samedi
+      const workingDaysJS = user.workingDays.map(day => {
+        const dbDay = Number(day);
+        // Convertir de notre format (0-6, lundi-dimanche) vers le format JS (0-6, dimanche-samedi)
+        return dbDay === 6 ? 0 : dbDay + 1;
+      });
+
+      console.log('Working days DB format:', user.workingDays);
+      console.log('Working days JS format:', workingDaysJS);
+
       while (currentDate <= endDate) {
         const dateStr = currentDate.toISOString().split('T')[0];
         
@@ -803,48 +815,57 @@ export class TimeEntriesService {
           return entryDate.toISOString().split('T')[0] === dateStr;
         });
 
-        if (dayEntries.length > 0) {
-          // Filtrer les pauses pour ce jour
-          const dayPauses = allPauses.filter(pause => {
-            const pauseDate = new Date(pause.pauseStart);
-            return pauseDate.toISOString().split('T')[0] === dateStr;
-          });
+        // Vérifier si c'est un jour de congé
+        const isVacationDay = allVacations.some(vacation => {
+          const vacationStart = new Date(vacation.startDate);
+          const vacationEnd = new Date(vacation.endDate);
+          return currentDate >= vacationStart && currentDate <= vacationEnd;
+        });
 
-          // Vérifier si c'est un jour de congé
-          const isVacationDay = allVacations.some(vacation => {
-            const vacationStart = new Date(vacation.startDate);
-            const vacationEnd = new Date(vacation.endDate);
-            return currentDate >= vacationStart && currentDate <= vacationEnd;
-          });
+        if (!isVacationDay) {
+          // Calculer les heures travaillées
+          const workedHours = this.calculateTotalHours(
+            dayEntries.map(entry => ({
+              startTime: entry.startTime,
+              endTime: entry.endTime || new Date(),
+            }))
+          );
 
-          if (!isVacationDay) {
-            // Calculer les heures travaillées
-            const workedHours = this.calculateTotalHours(
-              dayEntries.map(entry => ({
-                startTime: entry.startTime,
-                endTime: entry.endTime || new Date(),
-              }))
-            );
-
-            // Calculer les pauses
-            const pauseHours = this.calculateTotalHours(
-              dayPauses.map(pause => ({
+          // Calculer les pauses
+          const pauseHours = this.calculateTotalHours(
+            allPauses
+              .filter(pause => {
+                const pauseDate = new Date(pause.pauseStart);
+                return pauseDate.toISOString().split('T')[0] === dateStr;
+              })
+              .map(pause => ({
                 startTime: pause.pauseStart,
                 endTime: pause.pauseEnd || new Date(),
               }))
-            );
+          );
 
-            // Vérifier si c'est un jour ouvré
-            const dayOfWeek = currentDate.getDay();
-            const isWorkingDay = user.workingDays.map(Number).includes(dayOfWeek);
+          // Vérifier si c'est un jour ouvré
+          const dayOfWeek = currentDate.getDay(); // 0-6 (dimanche-samedi)
+          const isWorkingDay = workingDaysJS.includes(dayOfWeek);
 
-            // Calculer les heures supplémentaires
-            const contractualHours = isWorkingDay ? hoursPerDay : 0;
-            const extraHours = workedHours - pauseHours - contractualHours;
+          console.log('Day check:', {
+            date: dateStr,
+            dayOfWeek,
+            isWorkingDay,
+            workingDaysJS
+          });
 
-            if (extraHours > 0) {
-              dailyHours[dateStr] = extraHours;
-            }
+          // Calculer les heures supplémentaires
+          const contractualHours = isWorkingDay ? hoursPerDay : 0;
+          const extraHours = workedHours - pauseHours - contractualHours;
+
+          // Si c'est un jour ouvré et qu'il y a des entrées
+          if (isWorkingDay && dayEntries.length > 0) {
+            dailyHours[dateStr] = extraHours; // Peut être négatif pour les jours incomplets
+          } 
+          // Pour les jours non ouvrés, ne compter que les heures positives
+          else if (!isWorkingDay && extraHours > 0) {
+            dailyHours[dateStr] = extraHours;
           }
         }
 
