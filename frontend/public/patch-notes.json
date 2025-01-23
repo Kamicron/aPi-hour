@@ -8,6 +8,7 @@
         "Amélioration de la légende avec distinction entre heures manquantes et supplémentaires"
       ],
       "fix": [
+        "Correction de la génération des pdf",
         "Correction du calcul des jours ouvrés dans la heatmap",
         "Amélioration des tooltips pour mieux distinguer les heures manquantes et supplémentaires"
       ]
