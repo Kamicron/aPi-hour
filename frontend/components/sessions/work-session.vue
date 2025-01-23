@@ -9,6 +9,9 @@
       <extra-hours-rate :currentMonth="currentMonth" class="work-sessions__layout--rate" />
       <extra-hours-pdf class="work-sessions__layout--generate"/>
       <extra-hours-heatmap class="work-sessions__layout--heatmap" />
+      <bento-card title="Mes congés" class="work-sessions__layout--vacation_table">
+        <vacation-list />
+      </bento-card>
     </div>
     <div v-else>
       Veuillez vous connecter
@@ -20,6 +23,7 @@
 import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
 import { useUserStore } from '../../stores/user';
+import VacationList from '~/components/vacation/vacation-list.vue';
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
@@ -139,6 +143,10 @@ fetchSessions();
 
     &--heatmap {
       grid-area: 3 / 4 / 4 / 7;
+    }
+
+    &--vacation_table {
+      grid-area: 5 / 1 / 6 / 7;
     }
   }
 

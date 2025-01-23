@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.9.2",
+    "date": "2025-01-23",
+    "changes": {
+      "feat": [
+        "Ajout d'une page vacances, afin de visualiser et modifier les infos des jours de congés"
+      ]
+    }
+  },
+  {
     "version": "0.9.1",
     "date": "2025-01-23",
     "changes": {
@@ -86,7 +95,9 @@
     "version": "0.8.5",
     "date": "2025-01-08",
     "changes": {
-      "fix": ["Calcule du temps écoulé"]
+      "fix": [
+        "Calcule du temps écoulé"
+      ]
     }
   },
   {
@@ -102,21 +113,27 @@
     "version": "0.8.3",
     "date": "2025-01-06",
     "changes": {
-      "fix": ["Sauvegarde des jours travaillé et du nombre d'heure par semaine"]
+      "fix": [
+        "Sauvegarde des jours travaillé et du nombre d'heure par semaine"
+      ]
     }
   },
   {
     "version": "0.8.2",
     "date": "2025-01-04",
     "changes": {
-      "fix": ["style"]
+      "fix": [
+        "style"
+      ]
     }
   },
   {
     "version": "0.8.1",
     "date": "2024-12-02",
     "changes": {
-      "fix": ["Pied de page avec versionning automatique"]
+      "fix": [
+        "Pied de page avec versionning automatique"
+      ]
     }
   },
   {
@@ -127,7 +144,10 @@
         "Composant permettant compter le nombre d'heure suppplémentaire a 25% et 50%.",
         "Ajout d'une favicon"
       ],
-      "fix": ["Responsive de la page index", "Style des titres"]
+      "fix": [
+        "Responsive de la page index",
+        "Style des titres"
+      ]
     }
   },
   {
@@ -217,7 +237,9 @@
         "Ajout des fonctions pour démarrer, mettre en pause, reprendre et arrêter une session.",
         "Ajout de la gestion des utilisateurs pour les administrateurs (création, lecture, mise à jour, suppression et restauration)."
       ],
-      "fix": ["Correction du fonctionnement du garde d'authentification."]
+      "fix": [
+        "Correction du fonctionnement du garde d'authentification."
+      ]
     }
   },
   {
@@ -228,14 +250,18 @@
         "Sécurisation des liens (fonctionnalité encore non terminée).",
         "Ajout d'une authentification pour récupérer tous les utilisateurs en tant qu'administrateur."
       ],
-      "init": ["Initialisation du backend et du frontend."]
+      "init": [
+        "Initialisation du backend et du frontend."
+      ]
     }
   },
   {
     "version": "0.1.0",
     "date": "2024-12-01",
     "changes": {
-      "init": ["Première initialisation du projet."]
+      "init": [
+        "Première initialisation du projet."
+      ]
     }
   }
 ]

@@ -3,6 +3,7 @@
     <ul class="navbar__list">
       <li class="navbar__item"><NuxtLink to="/" class="navbar__link">Accueil</NuxtLink></li>
       <li class="navbar__item"><NuxtLink to="/profile" class="navbar__link">Profile</NuxtLink></li>
+      <li class="navbar__item"><NuxtLink to="/vacances" class="navbar__link">Vacances</NuxtLink></li>
       <li class="navbar__item"><NuxtLink to="/test" class="navbar__link">Test</NuxtLink></li>
     </ul>
   </div>
