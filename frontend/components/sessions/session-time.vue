@@ -42,10 +42,14 @@ import { useSessionStore } from '../../stores/session';
 import { useNuxtApp, useCookie } from '#app';
 import { useUserStore } from '../../stores/user';
 import { onMounted, onUnmounted, ref, computed, watch } from 'vue';
-import { useGlobalEvents } from '../../composable/useGlobalEvent';
+import { useGlobalEvents } from '../../composables/useGlobalEvent';
 import { EGlobalEvent } from '../../assets/ts/enums/global/globalEvent.enum';
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
 
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
 const userStore = useUserStore();
 const sessionStore = useSessionStore();
 const { $api } = useNuxtApp();
@@ -100,14 +104,28 @@ async function start() {
 
       elapsedTime.value = 0; // Réinitialisation du temps écoulé
       console.log('startTime.value', startTime.value);
-      
-      
+
+
       getProfile();
+
+      $toast.show({
+        message: 'Session démarré avec succès.',
+        type: EToast.SUCCESS,
+        duration: 3000
+      })
     } else {
-      throw new Error('Date de début manquante dans la réponse du serveur');
+      $toast.show({
+        message: 'Date de début manquante dans la réponse du serveur',
+        type: EToast.ERROR,
+        duration: 3000
+      })
     }
-  } catch (err) {
-    console.error('Erreur lors du démarrage de la session', err);
+  } catch (error) {
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 }
 
@@ -126,14 +144,14 @@ async function getProfile() {
     profile.value = fetchedProfile;
 
     console.log('profile', profile.value.currentSession.createdAt);
-    
+
 
     // Synchroniser la date de début si une session est active
     if (profile.value?.sessions?.length > 0 && profile.value.sessions[0].status === 'started') {
       const startTimeFromApi = profile.value.currentSession.createdAt;
 
       console.log('startTimeFromApi', startTimeFromApi);
-      
+
       startTimeString.value = useDateFormatter().formatDate(startTimeFromApi, { format: 'long', includeTime: true });
       if (startTimeFromApi) {
         startTime.value = new Date(startTimeFromApi); // Conversion en Date valide
@@ -143,8 +161,8 @@ async function getProfile() {
     } else {
       startTime.value = null; // Pas de session active
     }
-  } catch (err) {
-    console.error('Erreur lors de la récupération du profil', err);
+
+  } catch (error) {
     startTime.value = null; // Nettoyage en cas d'erreur
   }
 }
@@ -162,8 +180,17 @@ async function pause() {
     );
     sessionStore.pauseSession();
     getProfile();
-  } catch (err) {
-    console.error('Erreur lors de la mise en pause', err);
+    $toast.show({
+      message: 'Mise en pause avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
+  } catch (error) {
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 }
 
@@ -178,8 +205,17 @@ async function resume() {
     );
     sessionStore.resumeSession();
     getProfile();
-  } catch (err) {
-    console.error('Erreur lors de la reprise de la session', err);
+    $toast.show({
+      message: 'Reprise de la session avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
+  } catch (error) {
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 }
 
@@ -194,8 +230,17 @@ async function stop() {
     );
     sessionStore.stopSession();
     getProfile();
-  } catch (err) {
-    console.error("Erreur lors de l'arrêt de la session", err);
+    $toast.show({
+      message: 'Arrêt de la session avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
+  } catch (error) {
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 }
 

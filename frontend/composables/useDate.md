@@ -18,7 +18,7 @@ Assurez-vous que le composable `useDateFormatter.js` est disponible dans le doss
 Dans un composant Vue, importez et utilisez le composable :
 
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 ```
 
 ---
@@ -64,21 +64,21 @@ L'objet `customOptions` permet de passer des options détaillées directement à
 
 **Exemple 1 : Date avec le format long**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const formattedDate1 = useDateFormatter().formatDate(new Date(), { format: 'long' });
 // Résultat : "dimanche 22 décembre 2024"
 ```
 
 **Exemple 2 : Date avec heure incluse**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const formattedDate2 = useDateFormatter().formatDate(new Date(), { format: 'long', includeTime: true });
 // Résultat : "dimanche 22 décembre 2024 à 15:30"
 ```
 
 **Exemple 3 : Format court sans heure**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const formattedDate3 = useDateFormatter().formatDate(new Date(), { format: 'short' });
 // Résultat : "22 déc. 2024"
 ```
@@ -87,7 +87,7 @@ const formattedDate3 = useDateFormatter().formatDate(new Date(), { format: 'shor
 
 **Exemple 1 : Date avec jour et mois longs**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const formattedDate1 = useDateFormatter().formatDate('2024-12-22', {
   customOptions: {
     weekday: 'long',
@@ -101,7 +101,7 @@ const formattedDate1 = useDateFormatter().formatDate('2024-12-22', {
 
 **Exemple 2 : Date avec jour court et mois abrégé**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const formattedDate2 = useDateFormatter().formatDate('2024-12-22', {
   customOptions: {
     weekday: 'short',
@@ -115,7 +115,7 @@ const formattedDate2 = useDateFormatter().formatDate('2024-12-22', {
 
 **Exemple 3 : Heure avec fuseau horaire**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const formattedDate3 = useDateFormatter().formatDate('2024-12-22T15:30:45', {
   customOptions: {
     hour: '2-digit',
@@ -130,7 +130,7 @@ const formattedDate3 = useDateFormatter().formatDate('2024-12-22T15:30:45', {
 
 **Exemple 4 : Format 12 heures avec AM/PM**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const formattedDate4 = useDateFormatter().formatDate('2024-12-22T15:30:45', {
   customOptions: {
     hour: '2-digit',
@@ -145,7 +145,7 @@ const formattedDate4 = useDateFormatter().formatDate('2024-12-22T15:30:45', {
 
 **Exemple 5 : Format avec fractions de secondes et fuseau horaire long**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const formattedDate5 = useDateFormatter().formatDate('2024-12-22T15:30:45.123', {
   customOptions: {
     hour: '2-digit',
@@ -179,7 +179,7 @@ Calcule et formate la durée entre deux dates en fonction des options spécifié
 
 **Exemple 1 : Durée avec toutes les unités**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const duration1 = useDateFormatter().calculateDuration('2024-12-20T08:30:00', '2024-12-22T18:45:30', {
   customOptions: {
     day: '2-digit',
@@ -193,7 +193,7 @@ const duration1 = useDateFormatter().calculateDuration('2024-12-20T08:30:00', '2
 
 **Exemple 2 : Durée limitée à 24 heures**
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const duration2 = useDateFormatter().calculateDuration('2024-12-20T08:30:00', '2024-12-22T18:45:30', {
   customOptions: {
     hour: '2-digit',
@@ -216,7 +216,7 @@ Retourne une date relative (ex : "il y a 2 jours", "dans 3 jours").
 #### Exemple d'utilisation
 
 ```javascript
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 const { formatRelativeDate } = useDateFormatter();
 
 // Exemple 1 : Date dans le passé

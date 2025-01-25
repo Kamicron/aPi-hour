@@ -23,7 +23,7 @@
 <script setup lang='ts'>
 // ----- Import -----
 import { ref } from "vue";
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 
 // ------------------
 

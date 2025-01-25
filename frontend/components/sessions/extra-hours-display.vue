@@ -34,13 +34,10 @@
         </div>
         <div class="extra-hours-display__row">
           <span class="extra-hours-display__cell">Heures Supplémentaires</span>
-          <span
-            class="extra-hours-display__cell"
-            :class="{
-              'extra-hours-display__positive': extraHours >= 0,
-              'extra-hours-display__negative': extraHours < 0,
-            }"
-          >
+          <span class="extra-hours-display__cell" :class="{
+            'extra-hours-display__positive': extraHours >= 0,
+            'extra-hours-display__negative': extraHours < 0,
+          }">
             {{ extraHours.toFixed(2) }} h
           </span>
         </div>
@@ -54,15 +51,19 @@
 // ----- Import -----
 import { ref } from "vue";
 import { useCookie, useNuxtApp } from "#app";
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
 // ------------------
 
 // ------ Const ----- 
 const { $api } = useNuxtApp();
 const token = useCookie("token");
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
 // ------------------
 
 // ---- Reactive ----
-const startDate = ref<string>(""); 
+const startDate = ref<string>("");
 const endDate = ref<string>("");
 const loading = ref(false);
 const error = ref<string | null>(null);
@@ -73,12 +74,12 @@ const extraHours = ref<number>(0);
 // ------------------
 
 // --- Async Func --- 
-const fetchExtraHours = async () => { 
+const fetchExtraHours = async () => {
   if (!startDate.value || !endDate.value) {
     error.value = "Veuillez sélectionner les deux dates.";
-    return; 
+    return;
   }
-  loading.value = true; 
+  loading.value = true;
   error.value = null;
   try {
     const response = await $api.post(
@@ -93,20 +94,25 @@ const fetchExtraHours = async () => {
         },
       }
     );
-    const data = response.data; 
-    workedHours.value = data.workedHours; 
+    const data = response.data;
+    workedHours.value = data.workedHours;
     pauseHours.value = data.pauseHours;
     contractualHours.value = data.contractualHours;
     extraHours.value = data.extraHours;
-  } catch (err: any) {
-    if (err.response && err.response.status === 401) {
-      error.value = "Vous n'êtes pas autorisé. Vérifiez votre connexion.";
-    } else {
-      error.value = "Une erreur est survenue lors de la récupération des données.";
-    }
-    console.error(err); 
+
+    $toast.show({
+      message: 'Donnée récupérée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
+  } catch (error: any) {
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   } finally {
-    loading.value = false; 
+    loading.value = false;
   }
 };
 </script>
@@ -153,7 +159,8 @@ const fetchExtraHours = async () => {
   }
 
   &__row {
-    display: contents; /* Permet à chaque cellule d'occuper son espace */
+    display: contents;
+    /* Permet à chaque cellule d'occuper son espace */
   }
 
   &__cell {

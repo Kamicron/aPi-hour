@@ -33,6 +33,12 @@
 import { ref } from 'vue';
 import { useUserStore } from '../../stores/user';
 import { useNuxtApp } from '#app';
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
+
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
+
 // ------------------
 
 // ------ Type ------
@@ -82,10 +88,17 @@ const selectedWorkingDays = ref<number[]>([1, 2, 3, 4, 5]);
 async function updateSettings() {
   try {
     await profileStore.updateSettings($api, settings.value);
-    message.value = 'Paramètres mis à jour avec succès.';
+    $toast.show({
+      message: 'Profile mis à jour avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
   } catch (error) {
-    console.error(error);
-    message.value = 'Erreur lors de la mise à jour des paramètres.';
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 }
 
@@ -99,9 +112,18 @@ async function saveWorkingDays() {
       },
     });
 
+    $toast.show({
+      message: 'Profile mis à jour avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
+
   } catch (error) {
-    console.error(error);
-    alert("Erreur lors de la mise à jour des jours ouvrés.");
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 };
 // ------------------

@@ -77,9 +77,9 @@
 import { useNuxtApp, useCookie } from "#app";
 import { ref, onMounted, computed } from "vue";
 import { useRoute } from "vue-router";
-import useDateFormatter from "../../composable/useDate";
+import useDateFormatter from "../../composables/useDate";
 import { EGlobalEvent } from "~/assets/ts/enums/global/globalEvent.enum";
-import { useGlobalEvents } from "~/composable/useGlobalEvent";
+import { useGlobalEvents } from "~/composables/useGlobalEvent";
 
 const { $api } = useNuxtApp();
 const isUpdateSessionModal = ref<boolean>(false)

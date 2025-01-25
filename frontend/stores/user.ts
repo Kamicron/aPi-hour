@@ -1,11 +1,15 @@
 import { defineStore } from 'pinia';
-import { useCookie } from '#app';
-import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { useCookie, useNuxtApp } from '#app';
+import { useGlobalEvents } from '~/composables/useGlobalEvent';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
+import { EToast } from '~/assets/ts/enums/toast.enum';
+import { useAxiosError } from '~/composables/useAxiosError';
 
 export const useUserStore = defineStore('user', () => {
   const token = useCookie('token');
   const profile = ref<any>(null);
+  const { $toast } = useNuxtApp();
+  const { getErrorMessage } = useAxiosError();
 
   async function fetchProfile($api: any) {
     try {
@@ -15,12 +19,22 @@ export const useUserStore = defineStore('user', () => {
         },
       });
       profile.value = response.data;
-      useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, true)
+      useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, true);
+      $toast.show({
+        message: `Bienvenue ${profile.value.username} !`,
+        type: EToast.SUCCESS,
+        duration: 3000
+      });
       return response.data;
 
     } catch (error) {
       console.error('Erreur lors de la récupération du profil:', error);
       profile.value = null;
+      $toast.show({
+        message: getErrorMessage(error),
+        type: EToast.ERROR,
+        duration: 5000
+      });
     }
   }
 
@@ -45,16 +59,15 @@ export const useUserStore = defineStore('user', () => {
     }
   }
   
-
   function logout() {
-    
     token.value = null;
     profile.value = null;
-    console.log('logout user');
-    console.log('profile.value', profile.value);
-    
-    
-    useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, false)
+    useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, false);
+    $toast.show({
+      message: 'Vous avez été déconnecté avec succès',
+      type: EToast.INFO,
+      duration: 3000
+    });
   }
 
   return {

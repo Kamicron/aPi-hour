@@ -28,6 +28,7 @@
 import { ref } from 'vue';
 import { defineEmits } from 'vue';
 
+
 const emit = defineEmits(['handleAuth', 'close']);
 
 const isRegistering = ref(false);

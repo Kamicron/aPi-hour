@@ -25,8 +25,10 @@ import { useRouter } from 'vue-router';
 import { useNuxtApp, useCookie } from '#app';
 import { jwtDecode } from 'jwt-decode';
 import { useUserStore } from '../../stores/user';
-import { useGlobalEvents } from '../../composable/useGlobalEvent';
+import { useGlobalEvents } from '../../composables/useGlobalEvent';
 import { EGlobalEvent } from '../../assets/ts/enums/global/globalEvent.enum';
+import { EToast } from '~/assets/ts/enums/toast.enum';
+import { useAxiosError } from '~/composables/useAxiosError';
 
 // ------------------
 
@@ -43,6 +45,8 @@ const router = useRouter();
 const token = useCookie('token');
 const { $api } = useNuxtApp();
 const userStore = useUserStore();
+const { $toast } = useNuxtApp();
+const { getErrorMessage } = useAxiosError();
 // ------------------
 
 // ---- Reactive ----
@@ -102,8 +106,19 @@ async function handleAuth({ email, password, isRegistering }: {
     }
 
     isOpenModal.value = false;
+
+    $toast.show({
+      message: `Bienvenue ${profile.value.name} !`,
+      type: EToast.SUCCESS,
+      duration: 3000
+    });
   } catch (err) {
     console.error('Erreur d\'authentification', err);
+    $toast.show({
+      message: getErrorMessage(err),
+      type: EToast.ERROR,
+      duration: 3000
+    });
   }
 }
 
@@ -124,7 +139,11 @@ function logout() {
   useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, false)
   userStore.logout();
   isLoggedIn.value = false;
-
+  $toast.show({
+    message: `Déconnexion effectuée avec succès.`,
+    type: EToast.SUCCESS,
+    duration: 3000
+  });
   router.push('/')
 }
 // ------------------

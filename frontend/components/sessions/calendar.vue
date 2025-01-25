@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie, useRoute } from '#app';
-import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { useGlobalEvents } from '~/composables/useGlobalEvent';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 import { emit } from 'process';
 

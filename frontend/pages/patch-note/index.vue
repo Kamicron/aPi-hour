@@ -31,7 +31,7 @@
 
 <script setup lang='ts'>
 import { ref, onMounted } from 'vue';
-import useDateFormatter from '../../composable/useDate';
+import useDateFormatter from '../../composables/useDate';
 
 const patchNotes = ref([]);
 const customOptions = ref({

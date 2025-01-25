@@ -4,19 +4,10 @@
       <div class="extra-hours-pdf__input">
         <label>
           Mois:
-          <input
-            class="pi-input"
-            type="month"
-            v-model="selectedMonth"
-            :max="currentMonth"
-          />
+          <input class="pi-input" type="month" v-model="selectedMonth" :max="currentMonth" />
         </label>
       </div>
-      <button
-        class="btn"
-        @click="generatePDF"
-        :disabled="!selectedMonth || loading"
-      >
+      <button class="btn" @click="generatePDF" :disabled="!selectedMonth || loading">
         <pi-loader v-if="loading" />
         <span v-else>Générer PDF</span>
       </button>
@@ -29,6 +20,11 @@ import { ref, computed } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
 import { jsPDF } from 'jspdf';
 import 'jspdf-autotable';
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
+
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
@@ -61,7 +57,7 @@ const loadLogo = async () => {
 
 const generatePDF = async () => {
   if (!selectedMonth.value) return;
-  
+
   loading.value = true;
   try {
     // Charger le logo
@@ -79,8 +75,8 @@ const generatePDF = async () => {
     // Récupérer les congés
     const [year, month] = selectedMonth.value.split('-');
     const vacationsResponse = await $api.get('/time-entries/month', {
-      params: { 
-        year: parseInt(year), 
+      params: {
+        year: parseInt(year),
         month: parseInt(month)
       },
       headers: { Authorization: `Bearer ${token.value}` },
@@ -212,7 +208,7 @@ const generatePDF = async () => {
     if (vacations && vacations.length > 0) {
       // Filtrer les jours fériés
       const filteredVacations = vacations.filter(vacation => vacation.status !== 'public_holiday');
-      
+
       if (filteredVacations.length > 0) {
         yPosition = doc.lastAutoTable.finalY + 20;
         doc.setFontSize(16);
@@ -233,7 +229,7 @@ const generatePDF = async () => {
           const startDate = new Date(vacation.startDate);
           const endDate = new Date(vacation.endDate);
           const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-          
+
           return [
             `${startDate.toLocaleDateString('fr-FR')} au ${endDate.toLocaleDateString('fr-FR')}`,
             translateStatus(vacation.status),
@@ -287,11 +283,20 @@ const generatePDF = async () => {
         { align: 'center' }
       );
     }
-    
+
     // Save the PDF
     doc.save(`heures-sup-${selectedMonth.value}.pdf`);
+    $toast.show({
+      message: 'PDF crée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
   } catch (error) {
-    console.error('Erreur lors de la génération du PDF:', error);
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   } finally {
     loading.value = false;
   }

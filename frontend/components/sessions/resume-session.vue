@@ -65,8 +65,13 @@
 import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
-import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { useGlobalEvents } from '~/composables/useGlobalEvent';
 import { useUserStore } from '../../stores/user';
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
+
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
 
 const props = defineProps({
   selectedDate: String,
@@ -153,9 +158,18 @@ async function createSession() {
 
     // Rafraîchir les sessions
     fetchSessions();
+
+    $toast.show({
+      message: 'Session crée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
   } catch (error) {
-    console.error('Erreur lors de la création de la session :', error);
-    alert('Une erreur est survenue lors de la création de la session.');
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 }
 
@@ -261,7 +275,8 @@ function formatOvertime(seconds: number) {
     margin: 0;
     overflow-y: auto;
     flex: 1;
-    max-height: calc(622px - 300px); /* Ajustez cette valeur selon vos besoins */
+    max-height: calc(622px - 300px);
+    /* Ajustez cette valeur selon vos besoins */
   }
 }
 

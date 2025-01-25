@@ -21,13 +21,7 @@
 
       <div v-if="!isHoliday" class="vacation__field">
         <label for="reason" class="vacation__label">Raison</label>
-        <textarea
-          id="reason"
-          v-model="vacation.reason"
-          rows="2"
-          class="pi-input"
-          placeholder="Optionnel"
-        ></textarea>
+        <textarea id="reason" v-model="vacation.reason" rows="2" class="pi-input" placeholder="Optionnel"></textarea>
       </div>
 
       <button type="submit" class="btn btn--primary">Ajouter</button>
@@ -38,9 +32,14 @@
 <script setup lang="ts">
 // ---- Import ----- 
 import { ref } from 'vue';
-import { useNuxtApp, useCookie } from '#app'; 
-import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { useNuxtApp, useCookie } from '#app';
+import { useGlobalEvents } from '~/composables/useGlobalEvent';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
+
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
 
 // ---- Reactive ----
 const vacation = ref({
@@ -67,9 +66,17 @@ const submitVacation = async () => {
     vacation.value = { startDate: '', endDate: '', reason: '', status: 'pending' };
     isHoliday.value = false;
     useGlobalEvents().emitEvent(EGlobalEvent.UPDATE_CALENDAR);
+    $toast.show({
+      message: 'Vacances ajoutées avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
   } catch (error) {
-    console.error('Erreur lors de l\'ajout des vacances :', error);
-    alert('Une erreur est survenue. Veuillez réessayer.');
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 };
 </script>

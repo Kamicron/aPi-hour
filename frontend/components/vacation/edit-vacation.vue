@@ -4,34 +4,17 @@
       <div class="edit-vacation__fields">
         <div class="edit-vacation__field">
           <label for="startDate" class="edit-vacation__label">Date de début</label>
-          <input
-            id="startDate"
-            v-model="editedVacation.startDate"
-            type="date"
-            class="pi-input"
-            required
-          />
+          <input id="startDate" v-model="editedVacation.startDate" type="date" class="pi-input" required />
         </div>
 
         <div class="edit-vacation__field">
           <label for="endDate" class="edit-vacation__label">Date de fin</label>
-          <input
-            id="endDate"
-            v-model="editedVacation.endDate"
-            type="date"
-            class="pi-input"
-            required
-          />
+          <input id="endDate" v-model="editedVacation.endDate" type="date" class="pi-input" required />
         </div>
 
         <div class="edit-vacation__field">
           <label for="status" class="edit-vacation__label">Statut</label>
-          <select
-            id="status"
-            v-model="editedVacation.status"
-            class="pi-input"
-            required
-          >
+          <select id="status" v-model="editedVacation.status" class="pi-input" required>
             <option value="pending">En attente</option>
             <option value="approved">Approuvé</option>
             <option value="rejected">Refusé</option>
@@ -41,13 +24,8 @@
 
         <div class="edit-vacation__field">
           <label for="reason" class="edit-vacation__label">Raison</label>
-          <textarea
-            id="reason"
-            v-model="editedVacation.reason"
-            rows="2"
-            class="pi-input"
-            placeholder="Optionnel"
-          ></textarea>
+          <textarea id="reason" v-model="editedVacation.reason" rows="2" class="pi-input"
+            placeholder="Optionnel"></textarea>
         </div>
       </div>
 
@@ -66,9 +44,14 @@
 <script setup lang="ts">
 import { ref, defineProps, defineEmits, watch } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
-import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { useGlobalEvents } from '~/composables/useGlobalEvent';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 import Modal from '~/components/global/modal.vue';
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
+
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
 
 const props = defineProps({
   isOpen: {
@@ -116,12 +99,23 @@ const submitEdit = async () => {
     await $api.put(`/vacations/${props.vacation.id}`, editedVacation.value, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
-    
+
     useGlobalEvents().emitEvent(EGlobalEvent.UPDATE_CALENDAR);
     emit('update');
     closeModal();
+
+    $toast.show({
+      message: 'Edition effectuée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
+
   } catch (error) {
-    console.error('Erreur lors de la modification des vacances:', error);
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 };
 

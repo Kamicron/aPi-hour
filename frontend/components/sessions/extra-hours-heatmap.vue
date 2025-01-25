@@ -218,6 +218,7 @@ onMounted(() => {
   display: flex;
   margin-left: 50px;
   margin-bottom: 12px;
+  gap: 10px;
 }
 
 .month-label {

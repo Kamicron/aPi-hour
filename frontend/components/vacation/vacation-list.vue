@@ -30,22 +30,22 @@
     </div>
 
     <!-- Modal d'édition -->
-    <edit-vacation 
-      :is-open="isEditModalOpen" 
-      :vacation="selectedVacation" 
-      @close="closeEditModal"
-      @update="fetchVacations" 
-    />
+    <edit-vacation :is-open="isEditModalOpen" :vacation="selectedVacation" @close="closeEditModal"
+      @update="fetchVacations" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
-import { useGlobalEvents } from '~/composable/useGlobalEvent';
+import { useGlobalEvents } from '~/composables/useGlobalEvent';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 import EditVacation from '~/components/vacation/edit-vacation.vue';
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
 
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
 const { $api } = useNuxtApp();
 const token = useCookie('token');
 const vacations = ref([]);
@@ -64,8 +64,13 @@ const fetchVacations = async () => {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     vacations.value = response.data;
+
   } catch (error) {
-    console.error('Erreur lors de la récupération des vacances:', error);
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 };
 
@@ -78,8 +83,18 @@ const deleteVacation = async (id: string) => {
     });
     await fetchVacations();
     useGlobalEvents().emitEvent(EGlobalEvent.UPDATE_CALENDAR);
+
+    $toast.show({
+      message: 'Vacances supprimées avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
   } catch (error) {
-    console.error('Erreur lors de la suppression des vacances:', error);
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 };
 

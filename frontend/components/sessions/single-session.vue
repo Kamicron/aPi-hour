@@ -23,7 +23,10 @@
 // ----- Import -----
 import { useNuxtApp, useCookie } from '#app'
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum'
-import { useGlobalEvents } from '~/composable/useGlobalEvent'
+import { useGlobalEvents } from '~/composables/useGlobalEvent'
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
+
 // ------------------
 
 // ------ Type ------
@@ -46,6 +49,9 @@ const emit = defineEmits(['sessionDeleted'])
 const { $api } = useNuxtApp()
 const token = useCookie('token')
 const globalEvents = useGlobalEvents()
+
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
 // ------------------
 
 // ---- Function ----
@@ -64,12 +70,21 @@ const handleDelete = async (event: Event) => {
       throw new Error('Erreur lors de la suppression de la session')
     }
 
-    console.log('Session supprimée avec succès')
     emit('sessionDeleted', props.sessionId)
-    console.log('Émission de l\'événement UPDATE_DAY')
     globalEvents.emitEvent(EGlobalEvent.UPDATE_DAY)
+    $toast.show({
+      message: 'Session supprimée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
+
   } catch (error) {
     console.error('Erreur:', error)
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 }
 // ------------------
