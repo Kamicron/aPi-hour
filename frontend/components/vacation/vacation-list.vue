@@ -22,7 +22,7 @@
           <button class="btn btn--outline" @click="openEditModal(vacation)">
             Modifier
           </button>
-          <button class="btn btn--danger" @click="deleteVacation(vacation.id)">
+          <button class="btn btn--danger" @click="deleteVacation(vacation)">
             Supprimer
           </button>
         </div>
@@ -32,6 +32,13 @@
     <!-- Modal d'édition -->
     <edit-vacation :is-open="isEditModalOpen" :vacation="selectedVacation" @close="closeEditModal"
       @update="fetchVacations" />
+    <Modal v-model="showDeleteModal" title="Confirmation">
+      <p>Êtes-vous sûr de vouloir supprimer ces vacances ?</p>
+      <div class="modal-actions">
+        <button class="btn btn--danger" @click="confirmDelete">Supprimer</button>
+        <button class="btn btn--outline" @click="showDeleteModal = false">Annuler</button>
+      </div>
+    </Modal>
   </div>
 </template>
 
@@ -41,6 +48,7 @@ import { useNuxtApp, useCookie } from '#app';
 import { useGlobalEvents } from '~/composables/useGlobalEvent';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
 import EditVacation from '~/components/vacation/edit-vacation.vue';
+import Modal from '~/components/global/modal.vue';
 import { EToast } from '~/assets/ts/enums/toast.enum'
 import { useAxiosError } from '~/composables/useAxiosError'
 
@@ -51,6 +59,8 @@ const token = useCookie('token');
 const vacations = ref([]);
 const isEditModalOpen = ref(false);
 const selectedVacation = ref(null);
+const showDeleteModal = ref(false);
+const vacationToDelete = ref(null);
 
 const sortedVacations = computed(() => {
   return [...vacations.value].sort((a, b) => {
@@ -74,13 +84,19 @@ const fetchVacations = async () => {
   }
 };
 
-const deleteVacation = async (id: string) => {
-  if (!confirm('Êtes-vous sûr de vouloir supprimer ces vacances ?')) return;
+async function deleteVacation(vacation: any) {
+  vacationToDelete.value = vacation;
+  showDeleteModal.value = true;
+}
 
+async function confirmDelete() {
+  if (!vacationToDelete.value) return;
+  
   try {
-    await $api.delete(`/vacations/${id}`, {
+    await $api.delete(`/vacations/${vacationToDelete.value.id}`, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
+    showDeleteModal.value = false;
     await fetchVacations();
     useGlobalEvents().emitEvent(EGlobalEvent.UPDATE_CALENDAR);
 
@@ -96,7 +112,7 @@ const deleteVacation = async (id: string) => {
       duration: 5000
     })
   }
-};
+}
 
 const openEditModal = (vacation) => {
   selectedVacation.value = vacation;
@@ -207,6 +223,11 @@ onMounted(() => {
   &__actions {
     display: flex;
     gap: $spacing-small;
+
+    .btn {
+      min-width: 120px;  // Définir une largeur minimale fixe pour tous les boutons
+      justify-content: center;  // Centrer le texte dans les boutons
+    }
   }
 }
 
@@ -224,5 +245,16 @@ onMounted(() => {
 
 .status-holiday {
   color: $color-primary-light;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-medium;
+  margin-top: $spacing-large;
+}
+
+.btn {
+  height: 41px 
 }
 </style>

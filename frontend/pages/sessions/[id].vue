@@ -32,9 +32,7 @@
             : "En cours" }}
         </p>
         <button class="btn btn--primary" @click="editPause(pause)">Modifier</button>
-        <button class="btn btn--danger" @click="deletePause(pause.id)">
-          <font-awesome-icon icon="trash" />
-        </button>
+        <button class="btn btn--danger" @click="deletePause(pause)">Supprimer</button>
       </li>
     </ul>
     <hr class="divider" />
@@ -42,35 +40,51 @@
     <button class="btn btn--danger session-details__delete-session" @click="deleteSession">
       Supprimer la session
     </button>
-  </div>
 
-  <modal v-model="isUpdatePauseModal">
-    <div class="form-container">
-      <h3>Ajouter une pause</h3>
-      <form @submit.prevent="addPause" class="form">
-        <label for="newPauseStart" class="form__label">Début :</label>
-        <input type="time" id="newPauseStart" v-model="newPauseStart" required class="pi-input" />
+    <Modal v-model="showDeletePauseModal" title="Confirmation">
+      <p>Êtes-vous sûr de vouloir supprimer cette pause ?</p>
+      <div class="modal-actions">
+        <button class="btn btn--danger" @click="confirmDeletePause">Supprimer</button>
+        <button class="btn btn--outline" @click="showDeletePauseModal = false">Annuler</button>
+      </div>
+    </Modal>
 
-        <label for="newPauseEnd" class="form__label">Fin :</label>
-        <input type="time" id="newPauseEnd" v-model="newPauseEnd" class="pi-input" />
+    <Modal v-model="showDeleteSessionModal" title="Confirmation">
+      <p>Êtes-vous sûr de vouloir supprimer cette session ?</p>
+      <div class="modal-actions">
+        <button class="btn btn--danger" @click="confirmDeleteSession">Supprimer</button>
+        <button class="btn btn--ghost" @click="showDeleteSessionModal = false">Annuler</button>
+      </div>
+    </Modal>
 
-        <button type="submit" class="btn btn--primary">Ajouter la pause</button>
+    <modal v-model="isUpdatePauseModal">
+      <div class="form-container">
+        <h3>Ajouter une pause</h3>
+        <form @submit.prevent="addPause" class="form">
+          <label for="newPauseStart" class="form__label">Début :</label>
+          <input type="time" id="newPauseStart" v-model="newPauseStart" required class="pi-input" />
+
+          <label for="newPauseEnd" class="form__label">Fin :</label>
+          <input type="time" id="newPauseEnd" v-model="newPauseEnd" class="pi-input" />
+
+          <button type="submit" class="btn btn--primary">Ajouter la pause</button>
+        </form>
+      </div>
+    </modal>
+
+    <modal v-model="isUpdateSessionModal">
+      <h2 class="session-details__subtitle">Modifier la session</h2>
+      <form @submit.prevent="updateSession" class="form">
+        <label for="start" class="form__label">Début :</label>
+        <input type="time" v-model="editSession.startTime" id="start" class="pi-input" />
+
+        <label for="end" class="form__label">Fin :</label>
+        <input type="time" v-model="editSession.endTime" id="end" class="pi-input" />
+
+        <button type="submit" class="btn btn--primary">Enregistrer les modifications</button>
       </form>
-    </div>
-  </modal>
-
-  <modal v-model="isUpdateSessionModal">
-    <h2 class="session-details__subtitle">Modifier la session</h2>
-    <form @submit.prevent="updateSession" class="form">
-      <label for="start" class="form__label">Début :</label>
-      <input type="time" v-model="editSession.startTime" id="start" class="pi-input" />
-
-      <label for="end" class="form__label">Fin :</label>
-      <input type="time" v-model="editSession.endTime" id="end" class="pi-input" />
-
-      <button type="submit" class="btn btn--primary">Enregistrer les modifications</button>
-    </form>
-  </modal>
+    </modal>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -80,7 +94,12 @@ import { useRoute } from "vue-router";
 import useDateFormatter from "../../composables/useDate";
 import { EGlobalEvent } from "~/assets/ts/enums/global/globalEvent.enum";
 import { useGlobalEvents } from "~/composables/useGlobalEvent";
+import { EToast } from '~/assets/ts/enums/toast.enum'
+import { useAxiosError } from '~/composables/useAxiosError'
+import Modal from '~/components/global/modal.vue';
 
+const { $toast } = useNuxtApp()
+const { getErrorMessage } = useAxiosError()
 const { $api } = useNuxtApp();
 const isUpdateSessionModal = ref<boolean>(false)
 const isUpdatePauseModal = ref<boolean>(false)
@@ -198,7 +217,11 @@ async function fetchSessionDetails() {
 
 async function addPause() {
   if (!newPauseStart.value) {
-    alert("L'heure de début est requise pour ajouter une pause.");
+    $toast.show({
+      message: "L'heure de début est requise pour ajouter une pause.",
+      type: EToast.WARNING,
+      duration: 3000
+    })
     return;
   }
 
@@ -243,7 +266,11 @@ async function editPause(pause: any) {
 
 async function updateSession() {
   if (!editSession.value.startTime || !editSession.value.endTime) {
-    alert("Les heures de début et de fin sont obligatoires.");
+    $toast.show({
+      message: 'Les heures de début et de fin sont obligatoires.',
+      type: EToast.WARNING,
+      duration: 3000
+    })
     return;
   }
 
@@ -267,43 +294,63 @@ async function updateSession() {
   }
 }
 
-async function deletePause(pauseId: string) {
-  if (!confirm("Êtes-vous sûr de vouloir supprimer cette pause ?")) return;
+const showDeletePauseModal = ref(false);
+const showDeleteSessionModal = ref(false);
+const pauseToDelete = ref(null);
 
+async function deletePause(pause: any) {
+  pauseToDelete.value = pause;
+  showDeletePauseModal.value = true;
+}
+
+async function confirmDeletePause() {
+  if (!pauseToDelete.value) return;
+  
   try {
-    await $api.delete(`/pauses/${pauseId}`, {
+    await $api.delete(`/pauses/${pauseToDelete.value.id}`, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
-    pauses.value = pauses.value.filter((pause) => pause.id !== pauseId);
-    // alert("Pause supprimée avec succès.");
+    pauses.value = pauses.value.filter((pause) => pause.id !== pauseToDelete.value.id);
+    showDeletePauseModal.value = false;
+    $toast.show({
+      message: 'Pause supprimée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
   } catch (error) {
-    console.error("Erreur lors de la suppression de la pause :", error);
-    alert("Une erreur est survenue lors de la suppression de la pause.");
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 }
 
 async function deleteSession() {
-  if (!confirm("Êtes-vous sûr de vouloir supprimer cette session ?")) return;
+  showDeleteSessionModal.value = true;
+}
 
+async function confirmDeleteSession() {
   try {
     await $api.delete(`/time-entries/${sessionId}`, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
-    // alert("Session supprimée avec succès.");
-
-    console.log('formattedDate', formattedDate);
-
-    window.location.href = `/?date=${formattedDate}`;
-
+    showDeleteSessionModal.value = false;
+    window.location.href = `/?date=${formattedDate.value}`;
     useGlobalEvents().emitEvent(EGlobalEvent.UPDATE_DAY);
-
-    // window.location.href = "/sessions"; // Remplacez par votre route
+    $toast.show({
+      message: 'Session supprimée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
   } catch (error) {
-    console.error("Erreur lors de la suppression de la session :", error);
-    alert("Une erreur est survenue lors de la suppression de la session.");
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    })
   }
 }
-
 
 onMounted(() => {
   fetchSessionDetails();
@@ -416,6 +463,12 @@ onMounted(() => {
   }
 }
 
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: $spacing-medium;
+  margin-top: $spacing-large;
+}
 
 .divider {
   border: none;

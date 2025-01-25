@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.10.1",
+    "date": "2025-01-23",
+    "changes": {
+      "fix": [
+        "Correction de la taille des boutons et style des boutons."
+      ]
+    }
+  },
+  {
     "version": "0.10.0",
     "date": "2025-01-23",
     "changes": {

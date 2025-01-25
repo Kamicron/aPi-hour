@@ -136,7 +136,11 @@ async function fetchSessions() {
 // Créer une nouvelle session
 async function createSession() {
   if (!newSession.value.startTime) {
-    alert('Veuillez renseigner une date de début pour créer une session.');
+    $toast.show({
+      message: 'Veuillez renseigner une date de début pour créer une session.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    })
     return;
   }
 

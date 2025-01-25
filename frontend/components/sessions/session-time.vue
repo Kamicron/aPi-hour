@@ -116,7 +116,7 @@ async function start() {
     } else {
       $toast.show({
         message: 'Date de début manquante dans la réponse du serveur',
-        type: EToast.ERROR,
+        type: EToast.WARNING,
         duration: 3000
       })
     }
