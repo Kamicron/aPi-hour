@@ -146,7 +146,8 @@ const getStatusText = (status: string) => {
     pending: 'En attente',
     approved: 'Approuvé',
     rejected: 'Refusé',
-    public_holiday: 'Jour férié'
+    public_holiday: 'Jour férié',
+    sick_leave: 'Congé maladie'
   };
   return statusMap[status] || status;
 };

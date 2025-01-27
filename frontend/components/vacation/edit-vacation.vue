@@ -19,6 +19,7 @@
             <option value="approved">Approuvé</option>
             <option value="rejected">Refusé</option>
             <option value="public_holiday">Jour férié</option>
+            <option value="sick_leave">Congé maladie</option>
           </select>
         </div>
 

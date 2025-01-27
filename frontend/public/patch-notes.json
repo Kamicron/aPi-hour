@@ -1,7 +1,17 @@
 [
   {
+    "version": "0.10.2",
+    "date": "2025-01-27",
+    "changes": {
+      "fix": [
+        "Ajout d'un enum pour les jours de congé maladie",
+        "Modification du pdf pour prendre en compte les jours de congé maladie"
+      ]
+    }
+  },
+  {
     "version": "0.10.1",
-    "date": "2025-01-23",
+    "date": "2025-01-25",
     "changes": {
       "fix": [
         "Correction de la taille des boutons et style des boutons."
@@ -10,7 +20,7 @@
   },
   {
     "version": "0.10.0",
-    "date": "2025-01-23",
+    "date": "2025-01-24",
     "changes": {
       "feat": [
         "Ajout d'un composant pour afficher des notifications"

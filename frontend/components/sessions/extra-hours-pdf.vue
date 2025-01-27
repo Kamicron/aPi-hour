@@ -206,9 +206,11 @@ const generatePDF = async () => {
 
     // Add vacation details if any
     if (vacations && vacations.length > 0) {
-      // Filtrer les jours fériés
-      const filteredVacations = vacations.filter(vacation => vacation.status !== 'public_holiday');
+      // Filtrer les jours fériés et les congés maladie
+      const filteredVacations = vacations.filter(vacation => vacation.status !== 'public_holiday' && vacation.status !== 'sick_leave');
+      const sickLeaves = vacations.filter(vacation => vacation.status === 'sick_leave');
 
+      // Afficher les congés normaux
       if (filteredVacations.length > 0) {
         yPosition = doc.lastAutoTable.finalY + 20;
         doc.setFontSize(16);
@@ -220,7 +222,8 @@ const generatePDF = async () => {
             'pending': 'En attente',
             'approved': 'Approuvé',
             'rejected': 'Refusé',
-            'cancelled': 'Annulé'
+            'cancelled': 'Annulé',
+            'sick_leave': 'Congé maladie'
           };
           return statusMap[status] || status;
         };
@@ -265,6 +268,54 @@ const generatePDF = async () => {
           ...tableStyles,
           columnStyles: {
             3: { halign: 'right' }
+          }
+        });
+      }
+
+      // Afficher les congés maladie dans un tableau séparé
+      if (sickLeaves.length > 0) {
+        yPosition = doc.lastAutoTable.finalY + 20;
+        doc.setFontSize(16);
+        doc.setTextColor(colorPrimary);
+        doc.text('Périodes de congés maladie', 15, yPosition);
+
+        const sickLeaveTableData = sickLeaves.map(vacation => {
+          const startDate = new Date(vacation.startDate);
+          const endDate = new Date(vacation.endDate);
+          const daysCount = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+
+          return [
+            `${startDate.toLocaleDateString('fr-FR')} au ${endDate.toLocaleDateString('fr-FR')}`,
+            vacation.reason || 'Non spécifié',
+            `${daysCount} jour${daysCount > 1 ? 's' : ''}`
+          ];
+        });
+
+        // Calculer le total des jours de congés maladie
+        const totalSickDays = sickLeaveTableData.reduce((total, vacation) => {
+          return total + parseInt(vacation[2]);
+        }, 0);
+
+        doc.autoTable({
+          startY: yPosition + 10,
+          head: [
+            [
+              { content: 'Période', styles: { halign: 'left' } },
+              { content: 'Motif', styles: { halign: 'left' } },
+              { content: 'Durée', styles: { halign: 'right' } }
+            ]
+          ],
+          body: sickLeaveTableData,
+          foot: [
+            [
+              { content: 'Total', styles: { halign: 'left' } },
+              { content: '', styles: { halign: 'left' } },
+              { content: `${totalSickDays} jour${totalSickDays > 1 ? 's' : ''}`, styles: { halign: 'right' } }
+            ]
+          ],
+          ...tableStyles,
+          columnStyles: {
+            2: { halign: 'right' }
           }
         });
       }
