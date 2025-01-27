@@ -1,25 +1,14 @@
 <template>
   <div>
-    <pc-header />
-    <div class="layout">
-      <NuxtPage />
-    </div>
-    <Toast />
+    <PiHeader />
+    <NuxtPage />
+    <PiFooter />
   </div>
 </template>
 
-<script setup lang="ts">
-import { useAuthStore } from '../frontend/stores/auth';
-import { onMounted } from 'vue';
-import { Toast } from 'vue3-modern-toast'
-import 'vue3-modern-toast/dist/style.css'
+<script lang="ts" setup>
 import { EToast } from '~/assets/ts/enums/toast.enum'
 const { $toast } = useNuxtApp()
-
-const authStore = useAuthStore();
-onMounted(() => {
-  authStore.fetchAuthStatus(); // Synchronise l'état d'authentification
-});
 
 $toast.configure({
   position: {
@@ -54,11 +43,3 @@ $toast.configure({
   }
 })
 </script>
-
-<style>
-.layout {
-  padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
-}
-</style>
