@@ -56,6 +56,12 @@ const legendLevels = [
 // Fonction pour obtenir la classe CSS en fonction du nombre d'heures
 function getCellClass(hours: number | null) {
   if (hours === null) return 'empty';
+  
+  // Gestion des valeurs extrêmes
+  if (hours < -10) return 'negative-5';
+  if (hours > 10) return 'level-5';
+
+  // Échelle normale
   if (hours < 0) {
     if (hours <= -2) return 'negative-5';
     if (hours <= -1.5) return 'negative-4';
@@ -63,10 +69,13 @@ function getCellClass(hours: number | null) {
     if (hours <= -0.5) return 'negative-2';
     return 'negative-1';
   }
-  if (hours <= 0.5) return 'level-1';
-  if (hours <= 1) return 'level-2';
-  if (hours <= 1.5) return 'level-3';
-  if (hours <= 2) return 'level-4';
+
+  // Entre -30min et +30min (incluant 0) = neutre
+  if (hours <= 0.5) return 'neutral';
+  if (hours <= 1) return 'level-1';
+  if (hours <= 1.5) return 'level-2';
+  if (hours <= 2) return 'level-3';
+  if (hours <= 2.5) return 'level-4';
   return 'level-5';
 }
 
@@ -96,7 +105,8 @@ function formatDateToISO(date: Date): string {
 // Fonction pour obtenir le tooltip
 function getCellTitle(day: { date: string, hours: number | null }) {
   const date = createDate(day.date);
-  if (!day.hours) return `${formatDate(date)} : Pas d'heures supplémentaires`;
+  if (day.hours === null) return `${formatDate(date)} : Jour non travaillé`;
+  if (Math.abs(day.hours) <= 0.5) return `${formatDate(date)} : Journée standard (${day.hours.toFixed(1)}h)`;
   const prefix = day.hours < 0 ? 'Manque' : 'Heures supplémentaires';
   const hours = Math.abs(day.hours);
   return `${formatDate(date)} : ${prefix} de ${hours.toFixed(1)}h`;
@@ -147,7 +157,8 @@ const weeksData = computed(() => {
         const dateStr = formatDateToISO(date);
         return {
           date: dateStr,
-          hours: extraHours.value[dateStr] || null
+          // Si la date existe dans extraHours, c'est un jour travaillé
+          hours: dateStr in extraHours.value ? extraHours.value[dateStr] : null
         };
       })
     };
@@ -209,6 +220,11 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+// Variable pour la teinte (147 = vert, changez cette valeur pour changer la couleur)
+$heatmap-hue: 147;
+// Saturation constante pour tous les niveaux
+$heatmap-saturation: 70%;
+
 .heatmap-container {
   font-size: 12px;
   padding: 20px;
@@ -290,44 +306,47 @@ onMounted(() => {
   background-color: #20242b;
 }
 
-.negative-1 {
-  background-color: #1a3b77;
-}
-
-.negative-2 {
-  background-color: #284f99;
-}
-
-.negative-3 {
-  background-color: #42a5f5;
+.negative-5 {
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 14%);
 }
 
 .negative-4 {
-  background-color: #7caed6;
-
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 18%);
 }
 
-.negative-5 {
-  background-color: #9cc5e2;
+.negative-3 {
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 26%);
+}
+
+.negative-2 {
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 34%);
+}
+
+.negative-1 {
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 42%);
+}
+
+.neutral {
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 50%);
 }
 
 .level-1 {
-  background-color: #0a4020;
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 58%);
 }
 
 .level-2 {
-  background-color: #216e39;
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 66%);
 }
 
 .level-3 {
-  background-color: #30a14e;
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 74%);
 }
 
 .level-4 {
-  background-color: #40c463;
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 82%);
 }
 
 .level-5 {
-  background-color: #9be9a8;
+  background-color: hsl($heatmap-hue, $heatmap-saturation, 90%);
 }
 </style>

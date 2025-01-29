@@ -6,7 +6,7 @@
       "fix": [
         "Modification des limites de la heat map pour avoir des tranches de 30 minutes",
         "Correction de la liste des vacances pour n'afficher que celles de l'utilisateur connecté",
-        "Changement du nuancier de la heat map pour utiliser des tons de bleu plus doux"
+        "Amélioration du nuancier de la heat map avec une variable de teinte HSL pour une meilleure personnalisation"
       ]
     }
   },
