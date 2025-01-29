@@ -70,7 +70,7 @@ const sortedVacations = computed(() => {
 
 const fetchVacations = async () => {
   try {
-    const response = await $api.get('/vacations', {
+    const response = await $api.get('/vacations/my', {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     vacations.value = response.data;

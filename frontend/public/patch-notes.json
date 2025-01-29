@@ -4,7 +4,8 @@
     "date": "2025-01-27",
     "changes": {
       "fix": [
-        "Modification des limites de la heat map pour avoir des tranches de 30 minutes"
+        "Modification des limites de la heat map pour avoir des tranches de 30 minutes",
+        "Correction de la liste des vacances pour n'afficher que celles de l'utilisateur connecté"
       ]
     }
   },
