@@ -1,11 +1,12 @@
 [
   {
     "version": "0.10.3",
-    "date": "2025-01-27",
+    "date": "2025-01-28",
     "changes": {
       "fix": [
         "Modification des limites de la heat map pour avoir des tranches de 30 minutes",
-        "Correction de la liste des vacances pour n'afficher que celles de l'utilisateur connecté"
+        "Correction de la liste des vacances pour n'afficher que celles de l'utilisateur connecté",
+        "Changement du nuancier de la heat map pour utiliser des tons de bleu plus doux"
       ]
     }
   },

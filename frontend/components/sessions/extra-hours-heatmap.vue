@@ -291,23 +291,24 @@ onMounted(() => {
 }
 
 .negative-1 {
-  background-color: #4c1c1c;
+  background-color: #1a3b77;
 }
 
 .negative-2 {
-  background-color: #771c1c;
+  background-color: #284f99;
 }
 
 .negative-3 {
-  background-color: #a61c1c;
+  background-color: #42a5f5;
 }
 
 .negative-4 {
-  background-color: #d41c1c;
+  background-color: #7caed6;
+
 }
 
 .negative-5 {
-  background-color: #ff1c1c;
+  background-color: #9cc5e2;
 }
 
 .level-1 {
