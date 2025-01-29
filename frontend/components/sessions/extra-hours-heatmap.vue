@@ -47,26 +47,26 @@ const extraHours = ref<Record<string, number>>({});
 
 const legendLevels = [
   { class: '0', label: '0h' },
-  { class: '1', label: '0-1h' },
-  { class: '2', label: '1-2h' },
-  { class: '3', label: '2-3h' },
-  { class: '4', label: '3h+' },
+  { class: '1', label: '0-0.5h' },
+  { class: '2', label: '0.5-1h' },
+  { class: '3', label: '1-1.5h' },
+  { class: '4', label: '1.5h+' },
 ];
 
 // Fonction pour obtenir la classe CSS en fonction du nombre d'heures
 function getCellClass(hours: number | null) {
   if (hours === null) return 'empty';
   if (hours < 0) {
-    if (hours <= -5) return 'negative-5';
-    if (hours <= -3) return 'negative-4';
-    if (hours <= -2) return 'negative-3';
-    if (hours <= -1) return 'negative-2';
+    if (hours <= -2) return 'negative-5';
+    if (hours <= -1.5) return 'negative-4';
+    if (hours <= -1) return 'negative-3';
+    if (hours <= -0.5) return 'negative-2';
     return 'negative-1';
   }
-  if (hours <= 1) return 'level-1';
-  if (hours <= 2) return 'level-2';
-  if (hours <= 3) return 'level-3';
-  if (hours <= 5) return 'level-4';
+  if (hours <= 0.5) return 'level-1';
+  if (hours <= 1) return 'level-2';
+  if (hours <= 1.5) return 'level-3';
+  if (hours <= 2) return 'level-4';
   return 'level-5';
 }
 
@@ -106,16 +106,16 @@ function getLegendTitle(level: number) {
   const prefix = level < 0 ? 'Manque de' : 'Jusqu\'à';
   const hours = Math.abs(level);
   switch(level) {
-    case -5: return 'Plus de 5 heures manquantes'
-    case -4: return 'Jusqu\'à 5 heures manquantes'
-    case -3: return 'Jusqu\'à 3 heures manquantes'
-    case -2: return 'Jusqu\'à 2 heures manquantes'
-    case -1: return 'Jusqu\'à 1 heure manquante'
-    case 1: return 'Jusqu\'à 1 heure'
-    case 2: return 'Jusqu\'à 2 heures'
-    case 3: return 'Jusqu\'à 3 heures'
-    case 4: return 'Jusqu\'à 5 heures'
-    case 5: return 'Plus de 5 heures'
+    case -5: return 'Plus de 2 heures manquantes'
+    case -4: return 'Jusqu\'à 2 heures manquantes'
+    case -3: return 'Jusqu\'à 1.5 heures manquantes'
+    case -2: return 'Jusqu\'à 1 heure manquante'
+    case -1: return 'Jusqu\'à 0.5 heure manquante'
+    case 1: return 'Jusqu\'à 0.5 heure'
+    case 2: return 'Jusqu\'à 1 heure'
+    case 3: return 'Jusqu\'à 1.5 heures'
+    case 4: return 'Jusqu\'à 2 heures'
+    case 5: return 'Plus de 2 heures'
     default: return ''
   }
 }

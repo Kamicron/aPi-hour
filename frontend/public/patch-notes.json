@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.10.3",
+    "date": "2025-01-27",
+    "changes": {
+      "fix": [
+        "Modification des limites de la heat map pour avoir des tranches de 30 minutes"
+      ]
+    }
+  },
+  {
     "version": "0.10.2",
     "date": "2025-01-27",
     "changes": {
