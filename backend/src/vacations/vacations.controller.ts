@@ -8,10 +8,12 @@ import {
   Body,
   UseGuards,
   Req,
+  Query,
 } from '@nestjs/common';
 import { VacationsService } from './vacations.service';
 import { CreateVacationDto } from './dto/create-vacation.dto';
 import { UpdateVacationDto } from './dto/update-vacation.dto';
+import { GetVacationsDto } from './dto/get-vacations.dto';
 import { AuthGuard } from '../auth/auth.guard';
 
 @Controller('vacations')
@@ -26,14 +28,14 @@ export class VacationsController {
 
   @UseGuards(AuthGuard)
   @Get('my')
-  async findMyVacations(@Req() req) {
-    return await this.vacationsService.findUserVacations(req.user.userId);
+  async findMyVacations(@Req() req, @Query() query: GetVacationsDto) {
+    return await this.vacationsService.findUserVacations(req.user.userId, query);
   }
 
   @UseGuards(AuthGuard)
   @Get()
-  async findAll() {
-    return await this.vacationsService.findAll();
+  async findAll(@Query() query: GetVacationsDto) {
+    return await this.vacationsService.findAll(query);
   }
 
   @UseGuards(AuthGuard)

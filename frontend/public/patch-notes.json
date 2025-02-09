@@ -6,7 +6,8 @@
       "fix": [
         "Retravaille des couleur du calendrier",
         "Réactivité du module 'Résumé des heures travaillées' à l'initialisation",
-        "Lien entre la heatmap et le composant 'Résumé de la journée'"
+        "Lien entre la heatmap et le composant 'Résumé de la journée'",
+        "Tri et filtre sur le tableau des jours non travaillés"
       ]
     }
   },

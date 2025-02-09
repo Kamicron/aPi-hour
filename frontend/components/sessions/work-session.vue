@@ -9,7 +9,7 @@
       <extra-hours-rate :currentMonth="currentMonth" class="work-sessions__layout--rate" />
       <extra-hours-pdf class="work-sessions__layout--generate"/>
       <extra-hours-heatmap class="work-sessions__layout--heatmap" @pick-date="handleDatePicked"/>
-      <bento-card title="Mes congés" class="work-sessions__layout--vacation_table">
+      <bento-card title="Mes jours non travaillés" class="work-sessions__layout--vacation_table">
         <vacation-list />
       </bento-card>
     </div>

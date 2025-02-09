@@ -257,7 +257,7 @@ watch([currentMonth, currentYear], () => {
       border: 2px solid $color-background;
 
       .date {
-        color: $color-text-secondary;
+        color: $color-background;
       }
     }
 
@@ -282,14 +282,16 @@ watch([currentMonth, currentYear], () => {
     &--today {
       background-color: $color-primary;
       font-weight: bold;
+      
     }
 
     &--selected {
-      background-color: $color-secondary;
+      background-color: $color-primary-light;
       font-weight: bold;
+      border: 2px solid $color-secondary;
 
       .date {
-        color: $color-primary
+        color: $color-secondary
       }
     }
 
