@@ -43,3 +43,7 @@ $toast.configure({
   }
 })
 </script>
+
+<style lang="scss">
+
+</style>

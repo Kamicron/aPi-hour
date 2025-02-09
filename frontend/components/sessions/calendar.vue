@@ -216,7 +216,7 @@ watch([currentMonth, currentYear], () => {
 }, { immediate: true });
 </script>
 
-<style lang="scss">
+<style lang="scss" scoped>
 .calendar {
   background-color: $color-surface;
   color: $color-text-primary;
@@ -250,66 +250,66 @@ watch([currentMonth, currentYear], () => {
     cursor: pointer;
     border: 1px solid $color-text-primary;
     border-radius: 4px;
+    box-shadow: $box-shadow-dark;
 
+    &:hover {
+      background: darken($color-secondary, 15%);
+    }
+
+    .date {
+      font-weight: bold;
+    }
 
     &--inactive {
-      background-color: $color-surface;
-      border: 2px solid $color-background;
+      background: darken($color-surface, 10%);
+      border: 1px solid $color-text-dark;
 
       .date {
-        color: $color-background;
+        color: $color-text-dark;
+      }
+      cursor: default;
+    }
+
+    &--public-holiday {
+      background: rgba($color-warning, 0.2);
+      border: 1px solid $color-warning;
+
+      .date {
+        color: $color-warning;
       }
     }
 
     &--vacation {
-      border: 2px solid $color-danger;
-      font-weight: bold;
+      background: rgba($color-danger, 0.2);
+      border: 1px solid $color-danger;
 
       .date {
-        color: $color-danger
-      }
-    }
-
-    &--public-holiday {
-      border: 2px solid $color-primary-light;
-
-      .date {
-        color: $color-primary-light;
-        font-weight: bold;
-      }
-    }
-
-    &--today {
-      background-color: $color-primary;
-      font-weight: bold;
-      
-    }
-
-    &--selected {
-      background-color: $color-primary-light;
-      font-weight: bold;
-      border: 2px solid $color-secondary;
-
-      .date {
-        color: $color-secondary
+        color: $color-danger;
       }
     }
 
     &--session {
-      border: 2px solid $color-success;
-      font-weight: bold;
+      background: rgba($color-primary, 0.2);
+      border: 1px solid $color-primary;
+
+      .date {
+        color: $color-primary-light;
+      }
+    }
+
+    &--today {
+      background: rgba($color-success, 0.2);
+      border: 1px solid $color-success;
 
       .date {
         color: $color-success;
       }
     }
 
-    &:hover {
-      background-color: $color-secondary;
-
-      .date {
-        color: $color-primary-light;
-      }
+    &--selected {
+      background: $color-primary;
+      border: 1px solid $color-background;
+      box-shadow: $box-shadow-light;
     }
   }
 
