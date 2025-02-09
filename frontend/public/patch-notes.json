@@ -1,5 +1,16 @@
 [
   {
+    "version": "0.10.4",
+    "date": "2025-02-09",
+    "changes": {
+      "fix": [
+        "Retravaille des couleur du calendrier",
+        "Réactivité du module 'Résumé des heures travaillées' à l'initialisation",
+        "Lien entre la heatmap et le composant 'Résumé de la journée'"
+      ]
+    }
+  },
+  {
     "version": "0.10.3",
     "date": "2025-01-28",
     "changes": {

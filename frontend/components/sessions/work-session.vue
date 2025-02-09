@@ -8,7 +8,7 @@
       <set_vacation class="work-sessions__layout--vacation" />
       <extra-hours-rate :currentMonth="currentMonth" class="work-sessions__layout--rate" />
       <extra-hours-pdf class="work-sessions__layout--generate"/>
-      <extra-hours-heatmap class="work-sessions__layout--heatmap" />
+      <extra-hours-heatmap class="work-sessions__layout--heatmap" @pick-date="handleDatePicked"/>
       <bento-card title="Mes congés" class="work-sessions__layout--vacation_table">
         <vacation-list />
       </bento-card>
@@ -29,14 +29,12 @@ const { $api } = useNuxtApp();
 const token = useCookie('token');
 const profileStore = useUserStore();
 
-console.log('profileStore workSession', profileStore);
-
-const currentMonth = ref('2025-01'); // Initialisation avec un mois valide
+const currentMonth = ref('2025-01');
 
 const updateCurrentMonth = (newMonth) => {
-  console.log('Mois reçu de l’enfant :', newMonth);
-  currentMonth.value = newMonth; // Met à jour le mois dans le parent
+  currentMonth.value = newMonth; 
 };
+
 // Variables réactives
 const selectedDate = ref(new Date().toISOString().slice(0, 10));
 const summary = ref<any | null>(null);
@@ -48,7 +46,6 @@ const userProfile = computed(() => {
     return { weeklyHoursGoal: 35, workingDaysPerWeek: 5 }; // Valeurs par défaut si le profil n'est pas encore chargé
   }
 
-  console.log('profileStore.profile.workingDaysPerWeek', profileStore.profile.workingDaysPerWeek)
   return {
     weeklyHoursGoal: profileStore.profile.weeklyHoursGoal || 35,
     workingDaysPerWeek: profileStore.profile.workingDaysPerWeek || 5,
@@ -57,28 +54,9 @@ const userProfile = computed(() => {
 
 const dailyWorkGoal = computed(() => {
   if (!userProfile.value) return 0;
-  console.log('userProfile', userProfile.value);
   return (userProfile.value.weeklyHoursGoal / userProfile.value.workingDaysPerWeek) * 3600; // En secondes
 });
 
-// Gestion du profil lors de sa mise à jour
-watch(
-  () => profileStore.profile,
-  (newValue) => {
-    if (newValue) {
-      console.log('Profil mis à jour:', newValue);
-    }
-  },
-  { immediate: true }
-);
-
-// Suivi des modifications de dailyWorkGoal
-watch(
-  () => dailyWorkGoal.value,
-  (newValue) => {
-    console.log('Nouvel objectif quotidien:', newValue);
-  }
-);
 
 // Méthode pour récupérer les sessions par date
 async function fetchSessions() {
@@ -87,8 +65,6 @@ async function fetchSessions() {
       headers: { Authorization: `Bearer ${token.value}` },
     });
     summary.value = response.data;
-
-    console.log('summary', summary);
 
   } catch (error) {
     console.error('Erreur lors de la récupération des sessions', error);

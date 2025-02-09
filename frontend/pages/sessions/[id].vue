@@ -208,7 +208,6 @@ async function fetchSessionDetails() {
       customOptions: dateOptions,
     });
     formattedDate.value = new Date(session.value.startTime).toISOString().split('T')[0];
-    console.log('newDate.value', newDate.value);
 
   } catch (error) {
     console.error("Erreur lors du chargement des données :", error);

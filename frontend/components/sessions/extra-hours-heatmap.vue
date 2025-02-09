@@ -10,7 +10,8 @@
         </div>
         <div class="grid-container">
           <div v-for="(week, index) in weeksData" :key="index" class="week-column">
-            <div v-for="(day, index) in week.days" :key="index" 
+            <div v-for="(day, index) in week.days" :key="index"
+            @click="emits('pick-date', new Date(day.date))"
                  class="grid-cell"
                  :class="getCellClass(day.hours)"
                  :title="getCellTitle(day)">
@@ -45,13 +46,8 @@ const { $api } = useNuxtApp();
 const token = useCookie('token');
 const extraHours = ref<Record<string, number>>({});
 
-const legendLevels = [
-  { class: '0', label: '0h' },
-  { class: '1', label: '0-0.5h' },
-  { class: '2', label: '0.5-1h' },
-  { class: '3', label: '1-1.5h' },
-  { class: '4', label: '1.5h+' },
-];
+const emits = defineEmits(['pick-date']);
+
 
 // Fonction pour obtenir la classe CSS en fonction du nombre d'heures
 function getCellClass(hours: number | null) {
@@ -207,7 +203,6 @@ const fetchExtraHours = async () => {
     const response = await $api.get(`/time-entries/extra-hours-heatmap`, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
-    console.log('Extra hours data:', response.data);
     extraHours.value = response.data;
   } catch (error) {
     console.error('Erreur lors du chargement des heures supplémentaires:', error);
@@ -280,6 +275,7 @@ $heatmap-saturation: 70%;
   height: 13px;
   border-radius: 2px;
   background-color: $color-text-primary;
+  cursor: pointer;
 }
 
 .legend {

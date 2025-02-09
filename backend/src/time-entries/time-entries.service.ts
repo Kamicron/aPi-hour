@@ -117,11 +117,6 @@ export class TimeEntriesService {
 
   // Récupérer une entrée spécifique
   async findOne(id: string, userId: string, userRole: string) {
-    console.log('=============');
-    console.log('id', id);
-    console.log('userId', userId);
-    console.log('userRole', userRole);
-    console.log('=============');
 
     const timeEntry = await this.timeEntriesRepository.findOne({
       where: { id },
@@ -129,7 +124,6 @@ export class TimeEntriesService {
       withDeleted: userRole === 'admin',
     });
 
-    console.log('timeEntry', timeEntry);
 
     if (!timeEntry) throw new NotFoundException('Time entry not found');
     if (timeEntry.user.id !== userId && userRole !== 'admin') {
@@ -208,7 +202,6 @@ export class TimeEntriesService {
       where: { user: { id: userId } },
     });
 
-    console.log('session', session);
 
     if (session) {
       session.status = 'started';
@@ -305,7 +298,6 @@ export class TimeEntriesService {
     // Définition des dates pour le mois
     const startDate = new Date(year, week - 1, 1); // Premier jour de la semaine
     const endDate = new Date(year, week, 0, 23, 59, 59); // Dernier jour de la semaine
-    console.log('StartDate:', startDate, 'EndDate:', endDate);
 
     // Récupérer les pointages
     const timeEntries = await this.timeEntriesRepository.find({
@@ -521,15 +513,6 @@ export class TimeEntriesService {
     // S'assurer que endDate est à 23:59:59
     endDate.setHours(23, 59, 59, 999);
 
-    console.log('Calculated Month Range:', {
-      firstDayOfMonth,
-      lastDayOfMonth,
-      startDate,
-      endDate,
-      firstDayWeekday,
-      lastDayWeekday
-    });
-
     return { startDate, endDate };
   }
 
@@ -539,7 +522,6 @@ export class TimeEntriesService {
     month: number,
   ) {
     const { startDate, endDate } = this.getMonthRange(year, month);
-    console.log('Période de calcul :', { startDate, endDate });
 
     // Récupérer toutes les entrées pour la période
     const timeEntries = await this.getTimeEntriesBetweenDates(
@@ -740,7 +722,6 @@ export class TimeEntriesService {
   }
 
   async getExtraHoursHeatmap(userId: string) {
-    console.log('userId', userId);
     
     try {
       // Calculer la période d'un an
@@ -753,7 +734,6 @@ export class TimeEntriesService {
       startDate.setDate(1); // Premier jour du mois
       startDate.setHours(0, 0, 0, 0);
 
-      console.log('Period:', { startDate, endDate });
       
       // Récupérer l'utilisateur et ses paramètres
       const user = await this.userRepository.findOne({ where: { id: userId } });
@@ -803,9 +783,6 @@ export class TimeEntriesService {
         return dbDay === 6 ? 0 : dbDay + 1;
       });
 
-      console.log('Working days DB format:', user.workingDays);
-      console.log('Working days JS format:', workingDaysJS);
-
       while (currentDate <= endDate) {
         const dateStr = currentDate.toISOString().split('T')[0];
         
@@ -847,13 +824,6 @@ export class TimeEntriesService {
           // Vérifier si c'est un jour ouvré
           const dayOfWeek = currentDate.getDay(); // 0-6 (dimanche-samedi)
           const isWorkingDay = workingDaysJS.includes(dayOfWeek);
-
-          console.log('Day check:', {
-            date: dateStr,
-            dayOfWeek,
-            isWorkingDay,
-            workingDaysJS
-          });
 
           // Calculer les heures supplémentaires
           const contractualHours = isWorkingDay ? hoursPerDay : 0;

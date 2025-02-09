@@ -37,21 +37,14 @@ export class UserController {
   @Get('profile')
   @UseGuards(AuthGuard)
   getProfile(@Req() req: any) {
-    console.log('profile', req.user);
-
     return this.userService.findOne(req.user.userId);
   }
 
   @UseGuards(AuthGuard)
   @Patch('settings')
   async updateSettings(@Req() req: any, @Body() settings: any) {
-    console.log('updateSettings: Method called');
-    console.log('Request body:', settings);
-    console.log('Request headers:', req.headers);
-
     // Remplacement temporaire si req.user est undefined
     const userId = req.user?.userId; // Par défaut, un userId de test
-    console.log('Extracted userId:', req.user.userId);
 
     if (!userId) {
       throw new UnauthorizedException('Invalid token or userId not found');
@@ -79,7 +72,6 @@ export class UserController {
   @Delete(':id')
   async softDelete(@Param('id') id: string, @Req() req: any): Promise<void> {
     const user = await this.userService.findOne(id);
-    console.log('delete');
 
     // Vérification : propriétaire ou admin
     if (req.user.userId !== user.id && req.user.role !== 'admin') {
@@ -102,7 +94,6 @@ export class UserController {
   @UseGuards(AuthGuard)
   @Get(':id')
   async findOne(@Param('id') id: string, @Req() req: any): Promise<User> {
-    console.log(':id');
 
     const user = await this.userService.findOne(id);
 
@@ -128,7 +119,6 @@ export class UserController {
     @Req() req: any,
   ): Promise<User> {
     const user = await this.userService.findOne(id);
-    console.log('ediit');
 
     // Vérification des permissions
     if (req.user.userId !== user.id && req.user.role !== 'admin') {

@@ -28,7 +28,6 @@ export const createToast = () => {
   return {
     show: (options: ToastOptions) => {
       if (isClient && toastInstance) {
-        console.log('Toast show called with options:', options)
         toastInstance.show(options)
       }
     },

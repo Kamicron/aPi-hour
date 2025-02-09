@@ -49,7 +49,6 @@ const props = defineProps({
 
 const { $api } = useNuxtApp();
 const token = useCookie("token");
-const userId = useCookie("userId");
 const weeklyDetails = ref([]);
 const totalExtra25Hours = ref(0);
 const totalExtra50Hours = ref(0);
@@ -89,7 +88,7 @@ watch(
   () => {
     fetchMonthlyHours();
   },
-  { immediate: true }
+  { deep: true }
 );
 </script>
 

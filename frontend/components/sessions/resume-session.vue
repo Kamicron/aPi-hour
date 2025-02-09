@@ -90,8 +90,6 @@ const newSession = ref({
 });
 
 useGlobalEvents().subscribeTo<boolean | undefined>(EGlobalEvent.UPDATE_DAY, () => {
-  console.log('Event UPDATE_DAY reçu')
-  console.log('selectedDate:', props.selectedDate)
   fetchSessions()
 });
 
@@ -102,7 +100,6 @@ const userProfile = computed(() => {
     return { weeklyHoursGoal: 35, workingDaysPerWeek: 5 }; // Valeurs par défaut si le profil n'est pas encore chargé
   }
 
-  console.log('profileStore.profile.workingDaysPerWeek', profileStore.profile.workingDaysPerWeek)
   return {
     weeklyHoursGoal: profileStore.profile.weeklyHoursGoal || 35,
     workingDaysPerWeek: profileStore.profile.workingDaysPerWeek || 5,
@@ -111,7 +108,6 @@ const userProfile = computed(() => {
 
 const dailyWorkGoal = computed(() => {
   if (!userProfile.value) return 0;
-  console.log('userProfile', userProfile.value);
   return (userProfile.value.weeklyHoursGoal / userProfile.value.workingDaysPerWeek) * 3600; // En secondes
 });
 

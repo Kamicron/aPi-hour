@@ -58,9 +58,6 @@ const { getErrorMessage } = useAxiosError()
 const handleDelete = async (event: Event) => {
   event.preventDefault()
   event.stopPropagation()
-
-  console.log('Suppression de la session:', props.sessionId)
-
   try {
     const response = await $api.delete(`/time-entries/${props.sessionId}`, {
       headers: { Authorization: `Bearer ${token.value}` },

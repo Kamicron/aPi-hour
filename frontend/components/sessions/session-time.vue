@@ -103,9 +103,6 @@ async function start() {
       startTimeString.value = useDateFormatter().formatDate(new Date(response.data.startTime), { format: 'long', includeTime: true });
 
       elapsedTime.value = 0; // Réinitialisation du temps écoulé
-      console.log('startTime.value', startTime.value);
-
-
       getProfile();
 
       $toast.show({
@@ -143,14 +140,9 @@ async function getProfile() {
     const fetchedProfile = await userStore.fetchProfile($api);
     profile.value = fetchedProfile;
 
-    console.log('profile', profile.value.currentSession.createdAt);
-
-
     // Synchroniser la date de début si une session est active
     if (profile.value?.sessions?.length > 0 && profile.value.sessions[0].status === 'started') {
       const startTimeFromApi = profile.value.currentSession.createdAt;
-
-      console.log('startTimeFromApi', startTimeFromApi);
 
       startTimeString.value = useDateFormatter().formatDate(startTimeFromApi, { format: 'long', includeTime: true });
       if (startTimeFromApi) {
@@ -169,8 +161,6 @@ async function getProfile() {
 
 async function pause() {
   try {
-    console.log('profile', profile);
-
     await $api.patch(
       `/pauses/${profile.value.sessions[0].timeEntry.id}/start`,
       {},

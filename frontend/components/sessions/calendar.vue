@@ -18,7 +18,7 @@
           'calendar__cell--selected': isSelected(day.date),
           'calendar__cell--session': day.hasSession,
           'calendar__cell--vacation': day.hasVacation,
-          'calendar__cell--public-holiday': day.isPublicHoliday, // Nouvelle classe pour les jours fériés
+          'calendar__cell--public-holiday': day.isPublicHoliday,
         },
       ]" @click="selectDay(day.date)">
         <span class="date">{{ day.date.getDate() }}</span>
@@ -35,7 +35,6 @@ import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie, useRoute } from '#app';
 import { useGlobalEvents } from '~/composables/useGlobalEvent';
 import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum';
-import { emit } from 'process';
 
 const currentYear = ref(new Date().getFullYear());
 const currentMonth = ref(new Date().getMonth());
@@ -173,7 +172,6 @@ const changeMonth = (direction) => {
     currentYear.value++;
   }
   const formattedMonth = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, "0")}`;
-  console.log("currentMonth.value", formattedMonth);
 
   emits("currentMonth", formattedMonth); // Emit dans le format 'YYYY-MM'
 };
@@ -209,7 +207,13 @@ async function fetchTimeEntriesAndVacations() {
   }
 }
 
-watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: true });
+watch([currentMonth, currentYear], () => {
+  fetchTimeEntriesAndVacations();
+  
+  // Émet le mois formaté dans le parent
+  const formattedMonth = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, "0")}`;
+  emits("currentMonth", formattedMonth);
+}, { immediate: true });
 </script>
 
 <style lang="scss">
@@ -250,9 +254,10 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
 
     &--inactive {
       background-color: $color-surface;
+      border: 2px solid $color-background;
 
       .date {
-        color: $color-text-secondary
+        color: $color-text-secondary;
       }
     }
 
@@ -266,10 +271,10 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
     }
 
     &--public-holiday {
-      border: 2px solid $color-success;
+      border: 2px solid $color-primary-light;
 
       .date {
-        color: $color-success;
+        color: $color-primary-light;
         font-weight: bold;
       }
     }
@@ -280,7 +285,7 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
     }
 
     &--selected {
-      background-color: $color-primary-light;
+      background-color: $color-secondary;
       font-weight: bold;
 
       .date {
@@ -289,11 +294,11 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
     }
 
     &--session {
-      border: 2px solid $color-secondary;
+      border: 2px solid $color-success;
       font-weight: bold;
 
       .date {
-        color: $color-secondary
+        color: $color-success;
       }
     }
 
@@ -301,7 +306,7 @@ watch([currentMonth, currentYear], fetchTimeEntriesAndVacations, { immediate: tr
       background-color: $color-secondary;
 
       .date {
-        color: $color-background
+        color: $color-primary-light;
       }
     }
   }

@@ -103,15 +103,11 @@ export class PausesService {
   }
 
   async resumePause(timeEntryId: string, userId: string) {
-    console.log('timeEntryId', timeEntryId);
-    console.log('userId', userId);
-
     // Vérifier si l'entrée de temps existe
     const timeEntry = await this.timeEntryRepository.findOne({
       where: { id: timeEntryId, user: { id: userId } },
     });
     if (!timeEntry) throw new NotFoundException('Time entry not found');
-    console.log('timeEntry', timeEntry);
 
     // Récupérer la dernière pause sans `pauseEnd`
     const lastPause = await this.pauseRepository.findOne({
@@ -119,7 +115,6 @@ export class PausesService {
       order: { pauseStart: 'DESC' },
     });
 
-    console.log('lastPause', lastPause);
 
     if (!lastPause) {
       throw new NotFoundException('No active pause to resume.');
