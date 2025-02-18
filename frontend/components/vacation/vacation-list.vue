@@ -363,6 +363,7 @@ const handleClickOutside = (event: MouseEvent) => {
 
 <style lang="scss" scoped>
 .vacation-table {
+  
   position: relative;
   width: 100%;
   overflow: visible;
@@ -371,6 +372,7 @@ const handleClickOutside = (event: MouseEvent) => {
   box-shadow: $box-shadow-light;
 
   &__header {
+    min-width: 900px;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     background-color: $color-background;
@@ -384,6 +386,7 @@ const handleClickOutside = (event: MouseEvent) => {
   }
 
   &__row {
+    min-width: 900px;
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     padding: $spacing-medium;
@@ -631,5 +634,12 @@ const handleClickOutside = (event: MouseEvent) => {
 
 .status-holiday {
   color: $color-primary-light;
+}
+
+@media (max-width: 768px) {
+  .vacation-table {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
 }
 </style>

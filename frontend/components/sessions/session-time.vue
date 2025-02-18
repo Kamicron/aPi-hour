@@ -310,4 +310,19 @@ watch(isLogged, (newValue) => {
     }
   }
 }
+
+.btn {
+  width: 100%;
+}
+
+@media (max-width: 768px) {
+  .time-session {
+    margin: $spacing-medium;
+    margin-top: 50px;
+
+    &__actions {
+      flex-direction: column;
+    }
+  }
+}
 </style>

@@ -281,7 +281,10 @@ function formatOvertime(seconds: number) {
     overflow-y: auto;
     flex: 1;
     max-height: calc(622px - 300px);
-    /* Ajustez cette valeur selon vos besoins */
+  }
+
+  &__card {
+    margin-bottom: $spacing-small;
   }
 }
 
@@ -296,7 +299,8 @@ function formatOvertime(seconds: number) {
     color: $color-text-secondary;
   }
 
-  .form__input {
+  .pi-input {
+    width: 100%;
     padding: $spacing-small;
     border: 1px solid $color-primary-light;
     border-radius: $border-radius;
@@ -335,10 +339,27 @@ function formatOvertime(seconds: number) {
   }
 }
 
-@media screen and (max-width: $breakpoint-lg) {
+@media (max-width: 768px) {
   .work-sessions {
-    &__layout {
+    padding: $spacing-medium;
+    height: auto;
+
+    &__content-column {
+      padding: $spacing-medium;
+      max-height: none;
+    }
+
+    &__list {
+      max-height: none;
+    }
+
+    &__create-session-actions {
       flex-direction: column;
+      gap: $spacing-small;
+
+      .btn {
+        width: 100%;
+      }
     }
   }
 }

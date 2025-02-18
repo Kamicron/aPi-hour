@@ -87,6 +87,19 @@ fetchSessions();
   margin: $spacing-large;
 
   &__layout {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-large;
+
+    > * {
+      background: $color-surface;
+      border-radius: $border-radius;
+      box-shadow: $box-shadow-light;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    &__layout {
     display: grid;
     grid-template-columns: 1fr 1fr 2fr 2fr 1fr 1fr;
     grid-template-rows: 0.5fr 1fr;
@@ -125,71 +138,22 @@ fetchSessions();
       grid-area: 5 / 1 / 6 / 7;
     }
   }
-
-  // Media queries pour l'adaptation sur les appareils
-  @media (max-width: 1280px) {
-    &__layout {
-      grid-template-columns: 1fr 1fr 1fr;
-      grid-template-rows: auto auto auto;
-
-      &--calendar {
-        grid-area: 1 / 1 / 2 / 4; // Pleine largeur
-      }
-
-      &--resume {
-        grid-area: 2 / 1 / 3 / 4; // Pleine largeur
-      }
-
-      &--display {
-        grid-area: 3 / 1 / 4 / 4; // Pleine largeur
-      }
-
-      &--vacation {
-        grid-area: 4 / 1 / 5 / 4; // Pleine largeur
-      }
-
-      &--rate {
-        grid-area: 5 / 1 / 6 / 4; // Pleine largeur
-      }
-
-      &--generate {
-        grid-area: 6 / 1 / 7 / 4; // Pleine largeur
-      }
-
-      &--heatmap {
-        grid-area: 7 / 1 / 8 / 4; // Pleine largeur
-      }
-    }
   }
 
   @media (max-width: 768px) {
+    margin: $spacing-medium;
+
     &__layout {
-      grid-template-columns: 1fr;
-      grid-template-rows: auto auto auto auto auto;
-      grid-column-gap: $spacing-large;
-      grid-row-gap: $spacing-large;
+      gap: $spacing-medium;
 
       &--calendar {
-        grid-area: 1 / 1 / 2 / 2; // Colonne unique
-        height: 622px;
+        height: auto;
+        min-height: auto;
       }
 
       &--resume {
-        max-height: 622px !important;
-
-        grid-area: 2 / 1 / 3 / 2; // Colonne unique
-      }
-
-      &--display {
-        grid-area: 3 / 1 / 4 / 2; // Colonne unique
-      }
-
-      &--vacation {
-        grid-area: 4 / 1 / 5 / 2; // Colonne unique
-      }
-
-      &--rate {
-        grid-area: 5 / 1 / 6 / 2; // Colonne unique
+        height: auto;
+        min-height: auto;
       }
     }
   }

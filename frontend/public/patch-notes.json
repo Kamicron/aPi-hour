@@ -5,7 +5,8 @@
     "changes": {
       "fix": [
         "Modification de la page d'edition d'une session",
-        "Correcion des titres des sessions du composant Résumé de la journée"
+        "Correcion des titres des sessions du composant Résumé de la journée",
+        "Correction de la version mobile"
       ],
       "feat": [
         "Nouvelle barre de navigation"

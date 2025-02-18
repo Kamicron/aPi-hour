@@ -8,7 +8,7 @@
     </div>
     <div class="calendar__grid">
       <div class="calendar__day" v-for="day in daysOfWeek" :key="day">
-        {{ day }}
+        {{ isMobile ? day.charAt(0) : day }}
       </div>
       <div v-for="day in paddedDays" :key="day.date.toISOString()" :class="[
         'calendar__cell',
@@ -25,7 +25,7 @@
       </div>
     </div>
     <div class="calendar__footer" v-if="selectedDate">
-      Date sélectionnée : {{ new Date(selectedDate).toLocaleDateString('fr-FR') }}
+      {{ new Date(selectedDate).toLocaleDateString('fr-FR') }}
     </div>
   </div>
 </template>
@@ -47,6 +47,21 @@ const token = useCookie('token');
 const timeEntries = ref([]);
 const vacations = ref([]);
 const route = useRoute();
+
+const isMobile = ref(false)
+
+const checkMobile = () => {
+  isMobile.value = window.innerWidth <= 768
+}
+
+onMounted(() => {
+  checkMobile()
+  window.addEventListener('resize', checkMobile)
+})
+
+onUnmounted(() => {
+  window.removeEventListener('resize', checkMobile)
+})
 
 const selectDay = (date: Date) => {
   const localDate = new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0, 0);
@@ -223,14 +238,27 @@ watch([currentMonth, currentYear], () => {
   padding: $spacing-large;
   border-radius: $border-radius;
   box-shadow: $box-shadow-light;
-  min-width: 450px;
-  min-height: 489px;
+  width: 100%;
+
 
   &__header {
     display: flex;
     justify-content: space-between;
     align-items: center;
     margin-bottom: 1rem;
+
+    .btn {
+      background-color: $color-primary;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: $border-radius;
+      cursor: pointer;
+
+      &:hover {
+        background-color: darken($color-primary, 10%);
+      }
+    }
   }
 
   &__grid {
@@ -242,11 +270,14 @@ watch([currentMonth, currentYear], () => {
   &__day {
     font-weight: bold;
     text-align: center;
+    padding: 0.5rem;
   }
 
   &__cell {
-    padding: 1rem;
-    text-align: center;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     border: 1px solid $color-text-primary;
     border-radius: 4px;
@@ -317,6 +348,24 @@ watch([currentMonth, currentYear], () => {
     margin-top: 1rem;
     text-align: center;
     font-weight: bold;
+  }
+}
+
+@media (max-width: 768px) {
+  .calendar {
+    padding: $spacing-medium;
+
+    &__grid {
+      gap: 0.25rem;
+    }
+
+    &__day {
+      padding: 0.25rem;
+    }
+
+    &__cell {
+      box-shadow: none;
+    }
   }
 }
 </style>

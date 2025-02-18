@@ -124,12 +124,11 @@ const fetchExtraHours = async () => {
   padding: $spacing-large;
   border-radius: $border-radius;
   box-shadow: $box-shadow-light;
-  min-width: 420px;
+  width: 100%;
 
   &__header {
     text-align: center;
     margin-bottom: $spacing-large;
-
   }
 
   &__inputs {
@@ -139,6 +138,10 @@ const fetchExtraHours = async () => {
 
     label {
       flex: 1;
+    }
+
+    .pi-input {
+      width: 100%;
     }
   }
 
@@ -160,7 +163,6 @@ const fetchExtraHours = async () => {
 
   &__row {
     display: contents;
-    /* Permet à chaque cellule d'occuper son espace */
   }
 
   &__cell {
@@ -187,6 +189,49 @@ const fetchExtraHours = async () => {
     font-weight: bold;
     font-size: $font-size-base;
     margin-top: $spacing-medium;
+  }
+}
+
+@media (max-width: 768px) {
+  .extra-hours-display {
+    padding: $spacing-medium;
+
+    &__header {
+      margin-bottom: $spacing-medium;
+    }
+
+    &__inputs {
+      flex-direction: column;
+      gap: $spacing-small;
+
+      label {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-small;
+      }
+    }
+
+    &__table {
+      display: flex;
+      flex-direction: column;
+      gap: $spacing-small;
+    }
+
+    &__row {
+      display: flex;
+      justify-content: space-between;
+      padding: $spacing-small 0;
+      border-bottom: 1px solid $color-text-secondary;
+    }
+
+    &__cell {
+      padding: 0;
+      border: none;
+
+      &:nth-child(2) {
+        text-align: right;
+      }
+    }
   }
 }
 </style>
