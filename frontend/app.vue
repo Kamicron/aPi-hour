@@ -1,6 +1,7 @@
 <template>
   <div>
-    <PiHeader />
+    <!-- <PiHeader /> -->
+    <navbar />
     <NuxtPage />
     <PiFooter />
   </div>
