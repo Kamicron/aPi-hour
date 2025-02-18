@@ -20,11 +20,7 @@ export const useUserStore = defineStore('user', () => {
       });
       profile.value = response.data;
       useGlobalEvents().emitEvent<boolean>(EGlobalEvent.LOGGED, true);
-      $toast.show({
-        message: `Bienvenue ${profile.value.username} !`,
-        type: EToast.SUCCESS,
-        duration: 3000
-      });
+
       return response.data;
 
     } catch (error) {

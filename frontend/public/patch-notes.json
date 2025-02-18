@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.10.5",
+    "date": "2025-02-18",
+    "changes": {
+      "fix": [
+        "Modification de la page d'edition d'une session"
+      ]
+    }
+  },
+  {
     "version": "0.10.4",
     "date": "2025-02-09",
     "changes": {

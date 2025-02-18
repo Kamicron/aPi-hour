@@ -106,12 +106,12 @@ async function handleAuth({ email, password, isRegistering }: {
     }
 
     isOpenModal.value = false;
-
     $toast.show({
-      message: `Bienvenue ${profile.value.name} !`,
-      type: EToast.SUCCESS,
-      duration: 3000
-    });
+        message: `Bienvenue ${profile.value.name} !`,
+        type: EToast.SUCCESS,
+        duration: 3000
+      });
+
   } catch (err) {
     console.error('Erreur d\'authentification', err);
     $toast.show({
