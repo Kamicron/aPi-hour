@@ -26,10 +26,15 @@
     <section v-if="summary && summary.details.length" class="work-sessions__details">
       <h3 class="work-sessions__details-title">Détails des sessions :</h3>
       <ul class="work-sessions__list scrollable">
-        <li v-for="detail in summary.details" :key="detail.sessionId" class="work-sessions__card">
-          <single-session :sessionId="detail.sessionId" :start-time="formatDate(detail.startTime)"
-            :end-time="formatDate(detail.endTime)" :work-time="formatTime(detail.workTime)"
-            :pause-time="formatTime(detail.pauseTime)" />
+        <li v-for="(detail, index) in summary.details" :key="detail.sessionId" class="work-sessions__card">
+          <single-session 
+            :sessionId="detail.sessionId" 
+            :start-time="formatDate(detail.startTime)"
+            :end-time="formatDate(detail.endTime)" 
+            :work-time="formatTime(detail.workTime)"
+            :pause-time="formatTime(detail.pauseTime)"
+            :index="index"
+          />
         </li>
       </ul>
     </section>

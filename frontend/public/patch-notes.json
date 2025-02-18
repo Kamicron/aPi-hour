@@ -4,7 +4,8 @@
     "date": "2025-02-18",
     "changes": {
       "fix": [
-        "Modification de la page d'edition d'une session"
+        "Modification de la page d'edition d'une session",
+        "Correcion des titres des sessions du composant Résumé de la journée"
       ]
     }
   },
