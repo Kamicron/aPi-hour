@@ -2,7 +2,9 @@
   <div>
     <!-- <PiHeader /> -->
     <navbar />
-    <NuxtPage />
+    <div class="test">
+      <NuxtPage />
+    </div>
     <PiFooter />
   </div>
 </template>
@@ -46,5 +48,7 @@ $toast.configure({
 </script>
 
 <style lang="scss">
-
+.test {
+  margin-top: 60px;
+}
 </style>

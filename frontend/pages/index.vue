@@ -52,5 +52,4 @@ const isOpen2 = ref<boolean>(false)
 </script>
 
 <style lang='scss' scoped>
-.index {}
 </style>

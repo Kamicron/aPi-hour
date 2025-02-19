@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.10.6",
+    "date": "2025-02-19",
+    "changes": {
+      "fix": [
+        "Correction marge sur la page"
+      ]
+    }
+  },
+  {
     "version": "0.10.5",
     "date": "2025-02-18",
     "changes": {

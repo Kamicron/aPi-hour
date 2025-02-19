@@ -311,9 +311,7 @@ watch(isLogged, (newValue) => {
   }
 }
 
-.btn {
-  width: 100%;
-}
+
 
 @media (max-width: 768px) {
   .time-session {
@@ -323,6 +321,10 @@ watch(isLogged, (newValue) => {
     &__actions {
       flex-direction: column;
     }
+  }
+
+  .btn {
+    width: 100%;
   }
 }
 </style>
