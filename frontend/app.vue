@@ -15,7 +15,7 @@ const { $toast } = useNuxtApp()
 
 $toast.configure({
   position: {
-    top: 20,
+    top: 120,
     right: 20
   },
   styles: {

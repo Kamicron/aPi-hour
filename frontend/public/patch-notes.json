@@ -1,5 +1,14 @@
 [
   {
+    "version": "0.10.7",
+    "date": "2025-02-24",
+    "changes": {
+      "fix": [
+        "Correction de la position des notifications"
+      ]
+    }
+  },
+  {
     "version": "0.10.6",
     "date": "2025-02-19",
     "changes": {
