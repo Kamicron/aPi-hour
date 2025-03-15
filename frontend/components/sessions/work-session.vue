@@ -1,14 +1,17 @@
 <template>
   <div class="work-sessions">
     <div v-if="profileStore.profile" class="work-sessions__layout">
+      <session-time class="work-sessions__layout--time" />
+      <remaining-hours class="work-sessions__layout--remaining" />
+
       <calendar class="work-sessions__layout--calendar" @pick-date="handleDatePicked"
         @currentMonth="updateCurrentMonth" />
       <resume-session class="work-sessions__layout--resume" :selected-date="selectedDate" />
       <extra-hours-display class="work-sessions__layout--display" />
       <set_vacation class="work-sessions__layout--vacation" />
       <extra-hours-rate :currentMonth="currentMonth" class="work-sessions__layout--rate" />
-      <extra-hours-pdf class="work-sessions__layout--generate"/>
-      <extra-hours-heatmap class="work-sessions__layout--heatmap" @pick-date="handleDatePicked"/>
+      <extra-hours-pdf class="work-sessions__layout--generate" />
+      <extra-hours-heatmap class="work-sessions__layout--heatmap" @pick-date="handleDatePicked" />
       <bento-card title="Mes jours non travaillés" class="work-sessions__layout--vacation_table">
         <vacation-list />
       </bento-card>
@@ -24,6 +27,8 @@ import { ref, computed, watch } from 'vue';
 import { useNuxtApp, useCookie } from '#app';
 import { useUserStore } from '../../stores/user';
 import VacationList from '~/components/vacation/vacation-list.vue';
+import RemainingHours from '~/components/profile/remaining-hours.vue';
+import SessionTime from '~/components/sessions/session-time.vue';
 
 const { $api } = useNuxtApp();
 const token = useCookie('token');
@@ -32,7 +37,7 @@ const profileStore = useUserStore();
 const currentMonth = ref('2025-01');
 
 const updateCurrentMonth = (newMonth) => {
-  currentMonth.value = newMonth; 
+  currentMonth.value = newMonth;
 };
 
 // Variables réactives
@@ -91,7 +96,7 @@ fetchSessions();
     flex-direction: column;
     gap: $spacing-large;
 
-    > * {
+    >* {
       background: $color-surface;
       border-radius: $border-radius;
       box-shadow: $box-shadow-light;
@@ -100,44 +105,52 @@ fetchSessions();
 
   @media (min-width: 1024px) {
     &__layout {
-    display: grid;
-    grid-template-columns: 1fr 1fr 2fr 2fr 1fr 1fr;
-    grid-template-rows: 0.5fr 1fr;
-    grid-column-gap: $spacing-large;
-    grid-row-gap: $spacing-large;
+      display: grid;
+      grid-template-columns: 1fr 1fr 2fr 2fr 1fr 1fr;
+      grid-template-rows: auto 1fr 1fr 1fr 1fr;
+      grid-column-gap: $spacing-large;
+      grid-row-gap: $spacing-large;
 
-    &--calendar {
-      grid-area: 1 / 1 / 3 / 3;
-    }
+      &--time {
+        grid-area: 1 / 1 / 2 / 5; // Première ligne, prend 4 colonnes
+      }
 
-    &--resume {
-      grid-area: 1 / 3 / 3 / 5;
-    }
+      &--remaining {
+        grid-area: 1 / 5 / 2 / 7; // Première ligne, dernières colonnes
+      }
 
-    &--display {
-      grid-area: 1 / 5 / 2 / 7;
-    }
+      &--calendar {
+        grid-area: 2 / 1 / 4 / 3;
+      }
 
-    &--vacation {
-      grid-area: 4 / 4 / 5 / 7;
-    }
+      &--resume {
+        grid-area: 2 / 3 / 4 / 5;
+      }
 
-    &--rate {
-      grid-area: 3 / 1 / 5 / 4;
-    }
+      &--display {
+        grid-area: 2 / 5 / 3 / 7;
+      }
 
-    &--generate {
-      grid-area: 2 / 5 / 3 / 7;
-    }
+      &--vacation {
+        grid-area: 5 / 4 / 6 / 7;
+      }
 
-    &--heatmap {
-      grid-area: 3 / 4 / 4 / 7;
-    }
+      &--rate {
+        grid-area: 4 / 1 / 6 / 4;
+      }
 
-    &--vacation_table {
-      grid-area: 5 / 1 / 6 / 7;
+      &--generate {
+        grid-area: 3 / 5 / 4 / 7;
+      }
+
+      &--heatmap {
+        grid-area: 4 / 4 / 5 / 7;
+      }
+
+      &--vacation_table {
+        grid-area: 6 / 1 / 7 / 7;
+      }
     }
-  }
   }
 
   @media (max-width: 768px) {

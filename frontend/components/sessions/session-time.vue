@@ -245,7 +245,6 @@ watch(isLogged, (newValue) => {
 
 <style lang="scss" scoped>
 .time-session {
-  margin: $spacing-large;
   background-color: $color-surface;
   border-radius: $border-radius;
   box-shadow: $box-shadow-light;
