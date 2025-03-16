@@ -1,5 +1,15 @@
 [
   {
+    "version": "1.0.0",
+    "date": "2025-03-15",
+    "changes": {
+      "Autre": ["Passage en version 1.0.0"],
+      "fix": [
+        "Ajout du widget des heures restantes à réaliser"
+      ]
+    }
+  },
+  {
     "version": "0.10.7",
     "date": "2025-02-24",
     "changes": {
