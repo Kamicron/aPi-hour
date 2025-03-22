@@ -64,7 +64,7 @@ const weeklyDetails = ref<WeeklyDetail[]>([]);
 const weeklyGoal = computed(() => profileStore.profile?.weeklyHoursGoal || null);
 
 const currentWeekWorkedHours = computed(() => {
-  const now = new Date('2025-03-15T21:42:24+01:00');
+  const now = new Date();
   const currentWeek = weeklyDetails.value.find(week => {
     const weekStart = new Date(week.weekStart);
     const weekEnd = new Date(week.weekEnd);

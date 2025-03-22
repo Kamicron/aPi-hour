@@ -1,10 +1,19 @@
 [
   {
+    "version": "1.0.1",
+    "date": "2025-03-22",
+    "changes": {
+      "fix": [
+        "Le composant heures restantes à réaliser n'affichait pas les bonne valeurs"
+      ]
+    }
+  },
+  {
     "version": "1.0.0",
     "date": "2025-03-15",
     "changes": {
       "Autre": ["Passage en version 1.0.0"],
-      "fix": [
+      "feat": [
         "Ajout du widget des heures restantes à réaliser"
       ]
     }
