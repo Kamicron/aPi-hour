@@ -1,8 +1,15 @@
-import { defineNuxtRouteMiddleware, useCookie, navigateTo } from '#app';
+import { defineNuxtRouteMiddleware, useCookie, navigateTo, useRoute } from '#app';
 import { jwtDecode } from 'jwt-decode';
 
 export default defineNuxtRouteMiddleware(() => {
   const token = useCookie('token');
+  const route = useRoute();
+  
+  // Si nous sommes déjà sur la page d'accueil et que le token est null, ne rien faire
+  // Cela évite la boucle infinie de redirection
+  if (route.path === '/' && !token.value) {
+    return;
+  }
 
   if (token.value) {
     try {
@@ -13,12 +20,20 @@ export default defineNuxtRouteMiddleware(() => {
       if (decoded.exp < currentTime) {
         console.warn('Token expiré, déconnexion forcée');
         token.value = null;
-        return navigateTo('/'); // Rediriger vers la page de connexion
+        
+        // Ne rediriger que si nous ne sommes pas déjà sur la page d'accueil
+        if (route.path !== '/') {
+          return navigateTo('/');
+        }
       }
     } catch (err) {
       console.error('Token invalide, suppression du token');
       token.value = null;
-      return navigateTo('/');
+      
+      // Ne rediriger que si nous ne sommes pas déjà sur la page d'accueil
+      if (route.path !== '/') {
+        return navigateTo('/');
+      }
     }
   }
 });
