@@ -22,7 +22,6 @@ export class UserService {
 
   // Récupérer un utilisateur par ID
   async findOne(userId: string): Promise<any> {
-    console.log('findOne: Searching for user with ID:', userId);
     const user = await this.userRepository.findOne({
       where: { id: userId },
       relations: ['sessions'],
@@ -70,11 +69,8 @@ export class UserService {
     id: string,
     settings: { weeklyHoursGoal?: number },
   ): Promise<User> {
-    console.log('id received in updateSettings:', id);
 
     const user = await this.findOne(id);
-
-    console.log('User found:', user);
 
     if (settings.weeklyHoursGoal !== undefined) {
       user.weeklyHoursGoal = settings.weeklyHoursGoal;

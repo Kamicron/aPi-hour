@@ -10,10 +10,11 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.enableCors({
-    origin: ['http://localhost:3001', 'https://hour.pi-cto.top'],
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+    origin: ['http://localhost:3001', 'https://hour.pi-cto.top', 'http://hour.pi-cto.top'],
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
     credentials: true,
-    allowedHeaders: ['Content-Type', 'Authorization'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept', 'Origin', 'X-Requested-With'],
+    exposedHeaders: ['Content-Range', 'X-Content-Range'],
   });
 
   // Ajoutez ceci pour lister toutes les routes configurées

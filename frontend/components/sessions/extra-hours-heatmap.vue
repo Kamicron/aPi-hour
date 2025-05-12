@@ -2,7 +2,13 @@
   <bento-card title="Heures supplémentaires (12 derniers mois)">
     <div class="heatmap-container">
       <div class="months-row">
-        <div v-for="month in monthLabels" :key="month.date" class="month-label">{{ month.label }}</div>
+        <div v-for="(month, index) in monthLabels" :key="month.date" 
+             class="month-label"
+             :style="{ 
+               gridColumn: `${month.column + 1} / span ${index + 1 < monthLabels.length ? monthLabels[index + 1].column - month.column : 99}`
+             }">
+          {{ month.label }}
+        </div>
       </div>
       <div class="days-container">
         <div class="day-labels">
@@ -10,7 +16,8 @@
         </div>
         <div class="grid-container">
           <div v-for="(week, index) in weeksData" :key="index" class="week-column">
-            <div v-for="(day, index) in week.days" :key="index" 
+            <div v-for="(day, index) in week.days" :key="index"
+            @click="emits('pick-date', new Date(day.date))"
                  class="grid-cell"
                  :class="getCellClass(day.hours)"
                  :title="getCellTitle(day)">
@@ -45,13 +52,8 @@ const { $api } = useNuxtApp();
 const token = useCookie('token');
 const extraHours = ref<Record<string, number>>({});
 
-const legendLevels = [
-  { class: '0', label: '0h' },
-  { class: '1', label: '0-0.5h' },
-  { class: '2', label: '0.5-1h' },
-  { class: '3', label: '1-1.5h' },
-  { class: '4', label: '1.5h+' },
-];
+const emits = defineEmits(['pick-date']);
+
 
 // Fonction pour obtenir la classe CSS en fonction du nombre d'heures
 function getCellClass(hours: number | null) {
@@ -173,30 +175,30 @@ const weeksData = computed(() => {
 // Génère les labels des mois
 const monthLabels = computed(() => {
   const labels = [];
-  const now = new Date();
-  now.setMonth(now.getMonth() + 1, 0);
+  const weeks = weeksData.value;
   
-  const startDate = new Date();
-  startDate.setMonth(startDate.getMonth() - 11);
-  startDate.setDate(1);
+  if (weeks.length === 0) return labels;
 
-  let currentDate = new Date(startDate);
   let currentMonth = -1;
-  let weekCounter = 0;
-
-  while (currentDate <= now) {
-    const month = currentDate.getMonth();
+  
+  weeks.forEach((week, weekIndex) => {
+    const firstDayOfWeek = new Date(week.weekStart);
+    const month = firstDayOfWeek.getMonth();
+    
     if (month !== currentMonth) {
-      labels.push({
-        date: new Date(currentDate),
-        label: new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(currentDate),
-        column: weekCounter
-      });
-      currentMonth = month;
+      // Vérifier si c'est la première semaine du mois
+      const isFirstWeekOfMonth = firstDayOfWeek.getDate() <= 7;
+      
+      if (isFirstWeekOfMonth) {
+        labels.push({
+          date: new Date(firstDayOfWeek),
+          label: new Intl.DateTimeFormat('fr-FR', { month: 'short' }).format(firstDayOfWeek),
+          column: weekIndex
+        });
+        currentMonth = month;
+      }
     }
-    currentDate.setDate(currentDate.getDate() + 7);
-    weekCounter++;
-  }
+  });
   
   return labels;
 });
@@ -207,7 +209,6 @@ const fetchExtraHours = async () => {
     const response = await $api.get(`/time-entries/extra-hours-heatmap`, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
-    console.log('Extra hours data:', response.data);
     extraHours.value = response.data;
   } catch (error) {
     console.error('Erreur lors du chargement des heures supplémentaires:', error);
@@ -220,28 +221,35 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
-// Variable pour la teinte (147 = vert, changez cette valeur pour changer la couleur)
 $heatmap-hue: 147;
-// Saturation constante pour tous les niveaux
 $heatmap-saturation: 70%;
 
 .heatmap-container {
   font-size: 12px;
   padding: 20px;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .months-row {
-  display: flex;
-  margin-left: 50px;
-  margin-bottom: 12px;
-  gap: 10px;
+  display: grid;
+  grid-template-columns: repeat(53, 15px);
+  margin-left: 30px;
+  margin-bottom: 8px;
+  position: relative;
 }
 
 .month-label {
-  width: 55px; /* ~4 semaines + gap */
-  text-align: left;
+  text-align: center;
   color: $color-text-primary;
-  font-size: 12px;
+  font-size: 10px;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .days-container {
@@ -251,16 +259,16 @@ $heatmap-saturation: 70%;
 .day-labels {
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  width: 50px;
+  gap: 2px;
+  width: 30px;
 }
 
 .day-label {
   height: 13px;
   text-align: right;
-  padding-right: 12px;
+  padding-right: 8px;
   color: $color-text-primary;
-  font-size: 12px;
+  font-size: 10px;
 }
 
 .grid-container {
@@ -272,7 +280,7 @@ $heatmap-saturation: 70%;
 .week-column {
   display: flex;
   flex-direction: column;
-  gap: 3px;
+  gap: 2px;
 }
 
 .grid-cell {
@@ -280,16 +288,18 @@ $heatmap-saturation: 70%;
   height: 13px;
   border-radius: 2px;
   background-color: $color-text-primary;
+  cursor: pointer;
 }
 
 .legend {
   display: flex;
   align-items: center;
   gap: 4px;
-  margin-top: 25px;
-  margin-left: 50px;
-  font-size: 12px;
-  color: #586069;
+  margin-top: 16px;
+  margin-left: 30px;
+  font-size: 10px;
+  color: $color-text-secondary;
+  flex-wrap: wrap;
 }
 
 .legend-cell {
@@ -299,54 +309,74 @@ $heatmap-saturation: 70%;
 }
 
 .legend-item {
-  margin: 0 6px;
+  margin: 0 4px;
 }
 
 .empty {
   background-color: #20242b;
 }
 
-.negative-5 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 14%);
-}
+.negative-5 { background-color: hsl($heatmap-hue, $heatmap-saturation, 14%); }
+.negative-4 { background-color: hsl($heatmap-hue, $heatmap-saturation, 18%); }
+.negative-3 { background-color: hsl($heatmap-hue, $heatmap-saturation, 26%); }
+.negative-2 { background-color: hsl($heatmap-hue, $heatmap-saturation, 34%); }
+.negative-1 { background-color: hsl($heatmap-hue, $heatmap-saturation, 42%); }
+.neutral { background-color: hsl($heatmap-hue, $heatmap-saturation, 50%); }
+.level-1 { background-color: hsl($heatmap-hue, $heatmap-saturation, 58%); }
+.level-2 { background-color: hsl($heatmap-hue, $heatmap-saturation, 66%); }
+.level-3 { background-color: hsl($heatmap-hue, $heatmap-saturation, 74%); }
+.level-4 { background-color: hsl($heatmap-hue, $heatmap-saturation, 82%); }
+.level-5 { background-color: hsl($heatmap-hue, $heatmap-saturation, 90%); }
 
-.negative-4 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 18%);
-}
+@media (min-width: 768px) {
+  .heatmap-container {
+    padding: 20px;
+    overflow-x: hidden;
+  }
 
-.negative-3 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 26%);
-}
+  .months-row {
+    display: flex;
+    margin-left: 50px;
+    margin-bottom: 12px;
+    gap: 10px;
+  }
 
-.negative-2 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 34%);
-}
+  .month-label {
+    width: 55px;
+    text-align: left;
+    font-size: 12px;
+    writing-mode: horizontal-tb;
+    transform: none;
+    height: auto;
+  }
 
-.negative-1 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 42%);
-}
+  .day-labels {
+    gap: 3px;
+    width: 50px;
+  }
 
-.neutral {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 50%);
-}
+  .day-label {
+    padding-right: 12px;
+    font-size: 12px;
+  }
 
-.level-1 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 58%);
-}
+  .grid-container {
+    gap: 3px;
+  }
 
-.level-2 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 66%);
-}
+  .week-column {
+    gap: 3px;
+  }
 
-.level-3 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 74%);
-}
+  .legend {
+    margin-top: 25px;
+    margin-left: 50px;
+    font-size: 12px;
+    flex-wrap: nowrap;
+  }
 
-.level-4 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 82%);
-}
-
-.level-5 {
-  background-color: hsl($heatmap-hue, $heatmap-saturation, 90%);
+  .legend-item {
+    margin: 0 6px;
+  }
 }
 </style>

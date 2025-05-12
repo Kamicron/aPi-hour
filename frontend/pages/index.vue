@@ -1,6 +1,6 @@
 <template>
   <div class='index'>
-    <session-time />
+    <!-- <session-time /> -->
     <work-session />
   </div>
 </template>
@@ -52,5 +52,4 @@ const isOpen2 = ref<boolean>(false)
 </script>
 
 <style lang='scss' scoped>
-.index {}
 </style>

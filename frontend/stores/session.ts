@@ -8,24 +8,20 @@ export const useSessionStore = defineStore('session', () => {
   function startSession() {
     isRunning.value = true;
     isPaused.value = false;
-    console.log('Session démarrée');
   }
 
   function pauseSession() {
     isPaused.value = true;
-    console.log('Session en pause');
   }
 
   function resumeSession() {
     isPaused.value = false;
-    console.log('Session reprise');
   }
 
   function stopSession() {
     isRunning.value = false;
     isPaused.value = false;
     sessionId.value = null;
-    console.log('Session arrêtée');
   }
 
   return {

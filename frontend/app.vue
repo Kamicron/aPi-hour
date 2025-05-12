@@ -1,7 +1,10 @@
 <template>
   <div>
-    <PiHeader />
-    <NuxtPage />
+    <!-- <PiHeader /> -->
+    <navbar />
+    <div class="test">
+      <NuxtPage />
+    </div>
     <PiFooter />
   </div>
 </template>
@@ -12,7 +15,7 @@ const { $toast } = useNuxtApp()
 
 $toast.configure({
   position: {
-    top: 20,
+    top: 120,
     right: 20
   },
   styles: {
@@ -43,3 +46,9 @@ $toast.configure({
   }
 })
 </script>
+
+<style lang="scss">
+.test {
+  margin-top: 60px;
+}
+</style>

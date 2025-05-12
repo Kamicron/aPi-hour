@@ -1,11 +1,74 @@
 [
+  {    
+    "version": "1.0.2",
+  "date": "2025-05-12",
+  "changes": {
+    "fix": [
+      "Correction d'un problème critique causant une boucle infinie de déconnexion lors de l'expiration du token",
+      "Amélioration du middleware d'authentification pour éviter les redirections en boucle"
+      ]
+    }
+  },
   {
-    "version": "0.10.4",
-    "date": "2025-05-12",
+    "version": "1.0.1",
+    "date": "2025-03-22",
     "changes": {
       "fix": [
-        "Correction d'un problème critique causant une boucle infinie de déconnexion lors de l'expiration du token",
-        "Amélioration du middleware d'authentification pour éviter les redirections en boucle"
+        "Le composant heures restantes à réaliser n'affichait pas les bonne valeurs"
+      ]
+    }
+  },
+  {
+    "version": "1.0.0",
+    "date": "2025-03-15",
+    "changes": {
+      "Autre": ["Passage en version 1.0.0"],
+      "feat": [
+        "Ajout du widget des heures restantes à réaliser"
+      ]
+    }
+  },
+  {
+    "version": "0.10.7",
+    "date": "2025-02-24",
+    "changes": {
+      "fix": [
+        "Correction de la position des notifications"
+      ]
+    }
+  },
+  {
+    "version": "0.10.6",
+    "date": "2025-02-19",
+    "changes": {
+      "fix": [
+        "Correction marge sur la page"
+      ]
+    }
+  },
+  {
+    "version": "0.10.5",
+    "date": "2025-02-18",
+    "changes": {
+      "fix": [
+        "Modification de la page d'edition d'une session",
+        "Correcion des titres des sessions du composant Résumé de la journée",
+        "Correction de la version mobile"
+      ],
+      "feat": [
+        "Nouvelle barre de navigation"
+      ]
+    }
+  },
+  {
+    "version": "0.10.4",
+    "date": "2025-02-09",
+    "changes": {
+      "fix": [
+        "Retravaille des couleur du calendrier",
+        "Réactivité du module 'Résumé des heures travaillées' à l'initialisation",
+        "Lien entre la heatmap et le composant 'Résumé de la journée'",
+        "Tri et filtre sur le tableau des jours non travaillés"
       ]
     }
   },

@@ -6,11 +6,11 @@
     <NuxtLink :to="`/sessions/${sessionId}`">
       <div class="work-sessions__card-content">
         <header class="work-sessions__card-header">
-          <h4 class="work-sessions__card-title">Session ID : {{ sessionId }}</h4>
+          <h4 class="work-sessions__card-title">Session N°{{ sessionNumber }} du {{ formattedSessionDate }}</h4>
         </header>
         <div class="work-sessions__card-body">
-          <p><strong>Début :</strong> {{ startTime }}</p>
-          <p><strong>Fin :</strong> {{ endTime }}</p>
+          <p><strong>Début :</strong> {{ formattedStartTime }}</p>
+          <p><strong>Fin :</strong> {{ formattedEndTime }}</p>
           <p><strong>Temps de travail :</strong> {{ workTime }}</p>
           <p><strong>Temps de pause :</strong> {{ pauseTime }}</p>
         </div>
@@ -26,6 +26,8 @@ import { EGlobalEvent } from '~/assets/ts/enums/global/globalEvent.enum'
 import { useGlobalEvents } from '~/composables/useGlobalEvent'
 import { EToast } from '~/assets/ts/enums/toast.enum'
 import { useAxiosError } from '~/composables/useAxiosError'
+import { computed } from 'vue'
+import useDateFormatter from '~/composables/useDate'
 
 // ------------------
 
@@ -40,6 +42,7 @@ const props = defineProps({
   endTime: { type: String, default: '' },
   workTime: { type: String, default: '' },
   pauseTime: { type: String, default: '' },
+  index: { type: Number, required: true },
 })
 
 const emit = defineEmits(['sessionDeleted'])
@@ -52,15 +55,55 @@ const globalEvents = useGlobalEvents()
 
 const { $toast } = useNuxtApp()
 const { getErrorMessage } = useAxiosError()
+
+const dateFormatter = useDateFormatter()
+
+const formattedSessionDate = computed(() => {
+  // Parse la date au format DD/MM/YYYY HH:mm:ss
+  const [datePart, timePart] = props.startTime.split(' ');
+  const [day, month, year] = datePart.split('/');
+  const [hours, minutes, seconds] = timePart.split(':');
+  
+  // Crée la date avec le bon ordre des composants
+  const date = new Date(year, month - 1, day, hours, minutes, seconds);
+  
+  const options = {
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  };
+  return date.toLocaleDateString('fr-FR', options);
+})
+
+const formattedStartTime = computed(() => {
+  return dateFormatter.formatDate(props.startTime, {
+    customOptions: {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }
+  })
+})
+
+const formattedEndTime = computed(() => {
+  if (!props.endTime) return 'En cours'
+  return dateFormatter.formatDate(props.endTime, {
+    customOptions: {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }
+  })
+})
+
+const sessionNumber = computed(() => props.index + 1)
 // ------------------
 
 // ---- Function ----
 const handleDelete = async (event: Event) => {
   event.preventDefault()
   event.stopPropagation()
-
-  console.log('Suppression de la session:', props.sessionId)
-
   try {
     const response = await $api.delete(`/time-entries/${props.sessionId}`, {
       headers: { Authorization: `Bearer ${token.value}` },

@@ -1,45 +1,90 @@
 <template>
   <div class="session-details">
-    <button class="btn" @click="redirectToDate">
-      <i class="fa-solid fa-arrow-left"></i> Retour
-    </button>
-
-    <h2>Détails de la session</h2>
-    <p class="session-details__current-time">{{ currentTime }}</p>
-
-    <div v-if="session" class="session-details__info">
-      <p><strong>Début :</strong> {{ startSession }}</p>
-      <p><strong>Fin :</strong> {{ endSession || "En cours" }}</p>
-      <p><strong>Temps de travail :</strong> {{ formattedWorkTime }}</p>
-      <p><strong>Temps de pause :</strong> {{ formattedPauseTime }}</p>
+    <div class="session-details__header">
+      <button class="btn btn--secondary" @click="redirectToDate">
+        <i class="fa-solid fa-arrow-left"></i> Retour
+      </button>
+      <div class="session-details__actions">
+        <button class="btn btn--ghost" @click="copySessionId" title="Copier l'ID">
+          <i class="fa-regular fa-copy"></i>
+        </button>
+        <button class="btn btn--primary" @click="isUpdateSessionModal = true">
+          <i class="fa-solid fa-pen-to-square"></i> Modifier la session
+        </button>
+        <button class="btn btn--danger" @click="showDeleteSessionModal = true">
+          <i class="fa-solid fa-trash"></i> Supprimer la session
+        </button>
+      </div>
     </div>
 
-    <button class="btn" @click="isUpdateSessionModal = true"><i class="fa-solid fa-pen"></i> Editer</button>
-    <hr class="divider" />
+    <div class="session-details__content">
+      <div class="session-details__info">
+        <h2 class="session-details__title">Détails de la session</h2>
+        <div class="session-details__time">
+          <p>
+            <strong>Début :</strong>
+            {{ session?.startTime ? formatDate(session.startTime) : '' }}
+          </p>
+          <p>
+            <strong>Fin :</strong>
+            {{ session?.endTime ? formatDate(session.endTime) : "En cours" }}
+          </p>
+        </div>
+      </div>
 
-    <h2 class="session-details__subtitle">Pauses</h2>
-    <button class="btn" @click="isUpdatePauseModal = true"><i class="fa-solid fa-plus"></i> Ajouter une pause</button>
-    <ul class="session-details__pauses">
-      <li v-for="pause in pauses" :key="pause.id" class="pause-item">
-        <p>
-          <strong>Début :</strong>
-          {{ useDateFormatter().formatDate(pause.pauseStart, { customOptions: dateOptions }) }}
-        </p>
-        <p>
-          <strong>Fin :</strong>
-          {{ pause.pauseEnd
-            ? useDateFormatter().formatDate(pause.pauseEnd, { customOptions: dateOptions })
-            : "En cours" }}
-        </p>
-        <button class="btn btn--primary" @click="editPause(pause)">Modifier</button>
-        <button class="btn btn--danger" @click="deletePause(pause)">Supprimer</button>
-      </li>
-    </ul>
-    <hr class="divider" />
+      <div class="session-details__pauses-section">
+        <div class="session-details__pauses-header">
+          <h2 class="session-details__title">Pauses</h2>
+          <button class="btn btn--primary" @click="isUpdatePauseModal = true">
+            <i class="fa-solid fa-plus"></i> Ajouter une pause
+          </button>
+        </div>
 
-    <button class="btn btn--danger session-details__delete-session" @click="deleteSession">
-      Supprimer la session
-    </button>
+        <ul class="session-details__pauses-list">
+          <li v-for="pause in pauses" :key="pause.id" class="pause-item">
+            <div class="pause-item__content">
+              <p>
+                <strong>Début :</strong>
+                {{ pause.pauseStart ? formatTimeOnly(pause.pauseStart) : '' }}
+              </p>
+              <p>
+                <strong>Fin :</strong>
+                {{ pause.pauseEnd ? formatTimeOnly(pause.pauseEnd) : "En cours" }}
+              </p>
+            </div>
+            <div class="pause-item__actions">
+              <button class="btn btn--secondary btn--small" @click="editPause(pause)">
+                <i class="fa-solid fa-pen"></i>
+              </button>
+              <button class="btn btn--danger btn--small" @click="deletePause(pause)">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <time-form-modal
+      v-model="isUpdatePauseModal"
+      mode="add-pause"
+      @submit="handleAddPause"
+    />
+
+    <time-form-modal
+      v-model="showEditPauseModal"
+      mode="edit-pause"
+      :initial-data="selectedPause"
+      @submit="handleEditPause"
+    />
+
+    <time-form-modal
+      v-model="isUpdateSessionModal"
+      mode="edit-session"
+      :initial-data="editSession"
+      :is-end-required="true"
+      @submit="handleEditSession"
+    />
 
     <Modal v-model="showDeletePauseModal" title="Confirmation">
       <p>Êtes-vous sûr de vouloir supprimer cette pause ?</p>
@@ -53,122 +98,83 @@
       <p>Êtes-vous sûr de vouloir supprimer cette session ?</p>
       <div class="modal-actions">
         <button class="btn btn--danger" @click="confirmDeleteSession">Supprimer</button>
-        <button class="btn btn--ghost" @click="showDeleteSessionModal = false">Annuler</button>
+        <button class="btn btn--outline" @click="showDeleteSessionModal = false">Annuler</button>
       </div>
     </Modal>
-
-    <modal v-model="isUpdatePauseModal">
-      <div class="form-container">
-        <h3>Ajouter une pause</h3>
-        <form @submit.prevent="addPause" class="form">
-          <label for="newPauseStart" class="form__label">Début :</label>
-          <input type="time" id="newPauseStart" v-model="newPauseStart" required class="pi-input" />
-
-          <label for="newPauseEnd" class="form__label">Fin :</label>
-          <input type="time" id="newPauseEnd" v-model="newPauseEnd" class="pi-input" />
-
-          <button type="submit" class="btn btn--primary">Ajouter la pause</button>
-        </form>
-      </div>
-    </modal>
-
-    <modal v-model="isUpdateSessionModal">
-      <h2 class="session-details__subtitle">Modifier la session</h2>
-      <form @submit.prevent="updateSession" class="form">
-        <label for="start" class="form__label">Début :</label>
-        <input type="time" v-model="editSession.startTime" id="start" class="pi-input" />
-
-        <label for="end" class="form__label">Fin :</label>
-        <input type="time" v-model="editSession.endTime" id="end" class="pi-input" />
-
-        <button type="submit" class="btn btn--primary">Enregistrer les modifications</button>
-      </form>
-    </modal>
   </div>
 </template>
 
 <script setup lang="ts">
-import { useNuxtApp, useCookie } from "#app";
-import { ref, onMounted, computed } from "vue";
-import { useRoute } from "vue-router";
-import useDateFormatter from "../../composables/useDate";
-import { EGlobalEvent } from "~/assets/ts/enums/global/globalEvent.enum";
-import { useGlobalEvents } from "~/composables/useGlobalEvent";
+import { ref, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useNuxtApp, useCookie } from '#app'
 import { EToast } from '~/assets/ts/enums/toast.enum'
 import { useAxiosError } from '~/composables/useAxiosError'
-import Modal from '~/components/global/modal.vue';
+import Modal from '~/components/global/modal.vue'
+import TimeFormModal from '~/components/global/time-form-modal.vue'
 
-const { $toast } = useNuxtApp()
+const { $api, $toast } = useNuxtApp()
 const { getErrorMessage } = useAxiosError()
-const { $api } = useNuxtApp();
-const isUpdateSessionModal = ref<boolean>(false)
-const isUpdatePauseModal = ref<boolean>(false)
-const route = useRoute();
-const sessionId = route.params.id as string;
-const token = useCookie("token");
+const route = useRoute()
+const router = useRouter()
+const token = useCookie('token')
 
-const session = ref<any>(null);
-const pauses = ref<any[]>([]);
+const sessionId = route.params.id as string
+const session = ref<any>(null)
+const pauses = ref<any[]>([])
 const editSession = ref({
   startTime: "",
   endTime: "",
-});
+})
 
-const newDate = ref<Date>()
+const isUpdatePauseModal = ref(false)
+const isUpdateSessionModal = ref(false)
+const showDeletePauseModal = ref(false)
+const showDeleteSessionModal = ref(false)
+const showEditPauseModal = ref(false)
+const selectedPauseId = ref('')
+const selectedPause = ref(null)
+const pauseToDelete = ref(null)
+const formattedDate = ref('')
 
-const startSession = ref<string>("");
-const endSession = ref<string>("");
+function formatDate(date: string): string {
+  if (!date) return '';
+  return new Date(date).toLocaleString();
+}
 
-const newPauseStart = ref<Date>()
-const newPauseEnd = ref<Date>()
-const formattedDate = ref<string>()
+function formatTimeOnly(dateString: string): string {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  return `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+}
 
-const dateOptions = {
-  weekday: "short",
-  year: "numeric",
-  month: "short",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  second: "2-digit",
-};
-
-const durationOptions = {
-  customOptions: {
-    hour: "2-digit",
-    minute: "2-digit",
-    second: "2-digit",
-  },
-};
-
-// Calcul des durées
-const totalPauseTime = computed(() => {
-  return pauses.value.reduce((total, pause) => {
-    if (pause.pauseStart && pause.pauseEnd) {
-      const start = new Date(pause.pauseStart).getTime();
-      const end = new Date(pause.pauseEnd).getTime();
-      return total + (end - start);
-    }
-    return total;
-  }, 0);
-});
-
-const totalWorkTime = computed(() => {
-  if (session.value?.startTime && session.value?.endTime) {
-    const start = new Date(session.value.startTime).getTime();
-    const end = new Date(session.value.endTime).getTime();
-    return end - start - totalPauseTime.value;
+async function fetchSessionDetails() {
+  try {
+    const response = await $api.get(`/time-entries/${sessionId}`, {
+      headers: { Authorization: `Bearer ${token.value}` },
+    });
+    session.value = response.data;
+    pauses.value = response.data.pauses || [];
+    editSession.value.startTime = formatTimeOnly(response.data.startTime);
+    editSession.value.endTime = formatTimeOnly(response.data.endTime);
+    formattedDate.value = new Date(session.value.startTime).toISOString().split('T')[0];
+  } catch (error) {
+    console.error("Erreur lors du chargement des données :", error);
   }
-  return 0;
-});
+}
 
-const formattedPauseTime = computed(() =>
-  useDateFormatter().calculateDuration(0, totalPauseTime.value, durationOptions)
-);
+function combineDateAndTime(date: string, time: string): string {
+  const baseDate = new Date(date);
+  const [hours, minutes] = time.split(':');
+  baseDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+  return baseDate.toISOString();
+}
 
-const formattedWorkTime = computed(() =>
-  useDateFormatter().calculateDuration(0, totalWorkTime.value, durationOptions)
-);
+async function editPause(pause: any) {
+  selectedPauseId.value = pause.id;
+  selectedPause.value = pause;
+  showEditPauseModal.value = true;
+}
 
 function redirectToDate() {
   if (typeof window !== "undefined") {
@@ -183,120 +189,107 @@ function redirectToDate() {
   }
 }
 
-
-function combineDateAndTime(date: string, time: string): string {
-  const baseDate = new Date(date);
-  const [hours, minutes] = time.split(':');
-  baseDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
-  return baseDate.toISOString();
-}
-
-
-async function fetchSessionDetails() {
+async function handleAddPause({ startTime, endTime }) {
   try {
-    const response = await $api.get(`/time-entries/${sessionId}`, {
-      headers: { Authorization: `Bearer ${token.value}` },
-    });
-    session.value = response.data;
-    pauses.value = response.data.pauses || [];
-    editSession.value.startTime = response.data.startTime;
-    editSession.value.endTime = response.data.endTime;
-    startSession.value = useDateFormatter().formatDate(session.value.startTime, {
-      customOptions: dateOptions,
-    });
-    endSession.value = useDateFormatter().formatDate(session.value.endTime, {
-      customOptions: dateOptions,
-    });
-    formattedDate.value = new Date(session.value.startTime).toISOString().split('T')[0];
-    console.log('newDate.value', newDate.value);
-
-  } catch (error) {
-    console.error("Erreur lors du chargement des données :", error);
-  }
-}
-
-async function addPause() {
-  if (!newPauseStart.value) {
-    $toast.show({
-      message: "L'heure de début est requise pour ajouter une pause.",
-      type: EToast.WARNING,
-      duration: 3000
-    })
-    return;
-  }
-
-  try {
-    const sessionDate = session.value.startTime; // Date de la session
+    const sessionDate = session.value.startTime;
     const payload = {
-      pauseStart: combineDateAndTime(sessionDate, newPauseStart.value),
-      pauseEnd: newPauseEnd.value ? combineDateAndTime(sessionDate, newPauseEnd.value) : null,
+      pauseStart: combineDateAndTime(sessionDate, startTime),
+      pauseEnd: endTime ? combineDateAndTime(sessionDate, endTime) : null,
     };
 
-    const response = await $api.patch(`/pauses/${sessionId}/add-with-dates`, payload, {
+    await $api.patch(`/pauses/${sessionId}/add-with-dates`, payload, {
       headers: { Authorization: `Bearer ${token.value}` },
     });
-    pauses.value.push(response.data);
-    newPauseStart.value = "";
-    newPauseEnd.value = "";
+
+    await fetchSessionDetails();
+    isUpdatePauseModal.value = false;
+    $toast.show({
+      message: 'Pause ajoutée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    });
   } catch (error) {
-    console.error("Erreur lors de l’ajout de la pause :", error);
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    });
   }
 }
 
-async function editPause(pause: any) {
-  const newStart = prompt('Nouvelle heure de début (YYYY-MM-DD HH:mm:ss) :', pause.pauseStart);
-  const newEnd = prompt('Nouvelle heure de fin (YYYY-MM-DD HH:mm:ss) :', pause.pauseEnd);
-
-  if (!newStart || (pause.pauseEnd && !newEnd)) return;
-
+async function handleEditPause({ startTime, endTime }) {
   try {
+    if (!startTime) {
+      $toast.show({
+        message: "L'heure de début est requise.",
+        type: EToast.WARNING,
+        duration: 3000
+      });
+      return;
+    }
+
+    const sessionDate = selectedPause.value.pauseStart;
     const payload = {
-      pauseStart: new Date(newStart).toISOString(),
-      pauseEnd: newEnd ? new Date(newEnd).toISOString() : null,
+      pauseStart: combineDateAndTime(sessionDate, startTime),
+      pauseEnd: endTime ? combineDateAndTime(sessionDate, endTime) : null
     };
 
-    await $api.patch(`/pauses/${pause.id}/update`, payload, {
-      headers: { Authorization: `Bearer ${token.value}` },
+    await $api.patch(
+      `/pauses/${selectedPauseId.value}/update`,
+      payload,
+      {
+        headers: { Authorization: `Bearer ${token.value}` },
+      }
+    );
+
+    showEditPauseModal.value = false;
+    fetchSessionDetails();
+    $toast.show({
+      message: 'Pause modifiée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
     });
-    fetchSessionDetails(); // Recharger les données pour refléter les modifications
   } catch (error) {
-    console.error('Erreur lors de la modification de la pause :', error);
+    console.error('Erreur lors de la modification de la pause:', error);
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    });
   }
 }
 
-async function updateSession() {
-  if (!editSession.value.startTime || !editSession.value.endTime) {
-    $toast.show({
-      message: 'Les heures de début et de fin sont obligatoires.',
-      type: EToast.WARNING,
-      duration: 3000
-    })
-    return;
-  }
-
+async function handleEditSession({ startTime, endTime }) {
   try {
-    const sessionDate = session.value.startTime; // Utiliser la date de la session
-    const startTime = combineDateAndTime(sessionDate, editSession.value.startTime);
-    const endTime = combineDateAndTime(sessionDate, editSession.value.endTime);
+    const sessionDate = session.value.startTime;
+    const startTimeISO = combineDateAndTime(sessionDate, startTime);
+    const endTimeISO = combineDateAndTime(sessionDate, endTime);
 
     const response = await $api.patch(
       `/time-entries/${sessionId}`,
-      { startTime, endTime },
+      { startTime: startTimeISO, endTime: endTimeISO },
       {
         headers: { Authorization: `Bearer ${token.value}` },
       }
     );
     session.value = response.data;
-    isUpdateSessionModal.value = false
-    fetchSessionDetails()
+    isUpdateSessionModal.value = false;
+    fetchSessionDetails();
+
+    $toast.show({
+      message: 'Session modifiée avec succès.',
+      type: EToast.SUCCESS,
+      duration: 3000
+    });
   } catch (error) {
-    console.error("Erreur lors de la mise à jour de la session :", error);
+   
+    $toast.show({
+      message: getErrorMessage(error),
+      type: EToast.ERROR,
+      duration: 5000
+    });
   }
 }
-
-const showDeletePauseModal = ref(false);
-const showDeleteSessionModal = ref(false);
-const pauseToDelete = ref(null);
 
 async function deletePause(pause: any) {
   pauseToDelete.value = pause;
@@ -305,7 +298,7 @@ async function deletePause(pause: any) {
 
 async function confirmDeletePause() {
   if (!pauseToDelete.value) return;
-  
+
   try {
     await $api.delete(`/pauses/${pauseToDelete.value.id}`, {
       headers: { Authorization: `Bearer ${token.value}` },
@@ -326,10 +319,6 @@ async function confirmDeletePause() {
   }
 }
 
-async function deleteSession() {
-  showDeleteSessionModal.value = true;
-}
-
 async function confirmDeleteSession() {
   try {
     await $api.delete(`/time-entries/${sessionId}`, {
@@ -337,7 +326,6 @@ async function confirmDeleteSession() {
     });
     showDeleteSessionModal.value = false;
     window.location.href = `/?date=${formattedDate.value}`;
-    useGlobalEvents().emitEvent(EGlobalEvent.UPDATE_DAY);
     $toast.show({
       message: 'Session supprimée avec succès.',
       type: EToast.SUCCESS,
@@ -352,114 +340,138 @@ async function confirmDeleteSession() {
   }
 }
 
+async function copySessionId() {
+  try {
+    await navigator.clipboard.writeText(sessionId);
+    $toast.show({
+      message: 'ID de la session copié !',
+      type: EToast.INFO,
+      duration: 2000
+    });
+  } catch (error) {
+    $toast.show({
+      message: 'Erreur lors de la copie de l\'ID',
+      type: EToast.ERROR,
+      duration: 3000
+    });
+  }
+}
+
 onMounted(() => {
   fetchSessionDetails();
 });
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .session-details {
-  color: $color-text-primary;
-  background-color: $color-background;
   padding: $spacing-large;
-  border-radius: $border-radius;
+  max-width: 1200px;
+  margin: 0 auto;
 
-  &__current-time {
-    font-size: $font-size-small;
-    color: $color-text-secondary;
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: $spacing-large;
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-medium;
+  }
+
+  &__content {
+    background-color: $color-surface;
+    border-radius: $border-radius;
+    box-shadow: $box-shadow-light;
+    padding: $spacing-large;
   }
 
   &__info {
-    background-color: $color-surface;
-    padding: $spacing-medium;
-    border-radius: $border-radius;
-    box-shadow: $box-shadow-light;
     margin-bottom: $spacing-large;
-
-    p {
-      margin: $spacing-small 0;
-    }
+    padding-bottom: $spacing-large;
+    border-bottom: 1px solid rgba($color-text-secondary, 0.2);
   }
 
-  &__subtitle {
-    font-size: $font-size-base;
-    color: $color-primary;
+  &__title {
+    font-size: $font-size-large;
+    color: $color-primary-light;
     margin-bottom: $spacing-medium;
   }
 
-  &__pauses {
-    list-style: none;
-    padding: 0;
+  &__time {
+    display: flex;
+    gap: $spacing-large;
+    color: $color-text-primary;
 
-    .pause-item {
-      background-color: $color-surface;
-      border-radius: $border-radius;
-      padding: $spacing-medium;
-      margin-bottom: $spacing-medium;
-      box-shadow: $box-shadow-light;
-
-      p {
-        margin: $spacing-small 0;
+    p {
+      strong {
+        color: $color-text-secondary;
+        margin-right: $spacing-small;
       }
     }
   }
+
+  &__pauses-section {
+    margin-top: $spacing-large;
+  }
+
+  &__pauses-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: $spacing-large;
+  }
+
+  &__pauses-list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-medium;
+    list-style: none;
+    padding: 0;
+  }
 }
 
-.form-container {
-  background-color: $color-surface;
-  padding: $spacing-large;
+.pause-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: rgba($color-background, 0.5);
   border-radius: $border-radius;
-  box-shadow: $box-shadow-light;
-  margin-bottom: $spacing-large;
+  padding: $spacing-medium;
+  transition: background-color 0.2s ease;
 
-  h3 {
-    font-size: $font-size-base;
-    color: $color-primary;
-    margin-bottom: $spacing-medium;
+  &:hover {
+    background-color: rgba($color-background, 0.8);
+  }
+
+  &__content {
+    p {
+      margin: $spacing-small 0;
+      color: $color-text-primary;
+
+      strong {
+        color: $color-text-secondary;
+        margin-right: $spacing-small;
+      }
+    }
+  }
+
+  &__actions {
+    display: flex;
+    gap: $spacing-small;
   }
 }
 
 .form {
   display: flex;
   flex-direction: column;
+  gap: $spacing-large;
 
   &__label {
     margin-bottom: $spacing-small;
     font-size: $font-size-small;
     color: $color-text-secondary;
-  }
-
-  &__input {
-    margin-bottom: $spacing-medium;
-    padding: $spacing-small;
-    border: 1px solid $color-primary-light;
-    border-radius: $border-radius;
-    background-color: $color-background;
-    color: $color-text-primary;
-    font-size: $font-size-small;
-
-    &:focus {
-      outline: none;
-      border-color: $color-primary;
-    }
-  }
-}
-
-.pause-item__actions {
-  display: flex;
-  gap: $spacing-small;
-}
-
-.btn--danger {
-  background-color: $color-danger;
-  color: $color-text-secondary;
-  border: none;
-  padding: $spacing-small;
-  border-radius: $border-radius;
-
-  &:hover {
-    background-color: darken($color-danger, 10%);
   }
 }
 

@@ -23,16 +23,9 @@ export class TimeEntriesController {
 
   @Get('extra-hours-heatmap')
   @UseGuards(AuthGuard)
-  async getExtraHoursHeatmap(@Req() req: any) {
-    console.log('=== HEATMAP REQUEST ===');
-    console.log('Headers:', req.headers);
-    console.log('URL:', req.url);
-    console.log('Method:', req.method);
-    console.log('======================');
-    
+  async getExtraHoursHeatmap(@Req() req: any) {   
     try {
       const userId = req.user.userId;
-      console.log('UserId from request:', userId);
       return await this.timeEntriesService.getExtraHoursHeatmap(userId);
     } catch (error) {
       console.error('Error in getExtraHoursHeatmap:', error);
@@ -125,8 +118,6 @@ export class TimeEntriesController {
   ) {
     try {
       const userId = req.user.userId;
-      console.log('Mois reçu :', body.month);
-
       // Extraire année et mois du format "YYYY-MM"
       const [year, month] = body.month.split('-').map(Number);
 

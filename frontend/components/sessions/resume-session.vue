@@ -26,10 +26,15 @@
     <section v-if="summary && summary.details.length" class="work-sessions__details">
       <h3 class="work-sessions__details-title">Détails des sessions :</h3>
       <ul class="work-sessions__list scrollable">
-        <li v-for="detail in summary.details" :key="detail.sessionId" class="work-sessions__card">
-          <single-session :sessionId="detail.sessionId" :start-time="formatDate(detail.startTime)"
-            :end-time="formatDate(detail.endTime)" :work-time="formatTime(detail.workTime)"
-            :pause-time="formatTime(detail.pauseTime)" />
+        <li v-for="(detail, index) in summary.details" :key="detail.sessionId" class="work-sessions__card">
+          <single-session 
+            :sessionId="detail.sessionId" 
+            :start-time="formatDate(detail.startTime)"
+            :end-time="formatDate(detail.endTime)" 
+            :work-time="formatTime(detail.workTime)"
+            :pause-time="formatTime(detail.pauseTime)"
+            :index="index"
+          />
         </li>
       </ul>
     </section>
@@ -90,8 +95,6 @@ const newSession = ref({
 });
 
 useGlobalEvents().subscribeTo<boolean | undefined>(EGlobalEvent.UPDATE_DAY, () => {
-  console.log('Event UPDATE_DAY reçu')
-  console.log('selectedDate:', props.selectedDate)
   fetchSessions()
 });
 
@@ -102,7 +105,6 @@ const userProfile = computed(() => {
     return { weeklyHoursGoal: 35, workingDaysPerWeek: 5 }; // Valeurs par défaut si le profil n'est pas encore chargé
   }
 
-  console.log('profileStore.profile.workingDaysPerWeek', profileStore.profile.workingDaysPerWeek)
   return {
     weeklyHoursGoal: profileStore.profile.weeklyHoursGoal || 35,
     workingDaysPerWeek: profileStore.profile.workingDaysPerWeek || 5,
@@ -111,7 +113,6 @@ const userProfile = computed(() => {
 
 const dailyWorkGoal = computed(() => {
   if (!userProfile.value) return 0;
-  console.log('userProfile', userProfile.value);
   return (userProfile.value.weeklyHoursGoal / userProfile.value.workingDaysPerWeek) * 3600; // En secondes
 });
 
@@ -280,7 +281,10 @@ function formatOvertime(seconds: number) {
     overflow-y: auto;
     flex: 1;
     max-height: calc(622px - 300px);
-    /* Ajustez cette valeur selon vos besoins */
+  }
+
+  &__card {
+    margin-bottom: $spacing-small;
   }
 }
 
@@ -295,7 +299,8 @@ function formatOvertime(seconds: number) {
     color: $color-text-secondary;
   }
 
-  .form__input {
+  .pi-input {
+    width: 100%;
     padding: $spacing-small;
     border: 1px solid $color-primary-light;
     border-radius: $border-radius;
@@ -334,10 +339,27 @@ function formatOvertime(seconds: number) {
   }
 }
 
-@media screen and (max-width: $breakpoint-lg) {
+@media (max-width: 768px) {
   .work-sessions {
-    &__layout {
+    padding: $spacing-medium;
+    height: auto;
+
+    &__content-column {
+      padding: $spacing-medium;
+      max-height: none;
+    }
+
+    &__list {
+      max-height: none;
+    }
+
+    &__create-session-actions {
       flex-direction: column;
+      gap: $spacing-small;
+
+      .btn {
+        width: 100%;
+      }
     }
   }
 }

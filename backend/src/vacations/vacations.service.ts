@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Vacation } from './entities/vacation.entity';
 import { CreateVacationDto } from './dto/create-vacation.dto';
 import { UpdateVacationDto } from './dto/update-vacation.dto';
+import { GetVacationsDto } from './dto/get-vacations.dto';
 
 @Injectable()
 export class VacationsService {
@@ -22,20 +23,95 @@ export class VacationsService {
 
     const vacation = this.vacationRepository.create({
       ...dto,
-      user: { id: userId }, // Associer l'utilisateur ici
+      user: { id: userId },
     });
 
     return await this.vacationRepository.save(vacation);
   }
 
-  async findUserVacations(userId: string): Promise<Vacation[]> {
-    return await this.vacationRepository.find({
-      where: { user: { id: userId } },
-    });
+  async findUserVacations(userId: string, query: GetVacationsDto) {
+    const queryBuilder = this.vacationRepository
+      .createQueryBuilder('vacation')
+      .where('vacation.user.id = :userId', { userId })
+      .leftJoinAndSelect('vacation.user', 'user');
+
+    // Appliquer le filtre de statut si fourni
+    if (query.status) {
+      const statuses = Array.isArray(query.status) ? query.status : [query.status];
+      if (statuses.length > 0) {
+        queryBuilder.andWhere('vacation.status IN (:...status)', { status: statuses });
+      }
+    }
+
+    // Appliquer le tri
+    const sortBy = query.sortBy || 'startDate';
+    const sortOrder = query.sortOrder || 'DESC';
+    queryBuilder.orderBy(`vacation.${sortBy}`, sortOrder);
+
+    // Calculer le total avant pagination
+    const total = await queryBuilder.getCount();
+
+    // Appliquer la pagination
+    const page = Math.max(1, parseInt(query.page?.toString() || '1'));
+    const limit = Math.max(1, Math.min(50, parseInt(query.limit?.toString() || '10')));
+    const skip = (page - 1) * limit;
+
+    queryBuilder.skip(skip).take(limit);
+
+    const items = await queryBuilder.getMany();
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1
+    };
   }
 
-  async findAll(): Promise<Vacation[]> {
-    return await this.vacationRepository.find();
+  async findAll(query: GetVacationsDto) {
+    const queryBuilder = this.vacationRepository
+      .createQueryBuilder('vacation')
+      .leftJoinAndSelect('vacation.user', 'user');
+
+    // Appliquer le filtre de statut si fourni
+    if (query.status) {
+      const statuses = Array.isArray(query.status) ? query.status : [query.status];
+      if (statuses.length > 0) {
+        queryBuilder.andWhere('vacation.status IN (:...status)', { status: statuses });
+      }
+    }
+
+    // Appliquer le tri
+    const sortBy = query.sortBy || 'startDate';
+    const sortOrder = query.sortOrder || 'DESC';
+    queryBuilder.orderBy(`vacation.${sortBy}`, sortOrder);
+
+    // Calculer le total avant pagination
+    const total = await queryBuilder.getCount();
+
+    // Appliquer la pagination
+    const page = Math.max(1, parseInt(query.page?.toString() || '1'));
+    const limit = Math.max(1, Math.min(50, parseInt(query.limit?.toString() || '10')));
+    const skip = (page - 1) * limit;
+
+    queryBuilder.skip(skip).take(limit);
+
+    const items = await queryBuilder.getMany();
+    const totalPages = Math.ceil(total / limit);
+
+    return {
+      items,
+      total,
+      page,
+      limit,
+      totalPages,
+      hasNextPage: page < totalPages,
+      hasPreviousPage: page > 1
+    };
   }
 
   async updateVacation(id: string, dto: UpdateVacationDto): Promise<Vacation> {

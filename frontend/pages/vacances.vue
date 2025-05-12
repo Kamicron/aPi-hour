@@ -1,7 +1,7 @@
 <template>
   <div class="page-container">
     <!-- Liste des vacances -->
-    <bento-card title="Mes demandes de vacances">
+    <bento-card title="Mes jours non travaillés">
       <vacation-list />
     </bento-card>
 
