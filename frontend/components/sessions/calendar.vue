@@ -256,7 +256,7 @@ watch([currentMonth, currentYear], () => {
       cursor: pointer;
 
       &:hover {
-        background-color: color.scale($color-primary, $lightness: -10%);
+        background-color: darken($color-primary, 10%);
       }
     }
   }
@@ -284,7 +284,7 @@ watch([currentMonth, currentYear], () => {
     box-shadow: $box-shadow-dark;
 
     &:hover {
-      background: color.scale($color-secondary, $lightness: -15%);
+      background: darken($color-secondary, 15%);
     }
 
     .date {
@@ -292,7 +292,7 @@ watch([currentMonth, currentYear], () => {
     }
 
     &--inactive {
-      background: color.scale($color-surface, $lightness: -10%);
+      background: darken($color-surface, 10%);
       border: 1px solid $color-text-dark;
 
       .date {

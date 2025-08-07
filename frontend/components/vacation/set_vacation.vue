@@ -132,7 +132,7 @@ const submitVacation = async () => {
     box-shadow: $box-shadow-light;
 
     &:hover {
-      background-color: color.scale($color-primary, $lightness: -10%);
+      background-color: darken($color-primary, 10%);
     }
   }
 }

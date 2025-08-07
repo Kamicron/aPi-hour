@@ -14,7 +14,7 @@
 
   &--disabled {
     border-color: $color-surface;
-    background-color: color.scale($color-background, $lightness: 10%);
+    background-color: lighten($color-background, 10%);
     color: $color-text-secondary;
     cursor: not-allowed;
     opacity: 0.6;

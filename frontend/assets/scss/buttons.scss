@@ -14,21 +14,21 @@
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 
   &:hover {
-    background-color: color.scale($color-secondary, $lightness: 5%);
+    background-color: lighten($color-secondary, 5%);
     transform: translateY(-2px);
     box-shadow: $box-shadow-dark;
     color: $color-background;
   }
 
   &:active {
-    background-color: color.scale($color-surface, $lightness: -5%);
+    background-color: darken($color-surface, 5%);
     transform: translateY(1px);
     box-shadow: $box-shadow-dark;
   }
 
   &:disabled {
-    background-color: color.scale($color-surface, $lightness: 15%);
-    color: color.scale($color-text-secondary, $lightness: 20%);
+    background-color: lighten($color-surface, 15%);
+    color: lighten($color-text-secondary, 20%);
     cursor: not-allowed;
     box-shadow: none;
     transform: none;
@@ -39,11 +39,11 @@
     color: $color-text-primary;
 
     &:hover {
-      background-color: color.scale($color-danger, $lightness: 10%);
+      background-color: lighten($color-danger, 10%);
     }
 
     &:active {
-      background-color: color.scale($color-danger, $lightness: -10%);
+      background-color: darken($color-danger, 10%);
     }
   }
 
@@ -52,11 +52,11 @@
     color: $color-text-primary;
 
     &:hover {
-      background-color: color.scale($color-success, $lightness: 10%);
+      background-color: lighten($color-success, 10%);
     }
 
     &:active {
-      background-color: color.scale($color-success, $lightness: -10%);
+      background-color: darken($color-success, 10%);
     }
   }
 
@@ -65,11 +65,11 @@
     color: $color-text-primary;
 
     &:hover {
-      background-color: color.scale($color-warning, $lightness: 10%);
+      background-color: lighten($color-warning, 10%);
     }
 
     &:active {
-      background-color: color.scale($color-warning, $lightness: -10%);
+      background-color: darken($color-warning, 10%);
     }
   }
 
@@ -84,8 +84,8 @@
     }
 
     &:active {
-      background-color: color.scale($color-primary, $lightness: -10%);
-      border-color: color.scale($color-primary, $lightness: -10%);
+      background-color: darken($color-primary, 10%);
+      border-color: darken($color-primary, 10%);
     }
   }
 
@@ -100,7 +100,7 @@
     }
 
     &:active {
-      background-color: color.scale($color-surface, $lightness: -10%);
+      background-color: darken($color-surface, 10%);
     }
   }
 

@@ -39,7 +39,7 @@ export default defineNuxtConfig({
   modules: ['@pinia/nuxt'],
   runtimeConfig: {
     public: {
-      apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:5001', // Utilise .env ou port 5001 par défaut
+      apiBaseUrl: process.env.API_BASE_URL || 'http://localhost:3000', // URL par défaut si .env est manquant
     },
   },
   plugins: ['~/plugins/fontawesome.js'],
