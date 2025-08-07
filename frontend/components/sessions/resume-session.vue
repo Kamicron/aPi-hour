@@ -210,8 +210,6 @@ function formatOvertime(seconds: number) {
 </script>
 
 <style lang="scss" scoped>
-@use "sass:color";
-
 .work-sessions {
   font-family: $font-family-base;
   background-color: $color-background;

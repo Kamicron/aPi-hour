@@ -86,8 +86,6 @@ const internalValue = computed({
 </script>
 
 <style lang="scss" scoped>
-@use "sass:color";
-
 .custom-checkbox {
   display: inline-flex;
   align-items: center;

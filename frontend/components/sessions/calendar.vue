@@ -232,8 +232,6 @@ watch([currentMonth, currentYear], () => {
 </script>
 
 <style lang="scss" scoped>
-@use "sass:color";
-
 .calendar {
   background-color: $color-surface;
   color: $color-text-primary;

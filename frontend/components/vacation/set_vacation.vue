@@ -82,8 +82,6 @@ const submitVacation = async () => {
 </script>
 
 <style lang="scss" scoped>
-@use "sass:color";
-
 .vacation {
   background-color: $color-surface;
   padding: $spacing-large;

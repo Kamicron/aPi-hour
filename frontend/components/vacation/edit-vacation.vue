@@ -126,7 +126,6 @@ const closeModal = () => {
 </script>
 
 <style lang="scss" scoped>
-@use "sass:color";
 @import '~/assets/scss/variables.scss';
 
 .edit-vacation {
