@@ -86,6 +86,8 @@ const internalValue = computed({
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 .custom-checkbox {
   display: inline-flex;
   align-items: center;
@@ -147,7 +149,7 @@ const internalValue = computed({
   }
 
   &__input:disabled + .custom-checkbox__label .custom-checkbox__box {
-    background-color: lighten($color-background, 10%);
+    background-color: color.scale($color-background, $lightness: 10%);
     border-color: $color-surface;
     cursor: not-allowed;
     opacity: 0.6;

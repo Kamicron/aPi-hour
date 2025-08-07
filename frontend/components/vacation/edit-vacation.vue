@@ -126,6 +126,7 @@ const closeModal = () => {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
 @import '~/assets/scss/variables.scss';
 
 .edit-vacation {
@@ -169,7 +170,7 @@ const closeModal = () => {
     color: $color-text-primary;
 
     &:hover {
-      background-color: darken($color-primary, 10%);
+      background-color: color.scale($color-primary, $lightness: -10%);
     }
   }
 

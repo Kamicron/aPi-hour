@@ -232,6 +232,8 @@ watch([currentMonth, currentYear], () => {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 .calendar {
   background-color: $color-surface;
   color: $color-text-primary;
@@ -256,7 +258,7 @@ watch([currentMonth, currentYear], () => {
       cursor: pointer;
 
       &:hover {
-        background-color: darken($color-primary, 10%);
+        background-color: color.scale($color-primary, $lightness: -10%);
       }
     }
   }
@@ -284,7 +286,7 @@ watch([currentMonth, currentYear], () => {
     box-shadow: $box-shadow-dark;
 
     &:hover {
-      background: darken($color-secondary, 15%);
+      background: color.scale($color-secondary, $lightness: -15%);
     }
 
     .date {
@@ -292,7 +294,7 @@ watch([currentMonth, currentYear], () => {
     }
 
     &--inactive {
-      background: darken($color-surface, 10%);
+      background: color.scale($color-surface, $lightness: -10%);
       border: 1px solid $color-text-dark;
 
       .date {

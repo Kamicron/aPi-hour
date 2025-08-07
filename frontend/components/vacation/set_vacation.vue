@@ -82,6 +82,8 @@ const submitVacation = async () => {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 .vacation {
   background-color: $color-surface;
   padding: $spacing-large;
@@ -132,7 +134,7 @@ const submitVacation = async () => {
     box-shadow: $box-shadow-light;
 
     &:hover {
-      background-color: darken($color-primary, 10%);
+      background-color: color.scale($color-primary, $lightness: -10%);
     }
   }
 }

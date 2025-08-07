@@ -210,6 +210,8 @@ function formatOvertime(seconds: number) {
 </script>
 
 <style lang="scss" scoped>
+@use "sass:color";
+
 .work-sessions {
   font-family: $font-family-base;
   background-color: $color-background;
@@ -325,7 +327,7 @@ function formatOvertime(seconds: number) {
     color: $color-text-secondary;
 
     &:hover {
-      background-color: darken($color-primary, 10%);
+      background-color: color.scale($color-primary, $lightness: -10%);
     }
   }
 
@@ -334,7 +336,7 @@ function formatOvertime(seconds: number) {
     color: $color-text-secondary;
 
     &:hover {
-      background-color: darken($color-warning, 10%);
+      background-color: color.scale($color-warning, $lightness: -10%);
     }
   }
 }
